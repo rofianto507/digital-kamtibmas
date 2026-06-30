@@ -37,6 +37,8 @@ Modul Odoo 19 untuk pengelolaan data kamtibmas digital yang mencakup:
 
 **CV Sel Studio**
 - Website: https://selstudio.id
+- email : rofianto@selstudio.id
+- phone : 085608855007
 
 ## License
 
