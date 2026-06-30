@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_barang_bukti_form" model="ir.ui.view">
+        <field name="name">dkm.barang_bukti.form</field>
+        <field name="model">digital_kamtibmas.barang_bukti</field>
+        <field name="arch" type="xml">
+            <form string="Barang Bukti Online">
+                <header>
+                    <button name="action_simpan" type="object" string="Simpan ke Ruang BB"
+                            class="btn-primary"
+                            invisible="state != 'diterima'"/>
+                    <button name="action_proses" type="object" string="Proses (Sidang/Lab)"
+                            class="btn-warning"
+                            invisible="state != 'disimpan'"/>
+                    <button name="action_kembalikan" type="object" string="Kembalikan"
+                            class="btn-success"
+                            invisible="state != 'diproses'"/>
+                    <button name="action_musnahkan" type="object" string="Musnahkan"
+                            class="btn-danger"
+                            invisible="state != 'diproses'"/>
+                    <button name="action_reset" type="object" string="Reset ke Diterima"
+                            invisible="state not in ('disimpan',)"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="diterima,disimpan,diproses"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="code" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <!-- Info Perkara + Pelapor -->
+                    <group>
+                        <group string="Informasi Perkara">
+                            <field name="nomor_perkara"/>
+                            <field name="jenis_perkara"/>
+                            <field name="lokasi_kejadian"/>
+                            <field name="tanggal_penyitaan"/>
+                            <field name="tanggal_penerimaan"/>
+                            <field name="petugas_id"/>
+                            <field name="lokasi_penyimpanan"/>
+                        </group>
+                        <group string="Identitas Pelapor / Pemilik">
+                            <field name="nama_pelapor"/>
+                            <field name="nik_pelapor"/>
+                            <field name="no_hp_pelapor"/>
+                        </group>
+                    </group>
+
+                    <group string="Alamat Pelapor">
+                        <field name="alamat_pelapor" widget="text" rows="2" nolabel="1" colspan="2"/>
+                    </group>
+
+                    <!-- Daftar Barang Bukti -->
+                    <notebook>
+                        <page string="Daftar Barang Bukti" name="items">
+                            <field name="item_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="foto" widget="image"
+                                           options="{'size': [48, 48]}"
+                                           string="Foto"/>
+                                    <field name="nama_barang"/>
+                                    <field name="jenis_barang"/>
+                                    <field name="jumlah"/>
+                                    <field name="satuan"/>
+                                    <field name="kondisi"/>
+                                    <field name="keterangan"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Keterangan" name="keterangan">
+                            <group>
+                                <field name="keterangan" widget="text" rows="6" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_barang_bukti_list" model="ir.ui.view">
+        <field name="name">dkm.barang_bukti.list</field>
+        <field name="model">digital_kamtibmas.barang_bukti</field>
+        <field name="arch" type="xml">
+            <list string="Barang Bukti Online" default_order="id desc">
+                <field name="code"/>
+                <field name="nomor_perkara"/>
+                <field name="nama_pelapor"/>
+                <field name="jenis_perkara"/>
+                <field name="tanggal_penerimaan"/>
+                <field name="petugas_id" optional="hide"/>
+                <field name="lokasi_penyimpanan" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'diterima'"
+                       decoration-primary="state == 'disimpan'"
+                       decoration-warning="state == 'diproses'"
+                       decoration-success="state == 'dikembalikan'"
+                       decoration-danger="state == 'dimusnahkan'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_barang_bukti_search" model="ir.ui.view">
+        <field name="name">dkm.barang_bukti.search</field>
+        <field name="model">digital_kamtibmas.barang_bukti</field>
+        <field name="arch" type="xml">
+            <search string="Cari Barang Bukti">
+                <field name="code" string="No. BB"/>
+                <field name="nomor_perkara" string="No. Perkara"/>
+                <field name="nama_pelapor" string="Nama Pelapor"/>
+                <field name="nik_pelapor" string="NIK"/>
+                <separator/>
+                <filter string="Diterima"     name="f_diterima"     domain="[('state','=','diterima')]"/>
+                <filter string="Disimpan"     name="f_disimpan"     domain="[('state','=','disimpan')]"/>
+                <filter string="Diproses"     name="f_diproses"     domain="[('state','=','diproses')]"/>
+                <filter string="Dikembalikan" name="f_dikembalikan" domain="[('state','=','dikembalikan')]"/>
+                <filter string="Dimusnahkan"  name="f_dimusnahkan"  domain="[('state','=','dimusnahkan')]"/>
+                <group>
+                    <filter string="Status"        name="grp_state"   context="{'group_by': 'state'}"/>
+                    <filter string="Jenis Perkara" name="grp_jenis"   context="{'group_by': 'jenis_perkara'}"/>
+                    <filter string="Petugas"       name="grp_petugas" context="{'group_by': 'petugas_id'}"/>
+                    <filter string="Tgl Diterima"  name="grp_tgl"     context="{'group_by': 'tanggal_penerimaan:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_barang_bukti" model="ir.actions.act_window">
+        <field name="name">Barang Bukti Online</field>
+        <field name="res_model">digital_kamtibmas.barang_bukti</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_barang_bukti_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada data barang bukti.
+            </p>
+            <p>Klik <strong>Baru</strong> untuk mendaftarkan barang bukti.</p>
+        </field>
+    </record>
+
+</odoo>

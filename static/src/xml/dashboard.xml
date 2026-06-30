@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<t t-name="digital_kamtibmas.Dashboard">
+<div class="dkm-dashboard">
+
+    <!-- ── Sidebar ────────────────────────────────────────────────────────── -->
+    <div t-attf-class="dkm-sidebar #{ state.sidebarCollapsed ? 'collapsed' : '' }">
+
+        <!-- Logo only, no toggle -->
+        <div class="dkm-sidebar-brand">
+            <img class="dkm-sidebar-logo"
+                 src="/digital_kamtibmas/static/img/logo_polda.png"
+                 onerror="this.style.display='none'" alt="Polda Sumsel"/>
+        </div>
+
+        <div class="dkm-sidebar-section">
+            <div class="dkm-sidebar-section-title">Dashboard</div>
+
+            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satlantas' ? 'active' : '' }"
+                 t-on-click="() => this.setSection('satlantas')"
+                 title="Satlantas">
+                <i class="fa fa-car"/>
+                <span>Satlantas</span>
+            </div>
+
+            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satnarkoba' ? 'active' : '' }"
+                 t-on-click="() => this.setSection('satnarkoba')"
+                 title="Satnarkoba">
+                <i class="fa fa-medkit"/>
+                <span>Satnarkoba</span>
+            </div>
+
+            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satreskrim' ? 'active' : '' }"
+                 t-on-click="() => this.setSection('satreskrim')"
+                 title="Satreskrim">
+                <i class="fa fa-search"/>
+                <span>Satreskrim</span>
+            </div>
+
+            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'sabhara' ? 'active' : '' }"
+                 t-on-click="() => this.setSection('sabhara')"
+                 title="Sabhara">
+                <i class="fa fa-binoculars"/>
+                <span>Sabhara</span>
+            </div>
+
+        </div>
+
+        <!-- Toggle di paling bawah -->
+        <div class="dkm-sidebar-footer">
+            <div class="dkm-sidebar-toggle" t-on-click="toggleSidebar"
+                 t-att-title="state.sidebarCollapsed ? 'Buka sidebar' : 'Tutup sidebar'">
+                <i t-attf-class="fa #{ state.sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left' }"/>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Main Content ───────────────────────────────────────────────────── -->
+    <div class="dkm-main-content">
+
+        <!-- ── Satlantas Dashboard ──────────────────────────────────────── -->
+        <t t-if="state.activeSection === 'satlantas'">
+
+            <div class="dkm-header">
+                <div class="dkm-header-left">
+                    <i class="fa fa-car dkm-header-icon"/>
+                    <h1>Dashboard Satlantas</h1>
+                </div>
+                <div class="dkm-header-right">
+                    <span class="dkm-period-label">Periode Laka:</span>
+                    <select class="dkm-period-select" t-on-change="onPeriodChange">
+                        <option value="this_month" t-att-selected="state.period === 'this_month'">Bulan Ini</option>
+                        <option value="last_month" t-att-selected="state.period === 'last_month'">Bulan Lalu</option>
+                        <option value="this_year"  t-att-selected="state.period === 'this_year'">Tahun Ini</option>
+                        <option value="all_time"   t-att-selected="state.period === 'all_time'">Semua</option>
+                    </select>
+                    <button class="dkm-refresh-btn" t-on-click="loadData">
+                        <i t-attf-class="fa fa-refresh #{state.loading ? 'fa-spin' : ''}"/>
+                    </button>
+                </div>
+            </div>
+
+            <t t-if="state.loading">
+                <div class="dkm-loading">
+                    <i class="fa fa-spinner fa-spin"/>
+                    <span>Memuat data...</span>
+                </div>
+            </t>
+
+            <t t-if="!state.loading">
+
+                <div class="dkm-section-label">
+                    <i class="fa fa-list-ol"/> Antrian Layanan — Hari Ini
+                    <span class="dkm-section-date">
+                        <i class="fa fa-calendar-o"/> <t t-esc="state.todayLabel"/>
+                    </span>
+                </div>
+                <div class="dkm-kpi-row">
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openAntrianList([['state','!=','batal']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--purple">
+                            <i class="fa fa-users"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.kpi.antrTotal"/>
+                            <div class="dkm-kpi-label">Total Antrian</div>
+                            <div class="dkm-kpi-sub">Semua (non-batal)</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openAntrianList([['state','=','menunggu']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--gray">
+                            <i class="fa fa-clock-o"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.kpi.antrMenunggu"/>
+                            <div class="dkm-kpi-label">Menunggu</div>
+                            <div class="dkm-kpi-sub">Belum Dikonfirmasi</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openAntrianList([['state','in',['konfirmasi','dipanggil']]])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
+                            <i class="fa fa-bullhorn"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.kpi.antrAktif"/>
+                            <div class="dkm-kpi-label">Aktif</div>
+                            <div class="dkm-kpi-sub">Konfirmasi + Dipanggil</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openAntrianList([['state','=','selesai']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
+                            <i class="fa fa-check-circle"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.kpi.antrSelesai"/>
+                            <div class="dkm-kpi-label">Selesai</div>
+                            <div class="dkm-kpi-sub">Sudah Dilayani</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="dkm-section-label">
+                    <i class="fa fa-file-text-o"/> e-Form Laka — <t t-esc="periodLabel()"/>
+                </div>
+                <div class="dkm-kpi-row">
+
+                    <div class="dkm-kpi-card" t-on-click="() => this.openLakaList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--purple">
+                            <i class="fa fa-file-text-o"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.kpi.lakaTotal"/>
+                            <div class="dkm-kpi-label">Total Laka</div>
+                            <div class="dkm-kpi-sub">Semua Kasus</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openLakaList([['state','=','BARU']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--blue">
+                            <i class="fa fa-inbox"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.kpi.lakaBaru"/>
+                            <div class="dkm-kpi-label">Kasus Baru</div>
+                            <div class="dkm-kpi-sub">Menunggu Tindakan</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openLakaList([['state','=','DIPROSES']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
+                            <i class="fa fa-refresh"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.kpi.lakaDisproses"/>
+                            <div class="dkm-kpi-label">Diproses</div>
+                            <div class="dkm-kpi-sub">Dalam Penanganan</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openLakaList([['state','=','SELESAI']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
+                            <i class="fa fa-check-circle"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.kpi.lakaSelesai"/>
+                            <div class="dkm-kpi-label">Selesai</div>
+                            <div class="dkm-kpi-sub">Sudah Ditangani</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="dkm-charts-row">
+
+                    <div class="dkm-chart-card">
+                        <div class="dkm-chart-header">
+                            <span class="dkm-chart-title">Trend e-Form Laka</span>
+                            <span class="dkm-chart-sub">6 Bulan Terakhir</span>
+                        </div>
+                        <div t-ref="trendChart" class="dkm-echarts"/>
+                    </div>
+
+                    <div class="dkm-chart-card">
+                        <div class="dkm-chart-header">
+                            <span class="dkm-chart-title">Antrian per Jenis Layanan</span>
+                            <span class="dkm-chart-sub">Bulan Ini</span>
+                        </div>
+                        <div t-ref="statusChart" class="dkm-echarts"/>
+                    </div>
+
+                </div>
+
+                <div class="dkm-bottom-row dkm-bottom-row--mb">
+
+                    <div class="dkm-panel">
+                        <div class="dkm-panel-header">
+                            <span><i class="fa fa-list-ol"/> Antrian Aktif Hari Ini</span>
+                            <span class="dkm-count-badge dkm-count-badge--blue"
+                                  t-esc="state.activeAntrian.length + ' antrian'"/>
+                        </div>
+                        <t t-if="state.activeAntrian.length === 0">
+                            <div class="dkm-empty dkm-empty--ok">
+                                <i class="fa fa-check-circle dkm-empty-icon dkm-icon--green"/>
+                                <span>Tidak ada antrian aktif</span>
+                            </div>
+                        </t>
+                        <table t-if="state.activeAntrian.length > 0" class="dkm-table">
+                            <thead>
+                                <tr>
+                                    <th>Nomor</th><th>Nama</th><th>Layanan</th><th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.activeAntrian" t-as="r" t-key="r.id">
+                                    <tr class="dkm-tr" t-on-click="() => this.openAntrianRecord(r.id)">
+                                        <td class="dkm-code" t-esc="r.nomor_antrian"/>
+                                        <td t-esc="r.atas_nama"/>
+                                        <td t-esc="r.layanan_id ? r.layanan_id[1] : '-'"/>
+                                        <td>
+                                            <span t-attf-class="dkm-badge dkm-badge--#{r.state}"
+                                                  t-esc="stateLabel(r.state)"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="dkm-panel">
+                        <div class="dkm-panel-header">
+                            <span><i class="fa fa-exclamation-circle"/> Laka Perlu Tindakan</span>
+                            <span class="dkm-count-badge dkm-count-badge--orange"
+                                  t-esc="state.lakaPending.length + ' kasus'"/>
+                        </div>
+                        <t t-if="state.lakaPending.length === 0">
+                            <div class="dkm-empty dkm-empty--ok">
+                                <i class="fa fa-check-circle dkm-empty-icon dkm-icon--green"/>
+                                <span>Tidak ada kasus pending</span>
+                            </div>
+                        </t>
+                        <table t-if="state.lakaPending.length > 0" class="dkm-table">
+                            <thead>
+                                <tr>
+                                    <th>Kode</th><th>Kejadian</th><th>Tanggal</th><th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.lakaPending" t-as="r" t-key="r.id">
+                                    <tr class="dkm-tr" t-on-click="() => this.openLakaRecord(r.id)">
+                                        <td class="dkm-code" t-esc="r.code"/>
+                                        <td t-esc="r.kejadian"/>
+                                        <td t-esc="fmtTgl(r.tanggal_kejadian)"/>
+                                        <td>
+                                            <span t-attf-class="dkm-badge dkm-badge--laka-#{r.state.toLowerCase()}"
+                                                  t-esc="r.state"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="dkm-calendar-card">
+                    <div class="dkm-chart-header">
+                        <span class="dkm-chart-title">Aktivitas Antrian</span>
+                        <span class="dkm-chart-sub">
+                            <t t-esc="state.calendarYear"/> — Jumlah Antrian per Hari
+                        </span>
+                    </div>
+                    <div t-ref="calendarChart" class="dkm-echarts-calendar"/>
+                    <div class="dkm-cal-legend">
+                        <span class="dkm-cal-legend-label">Sedikit</span>
+                        <span class="dkm-cal-cell" style="background:#ebedf0"/>
+                        <span class="dkm-cal-cell" style="background:#c6e48b"/>
+                        <span class="dkm-cal-cell" style="background:#7bc96f"/>
+                        <span class="dkm-cal-cell" style="background:#239a3b"/>
+                        <span class="dkm-cal-cell" style="background:#196127"/>
+                        <span class="dkm-cal-legend-label">Banyak</span>
+                    </div>
+                </div>
+
+                <div class="dkm-map-section">
+
+                    <div class="dkm-map-section-header">
+                        <div class="dkm-map-title">
+                            <i class="fa fa-map-marker"/> Peta Sebaran Laka — Wilayah Palembang
+                        </div>
+                        <div class="dkm-map-breadcrumb">
+                            <t t-if="mapState.drillLevel === 'kecamatan'">
+                                <span class="dkm-crumb-active">Per Kecamatan</span>
+                                <span class="dkm-crumb-hint">— klik kecamatan untuk lihat desa</span>
+                            </t>
+                            <t t-if="mapState.drillLevel === 'desa'">
+                                <button class="dkm-back-btn" t-on-click="resetMapToKecamatan">
+                                    <i class="fa fa-chevron-left"/> Semua Kecamatan
+                                </button>
+                                <i class="fa fa-chevron-right dkm-crumb-sep"/>
+                                <span class="dkm-crumb-active" t-esc="mapState.kecName"/>
+                                <span class="dkm-crumb-hint"> — Per Desa/Kelurahan</span>
+                            </t>
+                        </div>
+                    </div>
+
+                    <div t-ref="dashMap" class="dkm-leaflet-map"/>
+
+                    <div class="dkm-map-legend">
+                        <div class="dkm-legend-item">
+                            <span class="dkm-legend-dot dkm-dot--baru"/> BARU
+                        </div>
+                        <div class="dkm-legend-item">
+                            <span class="dkm-legend-dot dkm-dot--diproses"/> DIPROSES
+                        </div>
+                        <div class="dkm-legend-item">
+                            <span class="dkm-legend-dot dkm-dot--selesai"/> SELESAI
+                        </div>
+                    </div>
+
+                </div>
+
+            </t><!-- /!state.loading -->
+
+        </t><!-- /satlantas -->
+
+        <!-- ── Satnarkoba Dashboard ──────────────────────────────────────── -->
+        <t t-if="state.activeSection === 'satnarkoba'">
+
+            <div class="dkm-header">
+                <div class="dkm-header-left">
+                    <i class="fa fa-medkit dkm-header-icon"/>
+                    <h1>Dashboard Satnarkoba</h1>
+                </div>
+                <div class="dkm-header-right">
+                    <button class="dkm-refresh-btn" t-on-click="loadSatnarkoba">
+                        <i t-attf-class="fa fa-refresh #{state.satkoba.loading ? 'fa-spin' : ''}"/>
+                    </button>
+                </div>
+            </div>
+
+            <t t-if="state.satkoba.loading">
+                <div class="dkm-loading">
+                    <i class="fa fa-spinner fa-spin"/>
+                    <span>Memuat data...</span>
+                </div>
+            </t>
+
+            <t t-if="!state.satkoba.loading">
+
+                <!-- KPI Konseling -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-comments"/> Konseling Online
+                </div>
+                <div class="dkm-kpi-row">
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openKonselingList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--purple">
+                            <i class="fa fa-comments"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.konTotal"/>
+                            <div class="dkm-kpi-label">Total Konseling</div>
+                            <div class="dkm-kpi-sub">Semua pengajuan</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openKonselingList([['state','=','menunggu']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--gray">
+                            <i class="fa fa-clock-o"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.konMenunggu"/>
+                            <div class="dkm-kpi-label">Menunggu</div>
+                            <div class="dkm-kpi-sub">Belum dikonfirmasi</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openKonselingList([['state','in',['konfirmasi','proses']]])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
+                            <i class="fa fa-spinner"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.konProses"/>
+                            <div class="dkm-kpi-label">Diproses</div>
+                            <div class="dkm-kpi-sub">Konfirmasi + Proses</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openKonselingList([['state','=','selesai']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
+                            <i class="fa fa-check"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.konSelesai"/>
+                            <div class="dkm-kpi-label">Selesai</div>
+                            <div class="dkm-kpi-sub">Sudah ditangani</div>
+                        </div>
+                    </div>
+
+                </div><!-- /kpi konseling -->
+
+                <!-- KPI Rehab -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-heartbeat"/> Permohonan Rehabilitasi
+                </div>
+                <div class="dkm-kpi-row">
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openRehabList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--blue">
+                            <i class="fa fa-heartbeat"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.rehTotal"/>
+                            <div class="dkm-kpi-label">Total Rehab</div>
+                            <div class="dkm-kpi-sub">Semua permohonan</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openRehabList([['state','=','menunggu']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--gray">
+                            <i class="fa fa-clock-o"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.rehMenunggu"/>
+                            <div class="dkm-kpi-label">Menunggu</div>
+                            <div class="dkm-kpi-sub">Belum dikonfirmasi</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openRehabList([['state','in',['konfirmasi','proses']]])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
+                            <i class="fa fa-spinner"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.rehProses"/>
+                            <div class="dkm-kpi-label">Diproses</div>
+                            <div class="dkm-kpi-sub">Konfirmasi + Proses</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openRehabList([['state','=','selesai']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
+                            <i class="fa fa-check"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.rehSelesai"/>
+                            <div class="dkm-kpi-label">Selesai</div>
+                            <div class="dkm-kpi-sub">Sudah ditangani</div>
+                        </div>
+                    </div>
+
+                </div><!-- /kpi rehab -->
+
+                <!-- Charts -->
+                <div class="dkm-charts-row">
+                    <div class="dkm-chart-card">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-line-chart" style="color:#71639e;"/>
+                            Trend Pengajuan (6 Bulan Terakhir)
+                        </div>
+                        <div t-ref="skTrendChart" class="dkm-echarts"/>
+                    </div>
+                    <div class="dkm-chart-card">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-pie-chart" style="color:#71639e;"/>
+                            Jenis Masalah Konseling
+                        </div>
+                        <div t-ref="skJenisChart" class="dkm-echarts"/>
+                    </div>
+                </div>
+
+                <!-- Jadwal tables -->
+                <div class="dkm-bottom-row dkm-bottom-row--mb">
+
+                    <!-- Jadwal Konseling -->
+                    <div class="dkm-panel">
+                        <div class="dkm-panel-header">
+                            <span><i class="fa fa-calendar" style="color:#71639e; margin-right:6px;"/>Jadwal Konseling Terdekat</span>
+                            <span class="dkm-count-badge dkm-count-badge--blue" t-esc="state.satkoba.jadwalKon.length"/>
+                        </div>
+                        <table class="dkm-table">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Pemohon</th>
+                                    <th>Jenis Masalah</th>
+                                    <th>Jadwal</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-if="!state.satkoba.jadwalKon.length">
+                                    <td colspan="5" class="dkm-table-empty">Tidak ada jadwal konseling aktif</td>
+                                </tr>
+                                <tr t-foreach="state.satkoba.jadwalKon" t-as="r" t-key="r.id"
+                                    class="dkm-tr"
+                                    t-on-click="() => this.openKonselingRecord(r.id)">
+                                    <td class="dkm-code" t-esc="r.code"/>
+                                    <td t-esc="r.nama"/>
+                                    <td t-esc="skJenisMasalah(r.jenis_masalah)"/>
+                                    <td t-esc="skFormatJadwal(r.tanggal_jadwal)"/>
+                                    <td>
+                                        <span t-attf-class="dkm-badge dkm-badge--#{r.state}"
+                                              t-esc="skStateLabel(r.state)"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Jadwal Rehab -->
+                    <div class="dkm-panel">
+                        <div class="dkm-panel-header">
+                            <span><i class="fa fa-calendar" style="color:#2563eb; margin-right:6px;"/>Jadwal Rehab Terdekat</span>
+                            <span class="dkm-count-badge dkm-count-badge--blue" t-esc="state.satkoba.jadwalReh.length"/>
+                        </div>
+                        <table class="dkm-table">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Pemohon</th>
+                                    <th>Jadwal</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-if="!state.satkoba.jadwalReh.length">
+                                    <td colspan="4" class="dkm-table-empty">Tidak ada jadwal rehab aktif</td>
+                                </tr>
+                                <tr t-foreach="state.satkoba.jadwalReh" t-as="r" t-key="r.id"
+                                    class="dkm-tr"
+                                    t-on-click="() => this.openRehabRecord(r.id)">
+                                    <td class="dkm-code" t-esc="r.code"/>
+                                    <td t-esc="r.nama"/>
+                                    <td t-esc="skFormatJadwal(r.tanggal_jadwal)"/>
+                                    <td>
+                                        <span t-attf-class="dkm-badge dkm-badge--#{r.state}"
+                                              t-esc="skStateLabel(r.state)"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div><!-- /bottom-row -->
+
+            </t><!-- /!satkoba.loading -->
+
+        </t><!-- /satnarkoba -->
+
+        <!-- ── Under Construction sections ──────────────────────────────── -->
+        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba'">
+
+            <div class="dkm-header">
+                <div class="dkm-header-left">
+                    <i t-attf-class="fa #{ucSectionIcon()} dkm-header-icon"/>
+                    <h1 t-esc="'Dashboard ' + ucSectionName()"/>
+                </div>
+            </div>
+
+            <div class="dkm-uc-wrap">
+                <div class="dkm-uc-card">
+                    <div class="dkm-uc-icon">
+                        <i class="fa fa-wrench"/>
+                    </div>
+                    <div class="dkm-uc-badge" t-esc="ucSectionName()"/>
+                    <div class="dkm-uc-title">Under Construction</div>
+                    <p class="dkm-uc-desc">
+                        Dashboard untuk seksi ini sedang dalam tahap pengembangan.<br/>
+                        Fitur akan segera tersedia.
+                    </p>
+                </div>
+            </div>
+
+        </t>
+
+    </div><!-- /dkm-main-content -->
+
+</div>
+</t>
+
+</templates>

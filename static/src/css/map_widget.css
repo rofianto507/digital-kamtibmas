@@ -1,0 +1,28 @@
+.dkm-map-wrapper {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.dkm-map-hint {
+    padding: 8px 14px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-size: 12px;
+    border-bottom: 1px solid #d1fae5;
+}
+
+.dkm-map-container {
+    height: 340px;
+    width: 100%;
+}
+
+.dkm-map-coords {
+    padding: 7px 14px;
+    background: #f9fafb;
+    color: #6b7280;
+    font-size: 12px;
+    font-family: monospace;
+    border-top: 1px solid #e5e7eb;
+}

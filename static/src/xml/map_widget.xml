@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+    <t t-name="digital_kamtibmas.MapPicker">
+        <div class="dkm-map-wrapper">
+            <div t-if="!readonly" class="dkm-map-hint">
+                <i class="fa fa-map-marker"/> Klik pada peta untuk menentukan lokasi kejadian
+            </div>
+            <div t-ref="mapContainer" class="dkm-map-container"/>
+            <div t-if="lat and lng" class="dkm-map-coords">
+                <i class="fa fa-crosshairs"/> <t t-esc="lat.toFixed(6)"/>, <t t-esc="lng.toFixed(6)"/>
+            </div>
+        </div>
+    </t>
+
+</templates>

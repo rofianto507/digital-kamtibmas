@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List -->
+    <record id="view_dkm_antrian_list" model="ir.ui.view">
+        <field name="name">dkm.antrian.list</field>
+        <field name="model">digital_kamtibmas.antrian</field>
+        <field name="arch" type="xml">
+            <list string="Antrian" default_order="tanggal_booking desc, nomor_urut asc">
+                <field name="nomor_antrian"/>
+                <field name="atas_nama"/>
+                <field name="layanan_id"/>
+                <field name="loket_id"/>
+                <field name="tanggal_booking"/>
+                <field name="user_id" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'menunggu'"
+                       decoration-info="state == 'konfirmasi'"
+                       decoration-warning="state == 'dipanggil'"
+                       decoration-success="state == 'selesai'"
+                       decoration-danger="state == 'batal'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="view_dkm_antrian_form" model="ir.ui.view">
+        <field name="name">dkm.antrian.form</field>
+        <field name="model">digital_kamtibmas.antrian</field>
+        <field name="arch" type="xml">
+            <form string="Antrian">
+                <header>
+                    <button name="action_konfirmasi" type="object" string="Konfirmasi"
+                            class="btn-primary"
+                            invisible="state != 'menunggu'"/>
+                    <button name="action_panggil" type="object" string="Panggil"
+                            class="btn-warning"
+                            invisible="state != 'konfirmasi'"/>
+                    <button name="action_selesai" type="object" string="Selesai"
+                            class="btn-success"
+                            invisible="state != 'dipanggil'"/>
+                    <button name="action_batal" type="object" string="Batalkan"
+                            class="btn-danger"
+                            invisible="state not in ('menunggu', 'konfirmasi')"/>
+                    <button name="action_reset" type="object" string="Reset ke Menunggu"
+                            invisible="state != 'batal'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="menunggu,konfirmasi,dipanggil,selesai"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="nomor_antrian" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Data Antrian">
+                            <field name="loket_id"/>
+                            <field name="layanan_id" readonly="1"/>
+                            <field name="tanggal_booking"/>
+                            <field name="nomor_urut" readonly="1"/>
+                        </group>
+                        <group string="Data Penerima">
+                            <field name="atas_nama"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="catatan" placeholder="Catatan tambahan..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_dkm_antrian_search" model="ir.ui.view">
+        <field name="name">dkm.antrian.search</field>
+        <field name="model">digital_kamtibmas.antrian</field>
+        <field name="arch" type="xml">
+            <search string="Cari Antrian">
+                <field name="nomor_antrian" string="Nomor Antrian"/>
+                <field name="atas_nama"     string="Atas Nama"/>
+                <field name="loket_id"      string="Loket"/>
+                <field name="layanan_id"    string="Jenis Layanan"/>
+                <filter string="Hari Ini" name="hari_ini"
+                        domain="[('tanggal_booking','=', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Menunggu"     name="menunggu"   domain="[('state','=','menunggu')]"/>
+                <filter string="Dikonfirmasi" name="konfirmasi" domain="[('state','=','konfirmasi')]"/>
+                <filter string="Dipanggil"    name="dipanggil"  domain="[('state','=','dipanggil')]"/>
+                <filter string="Selesai"      name="selesai"    domain="[('state','=','selesai')]"/>
+                <filter string="Batal"        name="batal"      domain="[('state','=','batal')]"/>
+                <group>
+                    <filter string="Jenis Layanan"   name="group_layanan"  context="{'group_by': 'layanan_id'}"/>
+                    <filter string="Loket"           name="group_loket"    context="{'group_by': 'loket_id'}"/>
+                    <filter string="Tanggal Booking" name="group_tanggal"  context="{'group_by': 'tanggal_booking'}"/>
+                    <filter string="Status"          name="group_state"    context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dkm_antrian" model="ir.actions.act_window">
+        <field name="name">Antrian Satlantas</field>
+        <field name="res_model">digital_kamtibmas.antrian</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_hari_ini': 1}</field>
+        <field name="search_view_id" ref="view_dkm_antrian_search"/>
+    </record>
+
+</odoo>

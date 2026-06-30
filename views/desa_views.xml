@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List -->
+    <record id="view_dkm_desa_list" model="ir.ui.view">
+        <field name="name">dkm.desa.list</field>
+        <field name="model">digital_kamtibmas.desa</field>
+        <field name="arch" type="xml">
+            <list string="Desa/Kelurahan">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="type"/>
+                <field name="kecamatan_id"/>
+                <field name="kabupaten_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="view_dkm_desa_form" model="ir.ui.view">
+        <field name="name">dkm.desa.form</field>
+        <field name="model">digital_kamtibmas.desa</field>
+        <field name="arch" type="xml">
+            <form string="Desa/Kelurahan">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="type"/>
+                        </group>
+                        <group>
+                            <field name="kecamatan_id"/>
+                            <field name="kabupaten_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_dkm_desa_search" model="ir.ui.view">
+        <field name="name">dkm.desa.search</field>
+        <field name="model">digital_kamtibmas.desa</field>
+        <field name="arch" type="xml">
+            <search string="Cari Desa/Kelurahan">
+                <field name="name" string="Nama"/>
+                <field name="code" string="Kode"/>
+                <field name="kecamatan_id" string="Kecamatan"/>
+                <field name="kabupaten_id" string="Kabupaten"/>
+                <filter string="Desa"      name="tipe_desa" domain="[('type','=','DESA')]"/>
+                <filter string="Kelurahan" name="tipe_kel"  domain="[('type','=','KELURAHAN')]"/>
+                <group>
+                    <filter string="Kecamatan" name="group_kec" context="{'group_by': 'kecamatan_id'}"/>
+                    <filter string="Kabupaten" name="group_kab" context="{'group_by': 'kabupaten_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dkm_config_desa" model="ir.actions.act_window">
+        <field name="name">Desa/Kelurahan</field>
+        <field name="res_model">digital_kamtibmas.desa</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_desa_search"/>
+    </record>
+
+</odoo>

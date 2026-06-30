@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- LIST VIEW -->
+        <record id="view_eform_laka_list" model="ir.ui.view">
+            <field name="name">eform_laka.list.dkm</field>
+            <field name="model">digital_kamtibmas.eform_laka</field>
+            <field name="arch" type="xml">
+                <list string="e-Form Laka" default_order="tanggal_kejadian desc">
+                    <field name="code"/>
+                    <field name="kejadian"/>
+                    <field name="tanggal_kejadian"/>
+                    <field name="lat" optional="hide"/>
+                    <field name="lng" optional="hide"/>
+                    <field name="state" widget="badge"
+                        decoration-info="state == 'BARU'"
+                        decoration-warning="state == 'DIPROSES'"
+                        decoration-success="state == 'SELESAI'"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- SEARCH VIEW -->
+        <record id="view_eform_laka_search" model="ir.ui.view">
+            <field name="name">eform_laka.search.dkm</field>
+            <field name="model">digital_kamtibmas.eform_laka</field>
+            <field name="arch" type="xml">
+                <search string="Cari e-Form Laka">
+                    <field name="code"/>
+                    <field name="kejadian"/>
+                    <separator/>
+                    <filter string="Baru" name="filter_baru"
+                        domain="[('state','=','BARU')]"/>
+                    <filter string="Diproses" name="filter_diproses"
+                        domain="[('state','=','DIPROSES')]"/>
+                    <filter string="Selesai" name="filter_selesai"
+                        domain="[('state','=','SELESAI')]"/>
+                    <separator/>
+                    <filter string="Bulan Ini" name="filter_bulan_ini"
+                        domain="[('tanggal_kejadian','&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                    <group>
+                        <filter string="Status" name="groupby_state"
+                            context="{'group_by': 'state'}"/>
+                        <filter string="Bulan" name="groupby_bulan"
+                            context="{'group_by': 'tanggal_kejadian:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- FORM VIEW -->
+        <record id="view_eform_laka_form" model="ir.ui.view">
+            <field name="name">eform_laka.form.dkm</field>
+            <field name="model">digital_kamtibmas.eform_laka</field>
+            <field name="arch" type="xml">
+                <form string="e-Form Laka">
+                    <header>
+                        <button name="action_set_diproses" string="Proses"
+                            type="object" class="btn-primary"
+                            invisible="state != 'BARU'"/>
+                        <button name="action_set_selesai" string="Selesaikan"
+                            type="object" class="btn-primary"
+                            invisible="state != 'DIPROSES'"/>
+                        <button name="action_set_baru" string="Reset ke Baru"
+                            type="object"
+                            invisible="state == 'BARU'"/>
+                        <field name="state" widget="statusbar"
+                            statusbar_visible="BARU,DIPROSES,SELESAI"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="code" readonly="1"/>
+                            </h1>
+                        </div>
+
+                        <group>
+                            <group string="Informasi Kejadian">
+                                <field name="kejadian"/>
+                                <field name="tanggal_kejadian"/>
+                            </group>
+                            <group string="Koordinat">
+                                <field name="lat" string="Latitude"/>
+                                <field name="lng" string="Longitude"/>
+                            </group>
+                        </group>
+
+                        <group string="Lokasi Kejadian">
+                            <field name="lat"
+                                widget="dkm_map_picker"
+                                nolabel="1"
+                                colspan="2"/>
+                        </group>
+
+                        <group string="Keterangan">
+                            <field name="keterangan" nolabel="1" colspan="2"
+                                placeholder="Keterangan detail kejadian laka..."/>
+                        </group>
+
+                        <group string="Foto Dokumentasi">
+                            <field name="foto" widget="image"
+                                options="{'size': [400, 300]}"
+                                nolabel="1" colspan="2"/>
+                        </group>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- ACTION -->
+        <record id="action_dkm_eform_laka" model="ir.actions.act_window">
+            <field name="name">e-Form Laka</field>
+            <field name="res_model">digital_kamtibmas.eform_laka</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{}</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_patroli" model="ir.sequence">
+            <field name="name">Patroli Sabhara</field>
+            <field name="code">digital_kamtibmas.patroli</field>
+            <field name="prefix">PAT</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_barang_bukti" model="ir.sequence">
+            <field name="name">Barang Bukti Online</field>
+            <field name="code">digital_kamtibmas.barang_bukti</field>
+            <field name="prefix">BBK</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_rehab" model="ir.sequence">
+            <field name="name">Permohonan Rehabilitasi</field>
+            <field name="code">digital_kamtibmas.rehab</field>
+            <field name="prefix">RHB</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_konseling" model="ir.sequence">
+            <field name="name">Konseling Online Satnarkoba</field>
+            <field name="code">digital_kamtibmas.konseling</field>
+            <field name="prefix">KSL</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_eform_laka" model="ir.sequence">
+            <field name="name">e-Form Laka Sequence</field>
+            <field name="code">digital_kamtibmas.eform_laka.sequence</field>
+            <field name="prefix">FL</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+    </data>
+</odoo>

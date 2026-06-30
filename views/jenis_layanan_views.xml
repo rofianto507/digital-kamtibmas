@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List -->
+    <record id="view_dkm_jenis_layanan_list" model="ir.ui.view">
+        <field name="name">dkm.jenis_layanan.list</field>
+        <field name="model">digital_kamtibmas.jenis_layanan</field>
+        <field name="arch" type="xml">
+            <list string="Jenis Layanan">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="loket_count" string="Loket"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="view_dkm_jenis_layanan_form" model="ir.ui.view">
+        <field name="name">dkm.jenis_layanan.form</field>
+        <field name="model">digital_kamtibmas.jenis_layanan</field>
+        <field name="arch" type="xml">
+            <form string="Jenis Layanan">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="loket_count" string="Jumlah Loket"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Loket" name="loket">
+                            <field name="loket_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="kuota"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'aktif'"
+                                           decoration-muted="state == 'nonaktif'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_dkm_jenis_layanan_search" model="ir.ui.view">
+        <field name="name">dkm.jenis_layanan.search</field>
+        <field name="model">digital_kamtibmas.jenis_layanan</field>
+        <field name="arch" type="xml">
+            <search string="Cari Jenis Layanan">
+                <field name="name" string="Nama"/>
+                <field name="code" string="Kode"/>
+                <filter string="Aktif"     name="aktif"     domain="[('active','=',True)]"/>
+                <filter string="Non Aktif" name="nonaktif"  domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dkm_config_jenis_layanan" model="ir.actions.act_window">
+        <field name="name">Jenis Layanan</field>
+        <field name="res_model">digital_kamtibmas.jenis_layanan</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_aktif': 1}</field>
+        <field name="search_view_id" ref="view_dkm_jenis_layanan_search"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List -->
+    <record id="view_dkm_loket_list" model="ir.ui.view">
+        <field name="name">dkm.loket.list</field>
+        <field name="model">digital_kamtibmas.loket</field>
+        <field name="arch" type="xml">
+            <list string="Loket">
+                <field name="name"/>
+                <field name="layanan_id"/>
+                <field name="kuota"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'aktif'"
+                       decoration-muted="state == 'nonaktif'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="view_dkm_loket_form" model="ir.ui.view">
+        <field name="name">dkm.loket.form</field>
+        <field name="model">digital_kamtibmas.loket</field>
+        <field name="arch" type="xml">
+            <form string="Loket">
+                <header>
+                    <button name="action_aktif"    type="object" string="Aktifkan"
+                            invisible="state == 'aktif'"    class="btn-primary"/>
+                    <button name="action_nonaktif" type="object" string="Non Aktifkan"
+                            invisible="state == 'nonaktif'" class="btn-secondary"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="aktif,nonaktif"/>
+                </header>
+                <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_antrian_hari_ini" icon="fa-users">
+                            <field name="antrian_count" widget="statinfo" string="Antrian Hari Ini"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group string="Informasi Loket">
+                            <field name="name"/>
+                            <field name="layanan_id"/>
+                            <field name="kuota"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Jadwal Operasional" name="jadwal">
+                            <field name="jadwal_ids">
+                                <list editable="bottom">
+                                    <field name="hari"/>
+                                    <field name="libur" widget="boolean_toggle"/>
+                                    <field name="jam_buka"  widget="float_time"
+                                           optional="show"
+                                           attrs="{'readonly': [('libur','=',True)]}"/>
+                                    <field name="jam_tutup" widget="float_time"
+                                           optional="show"
+                                           attrs="{'readonly': [('libur','=',True)]}"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_dkm_loket_search" model="ir.ui.view">
+        <field name="name">dkm.loket.search</field>
+        <field name="model">digital_kamtibmas.loket</field>
+        <field name="arch" type="xml">
+            <search string="Cari Loket">
+                <field name="name" string="Nama Loket"/>
+                <field name="layanan_id" string="Jenis Layanan"/>
+                <filter string="Aktif"     name="aktif"    domain="[('state','=','aktif')]"/>
+                <filter string="Non Aktif" name="nonaktif" domain="[('state','=','nonaktif')]"/>
+                <group>
+                    <filter string="Jenis Layanan" name="group_layanan"
+                            context="{'group_by': 'layanan_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dkm_config_loket" model="ir.actions.act_window">
+        <field name="name">Loket</field>
+        <field name="res_model">digital_kamtibmas.loket</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_aktif': 1}</field>
+        <field name="search_view_id" ref="view_dkm_loket_search"/>
+    </record>
+
+</odoo>

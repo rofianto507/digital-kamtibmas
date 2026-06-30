@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form view wizard ─────────────────────────────────────────────────── -->
+    <record id="view_dkm_display_config_form" model="ir.ui.view">
+        <field name="name">dkm.display.config.form</field>
+        <field name="model">digital_kamtibmas.display_config</field>
+        <field name="arch" type="xml">
+            <form string="Display Antrian">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Monitor Display Antrian</h2>
+                        <p class="text-muted">
+                            Pasang URL di bawah pada browser monitor/TV di ruang tunggu.
+                            Halaman akan refresh otomatis setiap 5 detik.
+                        </p>
+                    </div>
+
+                    <separator/>
+
+                    <div class="o_field_widget" style="margin-bottom: 20px;">
+                        <div class="d-flex gap-3 mb-4">
+                            <button name="action_generate_token" type="object"
+                                    class="btn btn-warning">
+                                <i class="fa fa-refresh me-1"/> Generate Token Baru
+                            </button>
+                            <button name="action_open_display" type="object"
+                                    class="btn btn-primary"
+                                    invisible="not token">
+                                <i class="fa fa-desktop me-1"/> Buka Display
+                            </button>
+                        </div>
+                    </div>
+
+                    <group>
+                        <group string="Informasi URL">
+                            <field name="token" widget="CopyClipboardChar"
+                                   string="Token" readonly="1"
+                                   placeholder="(Belum digenerate — klik Generate Token Baru)"/>
+                            <field name="display_url" widget="CopyClipboardChar"
+                                   string="URL Display" readonly="1"
+                                   placeholder="(Belum digenerate)"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-info mt-3" invisible="not token">
+                        <i class="fa fa-info-circle me-1"/>
+                        Token digunakan untuk keamanan URL. Jika di-generate ulang, URL lama
+                        tidak akan bisa diakses dan perlu diganti di semua monitor.
+                    </div>
+
+                    <div class="alert alert-warning" invisible="token">
+                        <i class="fa fa-exclamation-triangle me-1"/>
+                        Token belum digenerate. Klik <strong>Generate Token Baru</strong> untuk membuat URL display.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Action ───────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_display_config" model="ir.actions.act_window">
+        <field name="name">Display Antrian</field>
+        <field name="res_model">digital_kamtibmas.display_config</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dkm_display_config_form"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

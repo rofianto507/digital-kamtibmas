@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_patroli_form" model="ir.ui.view">
+        <field name="name">dkm.patroli.form</field>
+        <field name="model">digital_kamtibmas.patroli</field>
+        <field name="arch" type="xml">
+            <form string="Patroli">
+                <header>
+                    <button name="action_mulai" type="object" string="Mulai Patroli"
+                            class="btn-primary"
+                            invisible="state != 'menunggu'"/>
+                    <button name="action_selesai" type="object" string="Selesaikan Patroli"
+                            class="btn-success"
+                            invisible="state != 'berjalan'"/>
+                    <button name="action_reset" type="object" string="Reset ke Menunggu"
+                            invisible="state not in ('berjalan',)"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="menunggu,berjalan,selesai"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="code" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="tanggal_patroli"/>
+                            <field name="tanggal_selesai"/>
+                        </group>
+                        <group/>
+                    </group>
+
+                    <group string="Keterangan / Rute">
+                        <field name="keterangan" widget="text" rows="3" nolabel="1" colspan="2"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Personel" name="personel">
+                            <field name="personel_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="nama"/>
+                                    <field name="pangkat"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Titik Lokasi" name="titik">
+                            <field name="titik_ids">
+                                <list>
+                                    <field name="create_date" string="Waktu Rekam" readonly="1"/>
+                                    <field name="latitude"/>
+                                    <field name="longitude"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_patroli_list" model="ir.ui.view">
+        <field name="name">dkm.patroli.list</field>
+        <field name="model">digital_kamtibmas.patroli</field>
+        <field name="arch" type="xml">
+            <list string="Patroli" default_order="id desc">
+                <field name="code"/>
+                <field name="tanggal_patroli"/>
+                <field name="tanggal_selesai"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'menunggu'"
+                       decoration-warning="state == 'berjalan'"
+                       decoration-success="state == 'selesai'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_patroli_search" model="ir.ui.view">
+        <field name="name">dkm.patroli.search</field>
+        <field name="model">digital_kamtibmas.patroli</field>
+        <field name="arch" type="xml">
+            <search string="Cari Patroli">
+                <field name="code" string="No. Patroli"/>
+                <separator/>
+                <filter string="Menunggu" name="f_menunggu" domain="[('state','=','menunggu')]"/>
+                <filter string="Berjalan" name="f_berjalan" domain="[('state','=','berjalan')]"/>
+                <filter string="Selesai"  name="f_selesai"  domain="[('state','=','selesai')]"/>
+                <separator/>
+                <filter string="Bulan Ini" name="f_bulan" domain="[('tanggal_patroli','&gt;=',(context_today()+relativedelta(day=1)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group>
+                    <filter string="Status"       name="grp_state" context="{'group_by': 'state'}"/>
+                    <filter string="Bulan Patroli" name="grp_bulan" context="{'group_by': 'tanggal_patroli:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_patroli" model="ir.actions.act_window">
+        <field name="name">Patroli</field>
+        <field name="res_model">digital_kamtibmas.patroli</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_patroli_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada data patroli.
+            </p>
+            <p>Klik <strong>Baru</strong> untuk mencatat patroli baru.</p>
+        </field>
+    </record>
+
+</odoo>
