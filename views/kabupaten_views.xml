@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List -->
+    <record id="view_dkm_kabupaten_list" model="ir.ui.view">
+        <field name="name">dkm.kabupaten.list</field>
+        <field name="model">digital_kamtibmas.kabupaten</field>
+        <field name="arch" type="xml">
+            <list string="Kabupaten/Kota">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="type"/>
+                <field name="kecamatan_count" string="Kecamatan"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="view_dkm_kabupaten_form" model="ir.ui.view">
+        <field name="name">dkm.kabupaten.form</field>
+        <field name="model">digital_kamtibmas.kabupaten</field>
+        <field name="arch" type="xml">
+            <form string="Kabupaten/Kota">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="type"/>
+                        </group>
+                        <group>
+                            <field name="kecamatan_count" string="Total Kecamatan"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Kecamatan" name="kecamatan">
+                            <field name="kecamatan_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="desa_count" string="Desa/Kel."/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_dkm_kabupaten_search" model="ir.ui.view">
+        <field name="name">dkm.kabupaten.search</field>
+        <field name="model">digital_kamtibmas.kabupaten</field>
+        <field name="arch" type="xml">
+            <search string="Cari Kabupaten">
+                <field name="name" string="Nama"/>
+                <field name="code" string="Kode"/>
+                <filter string="Kabupaten" name="tipe_kab" domain="[('type','=','KABUPATEN')]"/>
+                <filter string="Kota"      name="tipe_kota" domain="[('type','=','KOTA')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dkm_config_kabupaten" model="ir.actions.act_window">
+        <field name="name">Kabupaten/Kota</field>
+        <field name="res_model">digital_kamtibmas.kabupaten</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_kabupaten_search"/>
+    </record>
+
+</odoo>

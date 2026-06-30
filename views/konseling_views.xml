@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_konseling_form" model="ir.ui.view">
+        <field name="name">dkm.konseling.form</field>
+        <field name="model">digital_kamtibmas.konseling</field>
+        <field name="arch" type="xml">
+            <form string="Konseling Online">
+                <header>
+                    <button name="action_konfirmasi" type="object" string="Konfirmasi"
+                            class="btn-primary"
+                            invisible="state != 'menunggu'"/>
+                    <button name="action_proses" type="object" string="Mulai Proses"
+                            class="btn-warning"
+                            invisible="state != 'konfirmasi'"/>
+                    <button name="action_selesai" type="object" string="Selesai"
+                            class="btn-success"
+                            invisible="state != 'proses'"/>
+                    <button name="action_reset" type="object" string="Reset ke Menunggu"
+                            invisible="state not in ('konfirmasi', 'proses')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="menunggu,konfirmasi,proses,selesai"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="code" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <!-- Identitas + Foto -->
+                    <group>
+                        <group string="Identitas Pemohon">
+                            <field name="nama"/>
+                            <field name="nik"/>
+                            <field name="no_hp"/>
+                            <field name="jenis_kelamin"/>
+                            <field name="tempat_lahir"/>
+                            <field name="tanggal_lahir"/>
+                            <field name="user_id"/>
+                        </group>
+                        <group string="Foto Pemohon">
+                            <field name="foto_pemohon" widget="image"
+                                   options="{'size': [240, 240]}"
+                                   nolabel="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Alamat Lengkap">
+                        <field name="alamat" widget="text" rows="3" nolabel="1" colspan="2"/>
+                    </group>
+
+                    <group string="Detail Permohonan">
+                        <field name="jenis_masalah"/>
+                        <field name="sumber_rujukan"/>
+                        <field name="tanggal_pengajuan"/>
+                        <field name="tanggal_jadwal"/>
+                    </group>
+
+                    <group string="Keterangan / Uraian Permasalahan">
+                        <field name="keterangan" widget="text" rows="5" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_konseling_list" model="ir.ui.view">
+        <field name="name">dkm.konseling.list</field>
+        <field name="model">digital_kamtibmas.konseling</field>
+        <field name="arch" type="xml">
+            <list string="Konseling Online" default_order="id desc">
+                <field name="code"/>
+                <field name="nama"/>
+                <field name="no_hp" optional="hide"/>
+                <field name="jenis_masalah"/>
+                <field name="sumber_rujukan" optional="hide"/>
+                <field name="tanggal_pengajuan"/>
+                <field name="tanggal_jadwal"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'menunggu'"
+                       decoration-info="state == 'konfirmasi'"
+                       decoration-warning="state == 'proses'"
+                       decoration-success="state == 'selesai'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_konseling_search" model="ir.ui.view">
+        <field name="name">dkm.konseling.search</field>
+        <field name="model">digital_kamtibmas.konseling</field>
+        <field name="arch" type="xml">
+            <search string="Cari Konseling">
+                <field name="code" string="No. Konseling"/>
+                <field name="nama" string="Nama Pemohon"/>
+                <field name="nik" string="NIK"/>
+                <field name="no_hp" string="No. HP"/>
+                <separator/>
+                <filter string="Menunggu"      name="f_menunggu"   domain="[('state','=','menunggu')]"/>
+                <filter string="Dikonfirmasi"  name="f_konfirmasi" domain="[('state','=','konfirmasi')]"/>
+                <filter string="Sedang Proses" name="f_proses"     domain="[('state','=','proses')]"/>
+                <filter string="Selesai"       name="f_selesai"    domain="[('state','=','selesai')]"/>
+                <separator/>
+                <filter string="Jadwal Hari Ini" name="f_today" domain="[('tanggal_jadwal','&gt;=',context_today().strftime('%Y-%m-%d 00:00:00')),('tanggal_jadwal','&lt;',(context_today()+relativedelta(days=1)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group>
+                    <filter string="Status"          name="grp_state"   context="{'group_by': 'state'}"/>
+                    <filter string="Jenis Masalah"   name="grp_jenis"   context="{'group_by': 'jenis_masalah'}"/>
+                    <filter string="Sumber Rujukan"  name="grp_sumber"  context="{'group_by': 'sumber_rujukan'}"/>
+                    <filter string="Tgl Pengajuan"   name="grp_tgl"     context="{'group_by': 'tanggal_pengajuan:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_konseling" model="ir.actions.act_window">
+        <field name="name">Konseling Online</field>
+        <field name="res_model">digital_kamtibmas.konseling</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_konseling_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada data konseling.
+            </p>
+            <p>Klik <strong>Baru</strong> untuk menambahkan permohonan konseling.</p>
+        </field>
+    </record>
+
+</odoo>

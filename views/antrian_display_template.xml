@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="antrian_display_page" name="Display Antrian Satlantas">
+<html lang="id">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Display Antrian — Satlantas</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0f172a;
+            color: #f1f5f9;
+            font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        .dsp-header {
+            background: #1e293b;
+            border-bottom: 3px solid #7c3aed;
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .dsp-brand { display: flex; align-items: center; gap: 14px; }
+        .dsp-brand-logo {
+            height: 56px;
+            width: auto;
+            filter: drop-shadow(0 0 8px rgba(124,58,237,0.4));
+        }
+        .dsp-brand-text {}
+        .dsp-brand-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .dsp-brand-sub {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 2px;
+            letter-spacing: 0.3px;
+        }
+        .dsp-clock-wrap { text-align: right; }
+        .dsp-clock {
+            font-size: 46px;
+            font-weight: 800;
+            color: #f8fafc;
+            letter-spacing: 3px;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .dsp-date {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── Main ── */
+        .dsp-main {
+            flex: 1;
+            padding: 24px 28px;
+            overflow-y: auto;
+        }
+
+        .dsp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        /* ── Loket Card ── */
+        .dsp-card {
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .dsp-card.active {
+            animation: pulse-border 3s ease-in-out infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: #7c3aed; box-shadow: 0 0 0 rgba(124,58,237,0); }
+            50%       { border-color: #a855f7; box-shadow: 0 0 24px rgba(124,58,237,0.35); }
+        }
+
+        .dsp-card-header {
+            background: linear-gradient(135deg, #334155 0%, #2d3748 100%);
+            padding: 14px 20px;
+            border-bottom: 1px solid #475569;
+        }
+        .dsp-loket-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #f1f5f9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .dsp-layanan-name {
+            font-size: 12px;
+            color: #a78bfa;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .dsp-card-body {
+            padding: 20px 18px 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .dsp-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            align-self: flex-start;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .dsp-count-badge {
+            background: #7c3aed;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 1px 7px;
+            letter-spacing: 0;
+        }
+
+        .dsp-number-box {
+            width: 100%;
+            background: #0f172a;
+            border-radius: 12px;
+            border: 2px solid #1e3a2e;
+            padding: 20px 16px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-height: 120px;
+            justify-content: center;
+            overflow: hidden;
+            transition: border-color 0.4s, box-shadow 0.4s;
+        }
+        .dsp-number-box.has-number {
+            border-color: #22c55e;
+            box-shadow: 0 0 30px rgba(34,197,94,0.18), inset 0 0 20px rgba(34,197,94,0.04);
+        }
+        .dsp-number {
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-size: clamp(24px, 3.5vw, 52px);
+            font-weight: 900;
+            color: #2d4a3e;
+            letter-spacing: clamp(1px, 0.3vw, 4px);
+            line-height: 1;
+            white-space: nowrap;
+            max-width: 100%;
+            transition: color 0.4s, text-shadow 0.4s;
+        }
+        .dsp-number.active {
+            color: #22c55e;
+            text-shadow: 0 0 30px rgba(34,197,94,0.5), 0 0 60px rgba(34,197,94,0.2);
+        }
+        .dsp-number.empty {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #334155;
+            letter-spacing: 3px;
+            white-space: nowrap;
+        }
+        .dsp-number-name {
+            font-size: 13px;
+            color: #475569;
+            text-align: center;
+            min-height: 20px;
+            letter-spacing: 0.3px;
+            padding: 0 8px;
+        }
+        .dsp-number-name.active { color: #94a3b8; }
+
+        .dsp-sep {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #334155, transparent);
+        }
+
+        .dsp-waiting-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-self: flex-start;
+        }
+        .dsp-pill {
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: #94a3b8;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .dsp-pill:hover { border-color: #7c3aed; color: #e2e8f0; }
+        .dsp-no-waiting {
+            font-size: 12px;
+            color: #334155;
+            font-style: italic;
+        }
+
+        /* ── Footer ── */
+        .dsp-footer {
+            background: #1e293b;
+            border-top: 1px solid #334155;
+            padding: 9px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .dsp-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .dsp-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            flex-shrink: 0;
+            animation: blink 2s ease-in-out infinite;
+        }
+        .dsp-dot.error { background: #ef4444; animation: none; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+        .dsp-updated { font-size: 12px; color: #475569; }
+
+        /* ── Empty state ── */
+        .dsp-empty {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 60px;
+            color: #475569;
+        }
+        .dsp-empty-icon { font-size: 48px; }
+        .dsp-empty-text { font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="dsp-header">
+        <div class="dsp-brand">
+            <img src="/digital_kamtibmas/static/img/logo_polda.png"
+                 class="dsp-brand-logo" alt="Logo Polda Sumsel"
+                 onerror="this.style.display='none'"/>
+            <div class="dsp-brand-text">
+                <div class="dsp-brand-title">Satlantas Polrestabes Palembang</div>
+                <div class="dsp-brand-sub">Sistem Antrian Layanan</div>
+            </div>
+        </div>
+        <div class="dsp-clock-wrap">
+            <div class="dsp-clock" id="dsp-clock">--:--:--</div>
+            <div class="dsp-date"  id="dsp-date">--</div>
+        </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="dsp-main">
+        <div class="dsp-grid" id="dsp-grid">
+            <div class="dsp-empty">
+                <div class="dsp-empty-icon">⏳</div>
+                <div class="dsp-empty-text">Memuat data antrian...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dsp-footer">
+        <div class="dsp-status">
+            <span class="dsp-dot" id="dsp-dot"></span>
+            <span id="dsp-status-text">Menghubungkan...</span>
+        </div>
+        <div class="dsp-updated" id="dsp-updated"></div>
+    </div>
+
+<script>var _DSP_TOKEN = '<t t-esc="token"/>';</script>
+<script>//<![CDATA[
+(function () {
+    'use strict';
+
+    const TOKEN   = _DSP_TOKEN;
+    const API_URL = '/antrian/' + TOKEN + '/data';
+    const HARI    = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const BULAN   = ['Januari','Februari','Maret','April','Mei','Juni',
+                     'Juli','Agustus','September','Oktober','November','Desember'];
+    const INTERVAL = 5000;
+
+    /* ── Clock ─────────────────────────────────────────────────────────────── */
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function tickClock() {
+        const now = new Date();
+        document.getElementById('dsp-clock').textContent =
+            pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+        document.getElementById('dsp-date').textContent =
+            HARI[now.getDay()] + ', ' + now.getDate() + ' ' + BULAN[now.getMonth()] + ' ' + now.getFullYear();
+    }
+    setInterval(tickClock, 1000);
+    tickClock();
+
+    /* ── Helpers ────────────────────────────────────────────────────────────── */
+
+    function esc(s) {
+        return String(s || '')
+            .replace(/&/g,  '&amp;')
+            .replace(/</g,  '&lt;')
+            .replace(/>/g,  '&gt;')
+            .replace(/"/g,  '&quot;');
+    }
+
+    /* ── Render ─────────────────────────────────────────────────────────────── */
+
+    function renderGrid(lokets) {
+        const grid = document.getElementById('dsp-grid');
+
+        if (!lokets || !lokets.length) {
+            grid.innerHTML =
+                '<div class="dsp-empty">' +
+                    '<div class="dsp-empty-icon">📋</div>' +
+                    '<div class="dsp-empty-text">Tidak ada loket aktif hari ini</div>' +
+                '</div>';
+            return;
+        }
+
+        /* Rebuild DOM hanya jika jumlah loket berubah (hindari flicker) */
+        const existing = grid.querySelectorAll('.dsp-card');
+        if (existing.length !== lokets.length) {
+            grid.innerHTML = '';
+            lokets.forEach(() => {
+                const card = document.createElement('div');
+                card.className = 'dsp-card';
+                card.innerHTML =
+                    '<div class="dsp-card-header">' +
+                        '<div class="dsp-loket-name"></div>' +
+                        '<div class="dsp-layanan-name"></div>' +
+                    '</div>' +
+                    '<div class="dsp-card-body">' +
+                        '<div class="dsp-label">Sedang Dilayani</div>' +
+                        '<div class="dsp-number-box">' +
+                            '<div class="dsp-number empty">KOSONG</div>' +
+                            '<div class="dsp-number-name"></div>' +
+                        '</div>' +
+                        '<div class="dsp-sep"></div>' +
+                        '<div class="dsp-label dsp-label--wait">Menunggu Berikutnya</div>' +
+                        '<div class="dsp-waiting-pills"></div>' +
+                    '</div>';
+                grid.appendChild(card);
+            });
+        }
+
+        const cards = grid.querySelectorAll('.dsp-card');
+        lokets.forEach(function (loket, i) {
+            const card     = cards[i];
+            const dipanggil = loket.dipanggil || [];
+            const menunggu  = loket.menunggu  || [];
+
+            /* Header */
+            card.querySelector('.dsp-loket-name').textContent   = loket.loket   || '';
+            card.querySelector('.dsp-layanan-name').textContent = loket.layanan || '';
+
+            /* Current number */
+            const hasNum = dipanggil.length > 0;
+            const numEl  = card.querySelector('.dsp-number');
+            const nameEl = card.querySelector('.dsp-number-name');
+            const boxEl  = card.querySelector('.dsp-number-box');
+
+            if (hasNum) {
+                numEl.textContent  = dipanggil[0].nomor;
+                nameEl.textContent = dipanggil[0].nama || '';
+                numEl.className    = 'dsp-number active';
+            } else {
+                numEl.textContent  = 'KOSONG';
+                nameEl.textContent = '';
+                numEl.className    = 'dsp-number empty';
+            }
+            nameEl.className = 'dsp-number-name' + (hasNum ? ' active' : '');
+            boxEl.className  = 'dsp-number-box'  + (hasNum ? ' has-number' : '');
+            card.className   = 'dsp-card'        + (hasNum ? ' active' : '');
+
+            /* Waiting count badge on label */
+            const waitLabel = card.querySelector('.dsp-label--wait');
+            if (waitLabel) {
+                const badgeHtml = menunggu.length
+                    ? ' <span class="dsp-count-badge">' + menunggu.length + '</span>'
+                    : '';
+                waitLabel.innerHTML = 'Menunggu Berikutnya' + badgeHtml;
+            }
+
+            /* Waiting pills */
+            const pillsEl = card.querySelector('.dsp-waiting-pills');
+            if (menunggu.length) {
+                pillsEl.innerHTML = menunggu.map(function (a) {
+                    return '<span class="dsp-pill">' + esc(a.nomor) + '</span>';
+                }).join('');
+            } else {
+                pillsEl.innerHTML = '<span class="dsp-no-waiting">Tidak ada antrian</span>';
+            }
+        });
+    }
+
+    /* ── Fetch ──────────────────────────────────────────────────────────────── */
+
+    function setStatus(ok, msg) {
+        const dot  = document.getElementById('dsp-dot');
+        const text = document.getElementById('dsp-status-text');
+        dot.className  = 'dsp-dot' + (ok ? '' : ' error');
+        text.textContent = msg;
+    }
+
+    async function fetchData() {
+        try {
+            const resp = await fetch(API_URL, { method: 'GET', cache: 'no-store' });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error);
+
+            renderGrid(data.lokets);
+            setStatus(true, 'Terhubung — update setiap 5 detik');
+
+            const now = new Date();
+            document.getElementById('dsp-updated').textContent =
+                'Diperbarui: ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+        } catch (e) {
+            setStatus(false, 'Koneksi terputus — mencoba ulang...');
+        }
+    }
+
+    fetchData();
+    setInterval(fetchData, INTERVAL);
+})();
+//]]></script>
+
+</body>
+</html>
+</template>
+</odoo>
