@@ -32,7 +32,10 @@
                             <field name="tanggal_patroli"/>
                             <field name="tanggal_selesai"/>
                         </group>
-                        <group/>
+                        <group>
+                            <field name="kecamatan_id"/>
+                            <field name="desa_id" domain="[('kecamatan_id','=',kecamatan_id)]"/>
+                        </group>
                     </group>
 
                     <group string="Keterangan / Rute">
@@ -51,8 +54,8 @@
                         </page>
                         <page string="Titik Lokasi" name="titik">
                             <field name="titik_ids">
-                                <list>
-                                    <field name="create_date" string="Waktu Rekam" readonly="1"/>
+                                <list editable="bottom">
+                                    <field name="waktu_rekam"/>
                                     <field name="latitude"/>
                                     <field name="longitude"/>
                                 </list>
@@ -75,6 +78,8 @@
                 <field name="code"/>
                 <field name="tanggal_patroli"/>
                 <field name="tanggal_selesai"/>
+                <field name="kecamatan_id"/>
+                <field name="desa_id"/>
                 <field name="state" widget="badge"
                        decoration-muted="state == 'menunggu'"
                        decoration-warning="state == 'berjalan'"
@@ -90,6 +95,8 @@
         <field name="arch" type="xml">
             <search string="Cari Patroli">
                 <field name="code" string="No. Patroli"/>
+                <field name="kecamatan_id"/>
+                <field name="desa_id"/>
                 <separator/>
                 <filter string="Menunggu" name="f_menunggu" domain="[('state','=','menunggu')]"/>
                 <filter string="Berjalan" name="f_berjalan" domain="[('state','=','berjalan')]"/>
@@ -97,8 +104,9 @@
                 <separator/>
                 <filter string="Bulan Ini" name="f_bulan" domain="[('tanggal_patroli','&gt;=',(context_today()+relativedelta(day=1)).strftime('%Y-%m-%d 00:00:00'))]"/>
                 <group>
-                    <filter string="Status"       name="grp_state" context="{'group_by': 'state'}"/>
-                    <filter string="Bulan Patroli" name="grp_bulan" context="{'group_by': 'tanggal_patroli:month'}"/>
+                    <filter string="Status"        name="grp_state"    context="{'group_by': 'state'}"/>
+                    <filter string="Kecamatan"     name="grp_kecamatan" context="{'group_by': 'kecamatan_id'}"/>
+                    <filter string="Bulan Patroli" name="grp_bulan"    context="{'group_by': 'tanggal_patroli:month'}"/>
                 </group>
             </search>
         </field>

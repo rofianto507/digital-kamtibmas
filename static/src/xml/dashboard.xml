@@ -731,8 +731,152 @@
 
         </t><!-- /satreskrim -->
 
+        <!-- ── Sabhara Dashboard ─────────────────────────────────────────── -->
+        <t t-if="state.activeSection === 'sabhara'">
+
+            <div class="dkm-header">
+                <div class="dkm-header-left">
+                    <i class="fa fa-binoculars dkm-header-icon"/>
+                    <h1>Dashboard Sabhara</h1>
+                </div>
+                <div class="dkm-header-right">
+                    <button class="dkm-refresh-btn" t-on-click="loadSabhara">
+                        <i t-attf-class="fa fa-refresh #{state.sabhara.loading ? 'fa-spin' : ''}"/>
+                    </button>
+                </div>
+            </div>
+
+            <t t-if="state.sabhara.loading">
+                <div class="dkm-loading">
+                    <i class="fa fa-spinner fa-spin"/>
+                    <span>Memuat data...</span>
+                </div>
+            </t>
+
+            <t t-if="!state.sabhara.loading">
+
+                <!-- KPI Patroli -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-map-marker"/> Patroli
+                </div>
+                <div class="dkm-kpi-row">
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openPatroliList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--purple">
+                            <i class="fa fa-shield"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.sabhara.kpi.total"/>
+                            <div class="dkm-kpi-label">Total Patroli</div>
+                            <div class="dkm-kpi-sub">Semua kegiatan</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openPatroliList([['state','=','menunggu']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--gray">
+                            <i class="fa fa-clock-o"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.sabhara.kpi.menunggu"/>
+                            <div class="dkm-kpi-label">Menunggu</div>
+                            <div class="dkm-kpi-sub">Belum dimulai</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openPatroliList([['state','=','berjalan']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
+                            <i class="fa fa-map-marker"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.sabhara.kpi.berjalan"/>
+                            <div class="dkm-kpi-label">Sedang Berjalan</div>
+                            <div class="dkm-kpi-sub">Aktif di lapangan</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openPatroliList([['state','=','selesai']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
+                            <i class="fa fa-check-circle"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.sabhara.kpi.selesai"/>
+                            <div class="dkm-kpi-label">Selesai</div>
+                            <div class="dkm-kpi-sub">Sudah selesai</div>
+                        </div>
+                    </div>
+
+                </div><!-- /kpi -->
+
+                <!-- Charts -->
+                <div class="dkm-charts-row">
+                    <div class="dkm-chart-card">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-bar-chart" style="color:#71639e;"/>
+                            Trend Patroli (6 Bulan Terakhir)
+                        </div>
+                        <div t-ref="sbTrendChart" class="dkm-echarts"/>
+                    </div>
+                    <div class="dkm-chart-card">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-pie-chart" style="color:#71639e;"/>
+                            Distribusi Status Patroli
+                        </div>
+                        <div t-ref="sbStatusChart" class="dkm-echarts"/>
+                    </div>
+                </div>
+
+                <!-- Tabel Patroli Terbaru -->
+                <div class="dkm-panel" style="margin-bottom:20px;">
+                    <div class="dkm-panel-header">
+                        <span>
+                            <i class="fa fa-list" style="color:#71639e; margin-right:6px;"/>
+                            Patroli Terbaru
+                        </span>
+                        <span class="dkm-count-badge dkm-count-badge--blue"
+                              t-esc="state.sabhara.terbaru.length"/>
+                    </div>
+                    <table class="dkm-table">
+                        <thead>
+                            <tr>
+                                <th>No. Patroli</th>
+                                <th>Tgl. Mulai</th>
+                                <th>Tgl. Selesai</th>
+                                <th>Kecamatan</th>
+                                <th>Personel</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="!state.sabhara.terbaru.length">
+                                <td colspan="6" class="dkm-table-empty">Belum ada data patroli</td>
+                            </tr>
+                            <tr t-foreach="state.sabhara.terbaru" t-as="r" t-key="r.id"
+                                class="dkm-tr"
+                                t-on-click="() => this.openPatroliRecord(r.id)">
+                                <td class="dkm-code" t-esc="r.code"/>
+                                <td t-esc="skFormatJadwal(r.tanggal_patroli)"/>
+                                <td t-esc="skFormatJadwal(r.tanggal_selesai)"/>
+                                <td t-esc="r.kecamatan_id ? r.kecamatan_id[1] : '-'"/>
+                                <td t-esc="r.personel_ids.length + ' orang'"/>
+                                <td>
+                                    <span t-attf-class="dkm-badge dkm-badge--sb-#{r.state}"
+                                          t-esc="sbStateLabel(r.state)"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </t><!-- /!sabhara.loading -->
+
+        </t><!-- /sabhara -->
+
         <!-- ── Under Construction sections ──────────────────────────────── -->
-        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba' and state.activeSection !== 'satreskrim'">
+        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba' and state.activeSection !== 'satreskrim' and state.activeSection !== 'sabhara'">
 
             <div class="dkm-header">
                 <div class="dkm-header-left">

@@ -752,6 +752,10 @@
 .dkm-badge--sr-diproses     { background: #ede9fe; color: #6d28d9; }
 .dkm-badge--sr-dikembalikan { background: #d1fae5; color: #065f46; }
 .dkm-badge--sr-dimusnahkan  { background: #fee2e2; color: #991b1b; }
+/* Patroli states */
+.dkm-badge--sb-menunggu  { background: #f3f4f6; color: #4b5563; }
+.dkm-badge--sb-berjalan  { background: #fef3c7; color: #92400e; }
+.dkm-badge--sb-selesai   { background: #d1fae5; color: #065f46; }
 
 /* Count badge di panel header */
 .dkm-count-badge {

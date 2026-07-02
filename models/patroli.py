@@ -18,6 +18,12 @@ class Patroli(models.Model):
         ('selesai',  'Selesai'),
     ], string='Status', default='menunggu', required=True, tracking=True)
 
+    kecamatan_id = fields.Many2one('digital_kamtibmas.kecamatan', 'Kecamatan',
+                                   ondelete='set null', tracking=True)
+    desa_id      = fields.Many2one('digital_kamtibmas.desa', 'Desa/Kelurahan',
+                                   ondelete='set null', tracking=True,
+                                   domain="[('kecamatan_id','=',kecamatan_id)]")
+
     personel_ids = fields.One2many(
         'digital_kamtibmas.patroli_personel', 'patroli_id',
         string='Personel')
@@ -62,9 +68,10 @@ class PatroliPersonel(models.Model):
 class PatroliTitik(models.Model):
     _name        = 'digital_kamtibmas.patroli_titik'
     _description = 'Titik Lokasi Patroli'
-    _order       = 'create_date asc, id asc'
+    _order       = 'waktu_rekam asc, id asc'
 
-    patroli_id  = fields.Many2one(
+    patroli_id   = fields.Many2one(
         'digital_kamtibmas.patroli', required=True, ondelete='cascade')
-    latitude    = fields.Float('Latitude',  digits=(10, 6))
-    longitude   = fields.Float('Longitude', digits=(10, 6))
+    waktu_rekam  = fields.Datetime('Waktu Rekam', default=fields.Datetime.now)
+    latitude     = fields.Float('Latitude',  digits=(10, 6))
+    longitude    = fields.Float('Longitude', digits=(10, 6))
