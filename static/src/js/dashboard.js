@@ -68,6 +68,13 @@ class DkmDashboard extends Component {
                 jenisPerkara: [],
                 terbaru:      [],
             },
+            // ── Sabhara ────────────────────────────────────────────────
+            sabhara: {
+                loading: false,
+                kpi: { total: 0, menunggu: 0, berjalan: 0, selesai: 0 },
+                trendData: [],
+                terbaru:   [],
+            },
         });
 
         this.mapState = useState({
@@ -86,6 +93,9 @@ class DkmDashboard extends Component {
         // Satreskrim chart refs
         this.srTrendRef = useRef("srTrendChart");
         this.srJenisRef = useRef("srJenisChart");
+        // Sabhara chart refs
+        this.sbTrendRef  = useRef("sbTrendChart");
+        this.sbStatusRef = useRef("sbStatusChart");
 
         this._trendChart     = null;
         this._statusChart    = null;
@@ -101,6 +111,9 @@ class DkmDashboard extends Component {
         // Satreskrim chart instances
         this._srTrendChart   = null;
         this._srJenisChart   = null;
+        // Sabhara chart instances
+        this._sbTrendChart   = null;
+        this._sbStatusChart  = null;
 
         onMounted(async () => await this.loadData());
 
@@ -128,6 +141,8 @@ class DkmDashboard extends Component {
             this._skJenisChart?.dispose();
             this._srTrendChart?.dispose();
             this._srJenisChart?.dispose();
+            this._sbTrendChart?.dispose();
+            this._sbStatusChart?.dispose();
             if (this._leafMap) { this._leafMap.remove(); this._leafMap = null; }
         });
     }
@@ -138,10 +153,25 @@ class DkmDashboard extends Component {
         return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    _dt(d) {
+    // _dt: local WIB Date → UTC string untuk domain Odoo
+    _dt(d) { return d.toISOString().replace('T', ' ').slice(0, 19); }
+
+    // _wib: parse string UTC Odoo ("YYYY-MM-DD HH:MM:SS") → Date object dimana
+    //       nilai UTC-nya merepresentasikan waktu WIB (offset +7 sudah ditambahkan)
+    _wib(dtStr) {
+        if (!dtStr) return null;
+        const d = new Date(String(dtStr).replace(' ', 'T') + 'Z');
+        return isNaN(d.getTime()) ? null : new Date(d.getTime() + 7 * 3600 * 1000);
+    }
+
+    // _fmtWib: format Datetime UTC Odoo → "YYYY-MM-DD HH:MM" dalam WIB
+    _fmtWib(dtStr) {
+        if (!dtStr) return '-';
+        const w = this._wib(dtStr);
+        if (!w) return '-';
         const p = n => String(n).padStart(2, '0');
-        return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ` +
-               `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+        return `${w.getUTCFullYear()}-${p(w.getUTCMonth()+1)}-${p(w.getUTCDate())} ` +
+               `${p(w.getUTCHours())}:${p(w.getUTCMinutes())}`;
     }
 
     _lakaDomain() {
@@ -168,15 +198,15 @@ class DkmDashboard extends Component {
 
     fmtTgl(s) {
         if (!s) return '-';
-        // Date field: 'YYYY-MM-DD' — no timezone conversion needed
-        if (s.length === 10) {
-            const [y, m, d] = s.split('-');
+        // Date field: 'YYYY-MM-DD' — tidak ada timezone
+        if (String(s).length === 10) {
+            const [y, m, d] = String(s).split('-');
             return `${parseInt(d)} ${BULAN[parseInt(m)-1]} ${y}`;
         }
-        // Datetime field: 'YYYY-MM-DD HH:MM:SS'
-        const d = new Date(s.replace(' ', 'T') + 'Z');
-        if (isNaN(d)) return s;
-        return `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+        // Datetime field: UTC → WIB (+7)
+        const w = this._wib(s);
+        if (!w) return s;
+        return `${w.getUTCDate()} ${BULAN[w.getUTCMonth()]} ${w.getUTCFullYear()}`;
     }
 
     // ── Load data ──────────────────────────────────────────────────────────────
@@ -307,8 +337,9 @@ class DkmDashboard extends Component {
         const map = {};
         for (const r of records) {
             if (!r.tanggal_kejadian) continue;
-            const d   = new Date(r.tanggal_kejadian.replace(' ', 'T') + 'Z');
-            const key = `${d.getFullYear()}-${d.getMonth()+1}`;
+            const w = this._wib(r.tanggal_kejadian);
+            if (!w) continue;
+            const key = `${w.getUTCFullYear()}-${w.getUTCMonth()+1}`;
             map[key]  = (map[key] || 0) + 1;
         }
         return months.map(m => ({
@@ -964,10 +995,7 @@ class DkmDashboard extends Component {
                  konsultasi:'Konsultasi', lainnya:'Lainnya' }[key] || '-';
     }
 
-    skFormatJadwal(dt) {
-        if (!dt) return '-';
-        return String(dt).replace('T', ' ').slice(0, 16);
-    }
+    skFormatJadwal(dt) { return this._fmtWib(dt); }
 
     // ── Satreskrim Dashboard ──────────────────────────────────────────────────
 
@@ -1032,8 +1060,19 @@ class DkmDashboard extends Component {
         const map = {};
         for (const r of raw) {
             if (!r[dateField]) continue;
-            const [y, mo] = r[dateField].split('-');
-            const k = `${y}-${parseInt(mo)}`;
+            const val = String(r[dateField]);
+            let y, mo;
+            if (val.length > 10) {
+                // Datetime field (UTC) → convert ke WIB sebelum ambil bulan
+                const w = this._wib(val);
+                if (!w) continue;
+                y  = w.getUTCFullYear();
+                mo = w.getUTCMonth() + 1;
+            } else {
+                // Date field ("YYYY-MM-DD") — tidak ada timezone
+                [y, mo] = val.split('-').map(Number);
+            }
+            const k = `${y}-${mo}`;
             map[k] = (map[k] || 0) + 1;
         }
         return months.map(m => ({
@@ -1120,6 +1159,116 @@ class DkmDashboard extends Component {
                  pemerkosaan:'Kesusilaan', pembunuhan:'Pembunuhan', lainnya:'Lainnya' }[key] || '-';
     }
 
+    // ── Sabhara Dashboard ──────────────────────────────────────────────────────
+
+    async loadSabhara() {
+        this.state.sabhara.loading = true;
+
+        const now       = new Date();
+        const sixAgo    = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+        const sixAgoStr = this._dateStr(sixAgo);
+
+        const [
+            total, menunggu, berjalan, selesai,
+            trendRaw, terbaru,
+        ] = await Promise.all([
+            this.orm.searchCount('digital_kamtibmas.patroli', []),
+            this.orm.searchCount('digital_kamtibmas.patroli', [['state','=','menunggu']]),
+            this.orm.searchCount('digital_kamtibmas.patroli', [['state','=','berjalan']]),
+            this.orm.searchCount('digital_kamtibmas.patroli', [['state','=','selesai']]),
+
+            this.orm.searchRead('digital_kamtibmas.patroli',
+                [['tanggal_patroli','>=', this._dt(sixAgo)]],
+                ['tanggal_patroli'], { limit: 5000 }),
+
+            this.orm.searchRead('digital_kamtibmas.patroli',
+                [],
+                ['code','tanggal_patroli','tanggal_selesai','state','personel_ids','kecamatan_id'],
+                { order: 'id desc', limit: 10 }),
+        ]);
+
+        this.state.sabhara.kpi       = { total, menunggu, berjalan, selesai };
+        this.state.sabhara.trendData = this._buildTrend6BulanDate(trendRaw, 'tanggal_patroli');
+        this.state.sabhara.terbaru   = terbaru;
+        this.state.sabhara.loading   = false;
+
+        setTimeout(() => this._renderSabharaCharts(), 60);
+    }
+
+    _renderSabharaCharts() {
+        if (typeof echarts === 'undefined') return;
+        this._renderSbTrend();
+        this._renderSbStatus();
+    }
+
+    _renderSbTrend() {
+        const el = this.sbTrendRef?.el;
+        if (!el) return;
+        this._sbTrendChart?.dispose();
+        this._sbTrendChart = echarts.init(el);
+        const data = this.state.sabhara.trendData;
+        this._sbTrendChart.setOption({
+            tooltip: { trigger:'axis',
+                formatter: p => `${p[0].name}<br/><b>Patroli: ${p[0].value}</b>` },
+            grid: { left:10, right:16, top:20, bottom:48, containLabel:true },
+            xAxis: { type:'category', data: data.map(d => d.label),
+                axisLabel: { rotate:30, fontSize:11, color:'#6b7280' },
+                axisLine: { lineStyle:{ color:'#e5e7eb' } }, axisTick:{ show:false } },
+            yAxis: { type:'value', minInterval:1,
+                axisLabel: { fontSize:11, color:'#9ca3af' },
+                splitLine: { lineStyle:{ color:'#f3f4f6', type:'dashed' } } },
+            series: [{
+                type:'bar', data: data.map(d => d.count),
+                itemStyle: { color:'#71639e', borderRadius:[4,4,0,0] },
+                label: { show:true, position:'top', fontSize:11, color:'#6b7280',
+                    formatter: p => p.value > 0 ? p.value : '' },
+            }],
+        });
+    }
+
+    _renderSbStatus() {
+        const el = this.sbStatusRef?.el;
+        if (!el) return;
+        this._sbStatusChart?.dispose();
+        this._sbStatusChart = echarts.init(el);
+        const kpi  = this.state.sabhara.kpi;
+        const data = [
+            { name:'Menunggu', value: kpi.menunggu, itemStyle:{ color:'#9ca3af' } },
+            { name:'Berjalan', value: kpi.berjalan, itemStyle:{ color:'#f59e0b' } },
+            { name:'Selesai',  value: kpi.selesai,  itemStyle:{ color:'#10b981' } },
+        ].filter(d => d.value > 0);
+
+        if (!data.length) {
+            this._sbStatusChart.setOption({ graphic:[{ type:'text', left:'center', top:'middle',
+                style:{ text:'Belum ada data patroli', fill:'#9ca3af', fontSize:13 } }] });
+            return;
+        }
+        this._sbStatusChart.setOption({
+            tooltip: { trigger:'item', formatter:'{b}: {c} ({d}%)' },
+            legend: { bottom:4, textStyle:{ fontSize:11, color:'#6b7280' } },
+            series: [{ type:'pie', radius:['40%','66%'], center:['50%','44%'],
+                label:{ show:false }, labelLine:{ show:false }, data }],
+        });
+    }
+
+    // ── Sabhara navigation ─────────────────────────────────────────────────────
+
+    openPatroliList(domain) {
+        this.action.doAction({ type:'ir.actions.act_window', name:'Patroli',
+            res_model:'digital_kamtibmas.patroli', view_mode:'list,form',
+            domain: domain || [] });
+    }
+
+    openPatroliRecord(id) {
+        this.action.doAction({ type:'ir.actions.act_window',
+            res_model:'digital_kamtibmas.patroli', res_id: id,
+            views: [[false,'form']] });
+    }
+
+    sbStateLabel(s) {
+        return { menunggu:'Menunggu', berjalan:'Berjalan', selesai:'Selesai' }[s] || s;
+    }
+
     // ── Sidebar navigation ─────────────────────────────────────────────────────
 
     toggleSidebar() {
@@ -1149,6 +1298,10 @@ class DkmDashboard extends Component {
             this._srTrendChart?.dispose(); this._srTrendChart = null;
             this._srJenisChart?.dispose(); this._srJenisChart = null;
         }
+        if (prev === 'sabhara') {
+            this._sbTrendChart?.dispose();  this._sbTrendChart  = null;
+            this._sbStatusChart?.dispose(); this._sbStatusChart = null;
+        }
 
         this.state.activeSection = section;
 
@@ -1165,6 +1318,9 @@ class DkmDashboard extends Component {
         }
         if (section === 'satreskrim') {
             this.loadSatreskrim();
+        }
+        if (section === 'sabhara') {
+            this.loadSabhara();
         }
     }
 
