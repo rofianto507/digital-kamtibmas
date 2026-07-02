@@ -801,6 +801,404 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 }
 
+/* ── Laka KPI Cards (gradient colored style) ─────────────────────────────── */
+
+.dkm-laka-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.dkm-laka-card {
+    position: relative;
+    border-radius: 0.25rem;
+    padding: 10px;
+    color: #fff;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 120px;
+}
+.dkm-laka-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+/* Gradient skins */
+.dkm-laka-card--purple {
+    background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%);
+}
+.dkm-laka-card--blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+}
+.dkm-laka-card--orange {
+    background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+}
+.dkm-laka-card--green {
+    background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
+}
+/* Patroli-specific skins */
+.dkm-laka-card--slate {
+    background: linear-gradient(135deg, #64748b 0%, #334155 100%);
+}
+.dkm-laka-card--amber {
+    background: linear-gradient(135deg, #f59e0b 0%, #92400e 100%);
+}
+
+/* Shine overlay */
+.dkm-laka-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, rgba(255,255,255,0.12) 0%, transparent 55%);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* Decorative large background icon */
+.dkm-laka-card-bg-icon {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    font-size: 80px;
+    opacity: 0.10;
+    pointer-events: none;
+    line-height: 1;
+    transform: rotate(-10deg);
+}
+
+/* Top row: chip label */
+.dkm-laka-card-top {
+    margin-bottom: 6px;
+}
+
+.dkm-laka-card-chip {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+/* Big number */
+.dkm-laka-card-value {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1.5px;
+    margin-top: 2px;
+}
+
+/* Label */
+.dkm-laka-card-label {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.9;
+    margin-top: 4px;
+    flex: 1;
+}
+
+/* Mini progress bar (% dari total) */
+.dkm-laka-card-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+.dkm-laka-card-bar-fill {
+    height: 100%;
+    background: rgba(255,255,255,0.7);
+    border-radius: 2px;
+    transition: width 0.6s ease;
+    min-width: 2px;
+}
+
+@media (max-width: 1200px) {
+    .dkm-laka-kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .dkm-laka-card-value { font-size: 30px; }
+}
+
+/* ── Sabhara Live Patrol Map ─────────────────────────────────────────────── */
+
+.dkm-sb-live-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.dkm-sb-live-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: #1e1b4b;
+    color: #fff;
+    gap: 12px;
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.dkm-sb-live-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.1px;
+}
+
+.dkm-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #dc2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    padding: 3px 9px 3px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.dkm-live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    animation: dkm-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes dkm-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.15; }
+}
+
+.dkm-sb-live-meta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    flex-shrink: 0;
+}
+
+.dkm-sb-live-count {
+    font-weight: 700;
+    color: #fbbf24;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dkm-sb-live-refresh {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+}
+
+.dkm-sb-live-body {
+    display: flex;
+    height: 430px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.dkm-sb-live-map {
+    flex: 1;
+    min-width: 0;
+}
+
+.dkm-sb-live-list {
+    width: 230px;
+    flex-shrink: 0;
+    border-left: 1px solid #e5e7eb;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    height: 100%;     /* wajib: ambil tinggi 430px dari parent agar overflow-y aktif */
+    min-height: 0;    /* cegah flex item expand melebihi parent */
+    box-sizing: border-box;
+}
+
+.dkm-sb-live-list-header {
+    padding: 10px 14px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.dkm-sb-live-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.dkm-sb-live-item:hover { background: #eff6ff; }
+.dkm-sb-live-item--no-loc { opacity: 0.6; }
+
+.dkm-sb-live-item-code {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 700;
+    font-size: 12px;
+    color: #1e1b4b;
+    margin-bottom: 3px;
+    font-family: monospace;
+}
+
+.dkm-sb-live-item-kec {
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 5px;
+    padding-left: 16px;
+}
+
+.dkm-sb-live-item-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+    color: #9ca3af;
+    padding-left: 16px;
+}
+.dkm-sb-live-item-detail i { width: 13px; }
+
+.dkm-sb-live-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 14px;
+    color: #9ca3af;
+    font-size: 12px;
+    text-align: center;
+    gap: 10px;
+}
+.dkm-sb-live-empty i { font-size: 32px; color: #d1d5db; }
+
+.dkm-dot-active {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34,197,94,0.25);
+    animation: dkm-pulse-green 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.dkm-dot-inactive {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #d1d5db;
+    flex-shrink: 0;
+}
+
+@keyframes dkm-pulse-green {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(34,197,94,0.25); }
+    50%       { box-shadow: 0 0 0 5px rgba(34,197,94,0.08); }
+}
+
+.dkm-sb-live-legend {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 8px 18px;
+    font-size: 11px;
+    color: #6b7280;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.dkm-sb-live-autoupdate {
+    margin-left: auto;
+    color: #9ca3af;
+}
+.dkm-sb-live-autoupdate i { margin-right: 3px; }
+
+/* Leaflet live marker */
+.dkm-live-marker {
+    display: inline-flex;
+    align-items: center;
+    position: relative;          /* wajib: menahan pulse ring agar tidak escape */
+    overflow: visible;
+}
+
+.dkm-live-marker-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #f59e0b;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.dkm-live-marker-pulse {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(245,158,11,0.45);
+    animation: dkm-ring 2s ease-out infinite;
+    z-index: 1;
+}
+
+@keyframes dkm-ring {
+    0%   { transform: scale(1);   opacity: 0.8; }
+    100% { transform: scale(2.8); opacity: 0; }
+}
+
+.dkm-live-marker-label {
+    background: #1e1b4b;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 6px;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    letter-spacing: 0.3px;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
 @media (max-width: 1200px) {

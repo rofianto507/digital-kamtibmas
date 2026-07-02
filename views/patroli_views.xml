@@ -60,6 +60,7 @@
                                     <field name="longitude"/>
                                 </list>
                             </field>
+                            <widget name="dkm_patroli_route_map"/>
                         </page>
                     </notebook>
                 </sheet>

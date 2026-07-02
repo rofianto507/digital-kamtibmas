@@ -152,52 +152,61 @@
                 <div class="dkm-section-label">
                     <i class="fa fa-file-text-o"/> e-Form Laka — <t t-esc="periodLabel()"/>
                 </div>
-                <div class="dkm-kpi-row">
+                <div class="dkm-laka-kpi-row">
 
-                    <div class="dkm-kpi-card" t-on-click="() => this.openLakaList([])">
-                        <div class="dkm-kpi-icon dkm-kpi-icon--purple">
-                            <i class="fa fa-file-text-o"/>
+                    <!-- Total -->
+                    <div class="dkm-laka-card dkm-laka-card--purple"
+                         t-on-click="() => this.openLakaList([])">
+                        <i class="fa fa-file-text-o dkm-laka-card-bg-icon"/>
+                        <div class="dkm-laka-card-top">
+                            <span class="dkm-laka-card-chip">Semua Kasus</span>
                         </div>
-                        <div class="dkm-kpi-body">
-                            <div class="dkm-kpi-value" t-esc="state.kpi.lakaTotal"/>
-                            <div class="dkm-kpi-label">Total Laka</div>
-                            <div class="dkm-kpi-sub">Semua Kasus</div>
-                        </div>
+                        <div class="dkm-laka-card-value" t-esc="state.kpi.lakaTotal"/>
+                        <div class="dkm-laka-card-label">Total Laka</div>
                     </div>
 
-                    <div class="dkm-kpi-card"
+                    <!-- Baru -->
+                    <div class="dkm-laka-card dkm-laka-card--blue"
                          t-on-click="() => this.openLakaList([['state','=','BARU']])">
-                        <div class="dkm-kpi-icon dkm-kpi-icon--blue">
-                            <i class="fa fa-inbox"/>
+                        <i class="fa fa-inbox dkm-laka-card-bg-icon"/>
+                        <div class="dkm-laka-card-top">
+                            <span class="dkm-laka-card-chip">Menunggu Tindakan</span>
                         </div>
-                        <div class="dkm-kpi-body">
-                            <div class="dkm-kpi-value" t-esc="state.kpi.lakaBaru"/>
-                            <div class="dkm-kpi-label">Kasus Baru</div>
-                            <div class="dkm-kpi-sub">Menunggu Tindakan</div>
+                        <div class="dkm-laka-card-value" t-esc="state.kpi.lakaBaru"/>
+                        <div class="dkm-laka-card-label">Kasus Baru</div>
+                        <div class="dkm-laka-card-bar">
+                            <div class="dkm-laka-card-bar-fill"
+                                 t-attf-style="width:#{state.kpi.lakaTotal ? Math.round(state.kpi.lakaBaru/state.kpi.lakaTotal*100) : 0}%"/>
                         </div>
                     </div>
 
-                    <div class="dkm-kpi-card"
+                    <!-- Diproses -->
+                    <div class="dkm-laka-card dkm-laka-card--orange"
                          t-on-click="() => this.openLakaList([['state','=','DIPROSES']])">
-                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
-                            <i class="fa fa-refresh"/>
+                        <i class="fa fa-refresh dkm-laka-card-bg-icon"/>
+                        <div class="dkm-laka-card-top">
+                            <span class="dkm-laka-card-chip">Dalam Penanganan</span>
                         </div>
-                        <div class="dkm-kpi-body">
-                            <div class="dkm-kpi-value" t-esc="state.kpi.lakaDisproses"/>
-                            <div class="dkm-kpi-label">Diproses</div>
-                            <div class="dkm-kpi-sub">Dalam Penanganan</div>
+                        <div class="dkm-laka-card-value" t-esc="state.kpi.lakaDisproses"/>
+                        <div class="dkm-laka-card-label">Diproses</div>
+                        <div class="dkm-laka-card-bar">
+                            <div class="dkm-laka-card-bar-fill"
+                                 t-attf-style="width:#{state.kpi.lakaTotal ? Math.round(state.kpi.lakaDisproses/state.kpi.lakaTotal*100) : 0}%"/>
                         </div>
                     </div>
 
-                    <div class="dkm-kpi-card"
+                    <!-- Selesai -->
+                    <div class="dkm-laka-card dkm-laka-card--green"
                          t-on-click="() => this.openLakaList([['state','=','SELESAI']])">
-                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
-                            <i class="fa fa-check-circle"/>
+                        <i class="fa fa-check-circle dkm-laka-card-bg-icon"/>
+                        <div class="dkm-laka-card-top">
+                            <span class="dkm-laka-card-chip">Sudah Ditangani</span>
                         </div>
-                        <div class="dkm-kpi-body">
-                            <div class="dkm-kpi-value" t-esc="state.kpi.lakaSelesai"/>
-                            <div class="dkm-kpi-label">Selesai</div>
-                            <div class="dkm-kpi-sub">Sudah Ditangani</div>
+                        <div class="dkm-laka-card-value" t-esc="state.kpi.lakaSelesai"/>
+                        <div class="dkm-laka-card-label">Selesai</div>
+                        <div class="dkm-laka-card-bar">
+                            <div class="dkm-laka-card-bar-fill"
+                                 t-attf-style="width:#{state.kpi.lakaTotal ? Math.round(state.kpi.lakaSelesai/state.kpi.lakaTotal*100) : 0}%"/>
                         </div>
                     </div>
 
@@ -440,53 +449,61 @@
                 <div class="dkm-section-label">
                     <i class="fa fa-heartbeat"/> Permohonan Rehabilitasi
                 </div>
-                <div class="dkm-kpi-row">
+                <div class="dkm-laka-kpi-row">
 
-                    <div class="dkm-kpi-card"
+                    <!-- Total -->
+                    <div class="dkm-laka-card dkm-laka-card--blue"
                          t-on-click="() => this.openRehabList([])">
-                        <div class="dkm-kpi-icon dkm-kpi-icon--blue">
-                            <i class="fa fa-heartbeat"/>
+                        <i class="fa fa-heartbeat dkm-laka-card-bg-icon"/>
+                        <div class="dkm-laka-card-top">
+                            <span class="dkm-laka-card-chip">Semua Permohonan</span>
                         </div>
-                        <div class="dkm-kpi-body">
-                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.rehTotal"/>
-                            <div class="dkm-kpi-label">Total Rehab</div>
-                            <div class="dkm-kpi-sub">Semua permohonan</div>
-                        </div>
+                        <div class="dkm-laka-card-value" t-esc="state.satkoba.kpi.rehTotal"/>
+                        <div class="dkm-laka-card-label">Total Rehab</div>
                     </div>
 
-                    <div class="dkm-kpi-card"
+                    <!-- Menunggu -->
+                    <div class="dkm-laka-card dkm-laka-card--slate"
                          t-on-click="() => this.openRehabList([['state','=','menunggu']])">
-                        <div class="dkm-kpi-icon dkm-kpi-icon--gray">
-                            <i class="fa fa-clock-o"/>
+                        <i class="fa fa-clock-o dkm-laka-card-bg-icon"/>
+                        <div class="dkm-laka-card-top">
+                            <span class="dkm-laka-card-chip">Belum Dikonfirmasi</span>
                         </div>
-                        <div class="dkm-kpi-body">
-                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.rehMenunggu"/>
-                            <div class="dkm-kpi-label">Menunggu</div>
-                            <div class="dkm-kpi-sub">Belum dikonfirmasi</div>
+                        <div class="dkm-laka-card-value" t-esc="state.satkoba.kpi.rehMenunggu"/>
+                        <div class="dkm-laka-card-label">Menunggu</div>
+                        <div class="dkm-laka-card-bar">
+                            <div class="dkm-laka-card-bar-fill"
+                                 t-attf-style="width:#{state.satkoba.kpi.rehTotal ? Math.round(state.satkoba.kpi.rehMenunggu/state.satkoba.kpi.rehTotal*100) : 0}%"/>
                         </div>
                     </div>
 
-                    <div class="dkm-kpi-card"
+                    <!-- Diproses -->
+                    <div class="dkm-laka-card dkm-laka-card--amber"
                          t-on-click="() => this.openRehabList([['state','in',['konfirmasi','proses']]])">
-                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
-                            <i class="fa fa-spinner"/>
+                        <i class="fa fa-spinner dkm-laka-card-bg-icon"/>
+                        <div class="dkm-laka-card-top">
+                            <span class="dkm-laka-card-chip">Konfirmasi + Proses</span>
                         </div>
-                        <div class="dkm-kpi-body">
-                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.rehProses"/>
-                            <div class="dkm-kpi-label">Diproses</div>
-                            <div class="dkm-kpi-sub">Konfirmasi + Proses</div>
+                        <div class="dkm-laka-card-value" t-esc="state.satkoba.kpi.rehProses"/>
+                        <div class="dkm-laka-card-label">Diproses</div>
+                        <div class="dkm-laka-card-bar">
+                            <div class="dkm-laka-card-bar-fill"
+                                 t-attf-style="width:#{state.satkoba.kpi.rehTotal ? Math.round(state.satkoba.kpi.rehProses/state.satkoba.kpi.rehTotal*100) : 0}%"/>
                         </div>
                     </div>
 
-                    <div class="dkm-kpi-card"
+                    <!-- Selesai -->
+                    <div class="dkm-laka-card dkm-laka-card--green"
                          t-on-click="() => this.openRehabList([['state','=','selesai']])">
-                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
-                            <i class="fa fa-check"/>
+                        <i class="fa fa-check-circle dkm-laka-card-bg-icon"/>
+                        <div class="dkm-laka-card-top">
+                            <span class="dkm-laka-card-chip">Sudah Ditangani</span>
                         </div>
-                        <div class="dkm-kpi-body">
-                            <div class="dkm-kpi-value" t-esc="state.satkoba.kpi.rehSelesai"/>
-                            <div class="dkm-kpi-label">Selesai</div>
-                            <div class="dkm-kpi-sub">Sudah ditangani</div>
+                        <div class="dkm-laka-card-value" t-esc="state.satkoba.kpi.rehSelesai"/>
+                        <div class="dkm-laka-card-label">Selesai</div>
+                        <div class="dkm-laka-card-bar">
+                            <div class="dkm-laka-card-bar-fill"
+                                 t-attf-style="width:#{state.satkoba.kpi.rehTotal ? Math.round(state.satkoba.kpi.rehSelesai/state.satkoba.kpi.rehTotal*100) : 0}%"/>
                         </div>
                     </div>
 
@@ -810,6 +827,75 @@
                     </div>
 
                 </div><!-- /kpi -->
+
+                <!-- Live Patrol Monitoring Map -->
+                <div class="dkm-sb-live-card">
+                    <div class="dkm-sb-live-header">
+                        <div class="dkm-sb-live-title">
+                            <span class="dkm-live-badge">
+                                <span class="dkm-live-dot"/>LIVE
+                            </span>
+                            Pemantauan Patroli Aktif
+                        </div>
+                        <div class="dkm-sb-live-meta">
+                            <span class="dkm-sb-live-count">
+                                <i class="fa fa-map-marker"/>
+                                <t t-esc="(state.sabhara.livePatroli || []).filter(p => p.lat).length"/>
+                                patroli di peta
+                            </span>
+                            <span t-if="state.sabhara.liveLastUpdate" class="dkm-sb-live-refresh">
+                                <i class="fa fa-clock-o"/>
+                                Update: <t t-esc="sbFmtLastUpdate(state.sabhara.liveLastUpdate)"/>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="dkm-sb-live-body">
+                        <div t-ref="sbLiveMap" class="dkm-sb-live-map"/>
+                        <div class="dkm-sb-live-list">
+                            <div class="dkm-sb-live-list-header">
+                                Patroli Berjalan
+                                (<t t-esc="(state.sabhara.livePatroli || []).length"/>)
+                            </div>
+                            <t t-if="!(state.sabhara.livePatroli || []).length">
+                                <div class="dkm-sb-live-empty">
+                                    <i class="fa fa-shield"/>
+                                    <span>Tidak ada patroli aktif saat ini</span>
+                                </div>
+                            </t>
+                            <t t-foreach="state.sabhara.livePatroli || []" t-as="p" t-key="p.id">
+                                <div t-attf-class="dkm-sb-live-item #{p.lat ? '' : 'dkm-sb-live-item--no-loc'}"
+                                     t-on-click="() => this.sbLiveFocus(p)">
+                                    <div class="dkm-sb-live-item-code">
+                                        <span t-if="p.lat"  class="dkm-dot-active"/>
+                                        <span t-if="!p.lat" class="dkm-dot-inactive"/>
+                                        <t t-esc="p.code"/>
+                                    </div>
+                                    <div class="dkm-sb-live-item-kec"
+                                         t-esc="p.kecamatan_id ? p.kecamatan_id[1] : '—'"/>
+                                    <div class="dkm-sb-live-item-detail">
+                                        <span>
+                                            <i class="fa fa-users"/>
+                                            <t t-esc="(p.personel_ids || []).length"/> personel
+                                        </span>
+                                        <span t-if="p.lat" style="color:#16a34a">
+                                            <i class="fa fa-map-marker"/> Ada titik lokasi
+                                        </span>
+                                        <span t-if="!p.lat" style="color:#dc2626">
+                                            <i class="fa fa-exclamation-triangle"/> Belum ada lokasi
+                                        </span>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="dkm-sb-live-legend">
+                        <span><span class="dkm-dot-active"/> Terlacak di peta</span>
+                        <span><span class="dkm-dot-inactive"/> Belum ada titik lokasi</span>
+                        <span class="dkm-sb-live-autoupdate">
+                            <i class="fa fa-refresh"/> Otomatis refresh setiap 30 detik
+                        </span>
+                    </div>
+                </div><!-- /live-card -->
 
                 <!-- Charts -->
                 <div class="dkm-charts-row">
