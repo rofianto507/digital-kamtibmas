@@ -60,6 +60,14 @@ class DkmDashboard extends Component {
                 jadwalKon:  [],
                 jadwalReh:  [],
             },
+            // ── Satreskrim ─────────────────────────────────────────────
+            satreskrim: {
+                loading: false,
+                kpi: { total: 0, diterima: 0, aktif: 0, selesai: 0 },
+                trendData:    [],
+                jenisPerkara: [],
+                terbaru:      [],
+            },
         });
 
         this.mapState = useState({
@@ -75,6 +83,9 @@ class DkmDashboard extends Component {
         // Satnarkoba chart refs
         this.skTrendRef = useRef("skTrendChart");
         this.skJenisRef = useRef("skJenisChart");
+        // Satreskrim chart refs
+        this.srTrendRef = useRef("srTrendChart");
+        this.srJenisRef = useRef("srJenisChart");
 
         this._trendChart     = null;
         this._statusChart    = null;
@@ -87,6 +98,9 @@ class DkmDashboard extends Component {
         // Satnarkoba chart instances
         this._skTrendChart   = null;
         this._skJenisChart   = null;
+        // Satreskrim chart instances
+        this._srTrendChart   = null;
+        this._srJenisChart   = null;
 
         onMounted(async () => await this.loadData());
 
@@ -112,6 +126,8 @@ class DkmDashboard extends Component {
             this._calendarChart?.dispose();
             this._skTrendChart?.dispose();
             this._skJenisChart?.dispose();
+            this._srTrendChart?.dispose();
+            this._srJenisChart?.dispose();
             if (this._leafMap) { this._leafMap.remove(); this._leafMap = null; }
         });
     }
@@ -953,6 +969,157 @@ class DkmDashboard extends Component {
         return String(dt).replace('T', ' ').slice(0, 16);
     }
 
+    // ── Satreskrim Dashboard ──────────────────────────────────────────────────
+
+    async loadSatreskrim() {
+        this.state.satreskrim.loading = true;
+
+        const now       = new Date();
+        const sixAgo    = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+        const sixAgoStr = this._dateStr(sixAgo);
+
+        const [
+            total, diterima, aktif, selesai,
+            trendRaw, jenisRaw, terbaru,
+        ] = await Promise.all([
+            this.orm.searchCount('digital_kamtibmas.barang_bukti', []),
+            this.orm.searchCount('digital_kamtibmas.barang_bukti', [['state','=','diterima']]),
+            this.orm.searchCount('digital_kamtibmas.barang_bukti',
+                [['state','in',['disimpan','diproses']]]),
+            this.orm.searchCount('digital_kamtibmas.barang_bukti',
+                [['state','in',['dikembalikan','dimusnahkan']]]),
+
+            this.orm.searchRead('digital_kamtibmas.barang_bukti',
+                [['tanggal_penerimaan','>=', sixAgoStr]],
+                ['tanggal_penerimaan'], { limit: 5000 }),
+
+            this.orm.searchRead('digital_kamtibmas.barang_bukti',
+                [], ['jenis_perkara'], { limit: 5000 }),
+
+            this.orm.searchRead('digital_kamtibmas.barang_bukti',
+                [],
+                ['code','nama_pelapor','jenis_perkara','tanggal_penerimaan','state'],
+                { order: 'id desc', limit: 10 }),
+        ]);
+
+        this.state.satreskrim.kpi          = { total, diterima, aktif, selesai };
+        this.state.satreskrim.trendData    = this._buildTrend6BulanDate(trendRaw, 'tanggal_penerimaan');
+        this.state.satreskrim.jenisPerkara = this._buildSelectionCount(jenisRaw, 'jenis_perkara', {
+            pencurian:    'Pencurian',
+            penipuan:     'Penipuan',
+            penganiayaan: 'Penganiayaan',
+            narkoba:      'Narkoba',
+            korupsi:      'Korupsi',
+            cybercrime:   'Cyber Crime',
+            pemerkosaan:  'Kesusilaan',
+            pembunuhan:   'Pembunuhan',
+            lainnya:      'Lainnya',
+        });
+        this.state.satreskrim.terbaru      = terbaru;
+        this.state.satreskrim.loading      = false;
+
+        setTimeout(() => this._renderSatreskrimCharts(), 60);
+    }
+
+    _buildTrend6BulanDate(raw, dateField) {
+        const now    = new Date();
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            months.push({ year: d.getFullYear(), month: d.getMonth() + 1,
+                          label: `${BULAN[d.getMonth()]} ${d.getFullYear()}` });
+        }
+        const map = {};
+        for (const r of raw) {
+            if (!r[dateField]) continue;
+            const [y, mo] = r[dateField].split('-');
+            const k = `${y}-${parseInt(mo)}`;
+            map[k] = (map[k] || 0) + 1;
+        }
+        return months.map(m => ({
+            label: m.label,
+            count: map[`${m.year}-${m.month}`] || 0,
+        }));
+    }
+
+    _renderSatreskrimCharts() {
+        if (typeof echarts === 'undefined') return;
+        this._renderSrTrend();
+        this._renderSrJenis();
+    }
+
+    _renderSrTrend() {
+        const el = this.srTrendRef?.el;
+        if (!el) return;
+        this._srTrendChart?.dispose();
+        this._srTrendChart = echarts.init(el);
+        const data = this.state.satreskrim.trendData;
+        this._srTrendChart.setOption({
+            tooltip: { trigger: 'axis',
+                formatter: p => `${p[0].name}<br/><b>Barang Bukti: ${p[0].value}</b>` },
+            grid: { left: 10, right: 16, top: 20, bottom: 48, containLabel: true },
+            xAxis: { type: 'category', data: data.map(d => d.label),
+                axisLabel: { rotate: 30, fontSize: 11, color: '#6b7280' },
+                axisLine: { lineStyle: { color: '#e5e7eb' } }, axisTick: { show: false } },
+            yAxis: { type: 'value', minInterval: 1,
+                axisLabel: { fontSize: 11, color: '#9ca3af' },
+                splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+            series: [{
+                type: 'bar', data: data.map(d => d.count),
+                itemStyle: { color: '#71639e', borderRadius: [4, 4, 0, 0] },
+                label: { show: true, position: 'top', fontSize: 11, color: '#6b7280',
+                    formatter: p => p.value > 0 ? p.value : '' },
+            }],
+        });
+    }
+
+    _renderSrJenis() {
+        const el = this.srJenisRef?.el;
+        if (!el) return;
+        this._srJenisChart?.dispose();
+        this._srJenisChart = echarts.init(el);
+        const data = this.state.satreskrim.jenisPerkara;
+        if (!data.length) {
+            this._srJenisChart.setOption({ graphic: [{ type:'text', left:'center', top:'middle',
+                style:{ text:'Belum ada data', fill:'#9ca3af', fontSize:13 } }] });
+            return;
+        }
+        const COLORS = ['#71639e','#3b82f6','#f59e0b','#ef4444','#10b981','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+        this._srJenisChart.setOption({
+            tooltip: { trigger:'item', formatter:'{b}: {c} ({d}%)' },
+            legend: { bottom: 4, textStyle: { fontSize: 11, color: '#6b7280' } },
+            series: [{ type:'pie', radius:['40%','66%'], center:['50%','44%'],
+                label:{ show:false }, labelLine:{ show:false },
+                data: data.map((d,i) => ({ value:d.count, name:d.name,
+                    itemStyle:{ color: COLORS[i % COLORS.length] } })) }],
+        });
+    }
+
+    // ── Satreskrim navigation ──────────────────────────────────────────────────
+
+    openBBList(domain) {
+        this.action.doAction({ type:'ir.actions.act_window', name:'Barang Bukti',
+            res_model:'digital_kamtibmas.barang_bukti', view_mode:'list,form',
+            domain: domain || [] });
+    }
+
+    openBBRecord(id) {
+        this.action.doAction({ type:'ir.actions.act_window',
+            res_model:'digital_kamtibmas.barang_bukti', res_id: id,
+            views: [[false,'form']] });
+    }
+
+    srStateLabel(s) {
+        return { diterima:'Diterima', disimpan:'Disimpan', diproses:'Diproses',
+                 dikembalikan:'Dikembalikan', dimusnahkan:'Dimusnahkan' }[s] || s;
+    }
+
+    srJenisPerkara(key) {
+        return { pencurian:'Pencurian', penipuan:'Penipuan', penganiayaan:'Penganiayaan',
+                 narkoba:'Narkoba', korupsi:'Korupsi', cybercrime:'Cyber Crime',
+                 pemerkosaan:'Kesusilaan', pembunuhan:'Pembunuhan', lainnya:'Lainnya' }[key] || '-';
+    }
+
     // ── Sidebar navigation ─────────────────────────────────────────────────────
 
     toggleSidebar() {
@@ -978,6 +1145,10 @@ class DkmDashboard extends Component {
             this._skTrendChart?.dispose(); this._skTrendChart = null;
             this._skJenisChart?.dispose(); this._skJenisChart = null;
         }
+        if (prev === 'satreskrim') {
+            this._srTrendChart?.dispose(); this._srTrendChart = null;
+            this._srJenisChart?.dispose(); this._srJenisChart = null;
+        }
 
         this.state.activeSection = section;
 
@@ -991,6 +1162,9 @@ class DkmDashboard extends Component {
         }
         if (section === 'satnarkoba') {
             this.loadSatnarkoba();
+        }
+        if (section === 'satreskrim') {
+            this.loadSatreskrim();
         }
     }
 
