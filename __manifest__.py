@@ -42,6 +42,9 @@
             'digital_kamtibmas/static/src/css/map_widget.css',
             'digital_kamtibmas/static/src/xml/map_widget.xml',
             'digital_kamtibmas/static/src/js/map_widget.js',
+            # Patroli route map
+            'digital_kamtibmas/static/src/xml/patroli_map_widget.xml',
+            'digital_kamtibmas/static/src/js/patroli_map_widget.js',
             # Dashboard
             'digital_kamtibmas/static/src/css/dashboard.css',
             'digital_kamtibmas/static/src/xml/dashboard.xml',

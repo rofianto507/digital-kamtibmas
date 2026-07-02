@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="digital_kamtibmas.PatroliRouteMap">
+    <div class="dkm-rmap-wrap">
+        <div class="dkm-rmap-header">
+            <i class="fa fa-map-o"/> Visualisasi Rute Patroli
+            <span class="dkm-rmap-count ms-auto">
+                <t t-esc="titikCount"/> titik
+            </span>
+        </div>
+        <div t-ref="patroliRouteMap" class="dkm-rmap-canvas"/>
+        <div class="dkm-rmap-legend">
+            <span><span class="dkm-rmap-dot" style="background:#10b981;"/> Mulai</span>
+            <span><span class="dkm-rmap-dot" style="background:#ef4444;"/> Akhir</span>
+            <span><span class="dkm-rmap-dot" style="background:#71639e;"/> Titik Antara</span>
+            <span style="margin-left:auto;color:#9ca3af;font-size:11px">
+                Klik marker untuk detail waktu &amp; koordinat
+            </span>
+        </div>
+    </div>
+</t>
+
+</templates>

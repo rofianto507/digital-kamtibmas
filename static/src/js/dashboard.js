@@ -72,8 +72,10 @@ class DkmDashboard extends Component {
             sabhara: {
                 loading: false,
                 kpi: { total: 0, menunggu: 0, berjalan: 0, selesai: 0 },
-                trendData: [],
-                terbaru:   [],
+                trendData:      [],
+                terbaru:        [],
+                livePatroli:    [],
+                liveLastUpdate: null,
             },
         });
 
@@ -96,6 +98,8 @@ class DkmDashboard extends Component {
         // Sabhara chart refs
         this.sbTrendRef  = useRef("sbTrendChart");
         this.sbStatusRef = useRef("sbStatusChart");
+        // Sabhara live map ref
+        this.sbLiveMapRef = useRef("sbLiveMap");
 
         this._trendChart     = null;
         this._statusChart    = null;
@@ -114,6 +118,11 @@ class DkmDashboard extends Component {
         // Sabhara chart instances
         this._sbTrendChart   = null;
         this._sbStatusChart  = null;
+        // Sabhara live patrol map
+        this._sbLiveMap          = null;
+        this._sbLiveMarkers      = {};
+        this._sbLivePollTimer    = null;
+        this._sbLiveBoundsFitted = false;
 
         onMounted(async () => await this.loadData());
 
@@ -144,6 +153,8 @@ class DkmDashboard extends Component {
             this._sbTrendChart?.dispose();
             this._sbStatusChart?.dispose();
             if (this._leafMap) { this._leafMap.remove(); this._leafMap = null; }
+            this._stopLivePoll();
+            if (this._sbLiveMap) { this._sbLiveMap.remove(); this._sbLiveMap = null; }
         });
     }
 
@@ -1193,6 +1204,7 @@ class DkmDashboard extends Component {
         this.state.sabhara.loading   = false;
 
         setTimeout(() => this._renderSabharaCharts(), 60);
+        setTimeout(() => this._initSabharaLiveMap(), 120);
     }
 
     _renderSabharaCharts() {
@@ -1251,6 +1263,178 @@ class DkmDashboard extends Component {
         });
     }
 
+    // ── Sabhara live patrol map ────────────────────────────────────────────────
+
+    _initSabharaLiveMap() {
+        const el = this.sbLiveMapRef?.el;
+        if (!el || typeof L === 'undefined' || this._sbLiveMap) return;
+
+        this._sbLiveMap = L.map(el, { zoomControl: true }).setView(PALEMBANG_CENTER, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org">OpenStreetMap</a>',
+            maxZoom: 19,
+        }).addTo(this._sbLiveMap);
+
+        setTimeout(() => this._sbLiveMap && this._sbLiveMap.invalidateSize(), 200);
+        this._loadLivePatroli();
+        this._startLivePoll();
+    }
+
+    async _loadLivePatroli() {
+        if (!this._sbLiveMap) return;
+        try {
+            const aktif = await this.orm.searchRead('digital_kamtibmas.patroli',
+                [['state', '=', 'berjalan']],
+                ['id', 'code', 'kecamatan_id', 'personel_ids', 'tanggal_patroli'],
+                { limit: 100 }
+            );
+
+            const aktifIds = aktif.map(p => p.id);
+            let titik = [];
+            if (aktifIds.length) {
+                titik = await this.orm.searchRead('digital_kamtibmas.patroli_titik',
+                    [['patroli_id', 'in', aktifIds],
+                     ['latitude', '!=', 0], ['longitude', '!=', 0]],
+                    ['patroli_id', 'latitude', 'longitude', 'waktu_rekam'],
+                    { order: 'waktu_rekam desc, id desc', limit: 5000 }
+                );
+            }
+
+            // Pick latest titik per patroli (already sorted desc)
+            const latestTitik = {};
+            for (const t of titik) {
+                const pid = Array.isArray(t.patroli_id) ? t.patroli_id[0] : t.patroli_id;
+                if (!latestTitik[pid]) latestTitik[pid] = t;
+            }
+
+            const livePatroli = aktif.map(p => ({
+                ...p,
+                lat:        latestTitik[p.id]?.latitude  || null,
+                lng:        latestTitik[p.id]?.longitude || null,
+                waktu_titik: latestTitik[p.id]?.waktu_rekam || null,
+            }));
+
+            this.state.sabhara.livePatroli    = livePatroli;
+            this.state.sabhara.liveLastUpdate = new Date().toISOString();
+            this._updateLiveMarkers(livePatroli);
+        } catch (e) {
+            console.error('[DKM] Live patrol fetch error:', e);
+        }
+    }
+
+    _updateLiveMarkers(patroli) {
+        if (!this._sbLiveMap) return;
+
+        // Remove markers for patrols no longer active
+        const newIds = new Set(patroli.map(p => p.id));
+        for (const id of Object.keys(this._sbLiveMarkers)) {
+            if (!newIds.has(parseInt(id))) {
+                this._sbLiveMap.removeLayer(this._sbLiveMarkers[id]);
+                delete this._sbLiveMarkers[id];
+            }
+        }
+
+        const bounds = [];
+        for (const p of patroli) {
+            if (!p.lat || !p.lng) continue;
+            bounds.push([p.lat, p.lng]);
+
+            const kec     = p.kecamatan_id ? p.kecamatan_id[1] : '-';
+            const personel = (p.personel_ids || []).length;
+            const waktu   = p.waktu_titik ? this._fmtWib(p.waktu_titik) : 'Belum ada lokasi';
+
+            const icon = L.divIcon({
+                className: '',
+                html: `<div class="dkm-live-marker">
+                    <div class="dkm-live-marker-pulse"></div>
+                    <div class="dkm-live-marker-dot"></div>
+                    <span class="dkm-live-marker-label">${p.code}</span>
+                </div>`,
+                iconSize:    [140, 22],
+                iconAnchor:  [11, 11],
+                popupAnchor: [0, -11],
+            });
+
+            const popupHtml = `
+<div style="font-family:inherit;min-width:190px">
+    <div style="background:#1e1b4b;color:#fff;padding:7px 12px;margin:-14px -20px 10px;
+                font-weight:700;font-size:12px;border-radius:3px 3px 0 0;display:flex;align-items:center;gap:6px">
+        <span style="background:#f59e0b;width:8px;height:8px;border-radius:50%;display:inline-block;
+                     animation:dkm-blink 1.2s ease-in-out infinite;"></span>
+        AKTIF — ${p.code}
+    </div>
+    <div style="font-size:12px;padding:0 2px 6px">
+        <div style="margin-bottom:4px"><i class="fa fa-map-marker" style="color:#f59e0b;width:14px"></i> ${kec}</div>
+        <div style="margin-bottom:4px"><i class="fa fa-users" style="color:#71639e;width:14px"></i> ${personel} personel</div>
+        <div style="color:#6b7280;font-size:11px"><i class="fa fa-clock-o" style="width:14px"></i> ${waktu}</div>
+    </div>
+    <button class="dkm-live-popup-btn" data-id="${p.id}"
+            style="width:100%;padding:5px 10px;background:#1e1b4b;color:#fff;border:none;
+                   border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">
+        <i class="fa fa-external-link"></i> Lihat Detail Patroli
+    </button>
+</div>`;
+
+            if (this._sbLiveMarkers[p.id]) {
+                this._sbLiveMarkers[p.id].setLatLng([p.lat, p.lng]);
+                this._sbLiveMarkers[p.id].setIcon(icon);
+                this._sbLiveMarkers[p.id].setPopupContent(popupHtml);
+            } else {
+                const marker = L.marker([p.lat, p.lng], { icon })
+                    .addTo(this._sbLiveMap)
+                    .bindPopup(popupHtml, { maxWidth: 260 });
+                marker.on('popupopen', ev => {
+                    const btn = ev.popup.getElement()?.querySelector('.dkm-live-popup-btn');
+                    if (btn) btn.onclick = () =>
+                        this.openPatroliRecord(parseInt(btn.dataset.id));
+                });
+                this._sbLiveMarkers[p.id] = marker;
+            }
+        }
+
+        if (bounds.length) {
+            try {
+                if (!this._sbLiveBoundsFitted) {
+                    // Pertama kali: langsung fit tanpa animasi
+                    this._sbLiveBoundsFitted = true;
+                    this._sbLiveMap.fitBounds(bounds, { padding: [80, 80] });
+                } else if (bounds.length === 1) {
+                    // 1 patroli: pan halus ke posisi terbaru
+                    this._sbLiveMap.panTo(bounds[0], { animate: true });
+                } else {
+                    // Beberapa patroli: fit semua dengan animasi
+                    this._sbLiveMap.fitBounds(bounds, { padding: [80, 80], animate: true });
+                }
+            } catch (e) {}
+        }
+    }
+
+    _startLivePoll() {
+        this._stopLivePoll();
+        this._sbLivePollTimer = setInterval(() => this._loadLivePatroli(), 30000);
+    }
+
+    _stopLivePoll() {
+        if (this._sbLivePollTimer) {
+            clearInterval(this._sbLivePollTimer);
+            this._sbLivePollTimer = null;
+        }
+    }
+
+    sbFmtLastUpdate(iso) {
+        if (!iso) return '-';
+        const d = new Date(iso);
+        const p = n => String(n).padStart(2, '0');
+        return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    }
+
+    sbLiveFocus(patrol) {
+        if (!this._sbLiveMap || !patrol.lat || !patrol.lng) return;
+        this._sbLiveMap.setView([patrol.lat, patrol.lng], 16, { animate: true });
+        const marker = this._sbLiveMarkers[patrol.id];
+        if (marker) setTimeout(() => marker.openPopup(), 300);
+    }
+
     // ── Sabhara navigation ─────────────────────────────────────────────────────
 
     openPatroliList(domain) {
@@ -1301,6 +1485,10 @@ class DkmDashboard extends Component {
         if (prev === 'sabhara') {
             this._sbTrendChart?.dispose();  this._sbTrendChart  = null;
             this._sbStatusChart?.dispose(); this._sbStatusChart = null;
+            this._stopLivePoll();
+            if (this._sbLiveMap) { this._sbLiveMap.remove(); this._sbLiveMap = null; }
+            this._sbLiveMarkers      = {};
+            this._sbLiveBoundsFitted = false;
         }
 
         this.state.activeSection = section;
