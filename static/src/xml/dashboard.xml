@@ -589,8 +589,150 @@
 
         </t><!-- /satnarkoba -->
 
+        <!-- ── Satreskrim Dashboard ──────────────────────────────────────── -->
+        <t t-if="state.activeSection === 'satreskrim'">
+
+            <div class="dkm-header">
+                <div class="dkm-header-left">
+                    <i class="fa fa-search dkm-header-icon"/>
+                    <h1>Dashboard Satreskrim</h1>
+                </div>
+                <div class="dkm-header-right">
+                    <button class="dkm-refresh-btn" t-on-click="loadSatreskrim">
+                        <i t-attf-class="fa fa-refresh #{state.satreskrim.loading ? 'fa-spin' : ''}"/>
+                    </button>
+                </div>
+            </div>
+
+            <t t-if="state.satreskrim.loading">
+                <div class="dkm-loading">
+                    <i class="fa fa-spinner fa-spin"/>
+                    <span>Memuat data...</span>
+                </div>
+            </t>
+
+            <t t-if="!state.satreskrim.loading">
+
+                <!-- KPI Barang Bukti -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-archive"/> Barang Bukti Online
+                </div>
+                <div class="dkm-kpi-row">
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openBBList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--purple">
+                            <i class="fa fa-archive"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satreskrim.kpi.total"/>
+                            <div class="dkm-kpi-label">Total Barang Bukti</div>
+                            <div class="dkm-kpi-sub">Semua perkara</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openBBList([['state','=','diterima']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--blue">
+                            <i class="fa fa-inbox"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satreskrim.kpi.diterima"/>
+                            <div class="dkm-kpi-label">Baru Diterima</div>
+                            <div class="dkm-kpi-sub">Belum disimpan</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openBBList([['state','in',['disimpan','diproses']]])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
+                            <i class="fa fa-hourglass-half"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satreskrim.kpi.aktif"/>
+                            <div class="dkm-kpi-label">Aktif</div>
+                            <div class="dkm-kpi-sub">Disimpan + Diproses</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openBBList([['state','in',['dikembalikan','dimusnahkan']]])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
+                            <i class="fa fa-check-circle"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.satreskrim.kpi.selesai"/>
+                            <div class="dkm-kpi-label">Selesai</div>
+                            <div class="dkm-kpi-sub">Dikembalikan / Dimusnahkan</div>
+                        </div>
+                    </div>
+
+                </div><!-- /kpi -->
+
+                <!-- Charts -->
+                <div class="dkm-charts-row">
+                    <div class="dkm-chart-card">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-bar-chart" style="color:#71639e;"/>
+                            Trend Penerimaan (6 Bulan Terakhir)
+                        </div>
+                        <div t-ref="srTrendChart" class="dkm-echarts"/>
+                    </div>
+                    <div class="dkm-chart-card">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-pie-chart" style="color:#71639e;"/>
+                            Distribusi Jenis Perkara
+                        </div>
+                        <div t-ref="srJenisChart" class="dkm-echarts"/>
+                    </div>
+                </div>
+
+                <!-- Tabel Terbaru -->
+                <div class="dkm-panel" style="margin-bottom:20px;">
+                    <div class="dkm-panel-header">
+                        <span>
+                            <i class="fa fa-list" style="color:#71639e; margin-right:6px;"/>
+                            Barang Bukti Terbaru
+                        </span>
+                        <span class="dkm-count-badge dkm-count-badge--blue"
+                              t-esc="state.satreskrim.terbaru.length"/>
+                    </div>
+                    <table class="dkm-table">
+                        <thead>
+                            <tr>
+                                <th>No. BB</th>
+                                <th>Pelapor / Pemilik</th>
+                                <th>Jenis Perkara</th>
+                                <th>Tgl. Penerimaan</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="!state.satreskrim.terbaru.length">
+                                <td colspan="5" class="dkm-table-empty">Belum ada data barang bukti</td>
+                            </tr>
+                            <tr t-foreach="state.satreskrim.terbaru" t-as="r" t-key="r.id"
+                                class="dkm-tr"
+                                t-on-click="() => this.openBBRecord(r.id)">
+                                <td class="dkm-code" t-esc="r.code"/>
+                                <td t-esc="r.nama_pelapor"/>
+                                <td t-esc="srJenisPerkara(r.jenis_perkara)"/>
+                                <td t-esc="r.tanggal_penerimaan || '-'"/>
+                                <td>
+                                    <span t-attf-class="dkm-badge dkm-badge--sr-#{r.state}"
+                                          t-esc="srStateLabel(r.state)"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </t><!-- /!satreskrim.loading -->
+
+        </t><!-- /satreskrim -->
+
         <!-- ── Under Construction sections ──────────────────────────────── -->
-        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba'">
+        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba' and state.activeSection !== 'satreskrim'">
 
             <div class="dkm-header">
                 <div class="dkm-header-left">
