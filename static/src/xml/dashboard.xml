@@ -45,6 +45,13 @@
                 <span>Sabhara</span>
             </div>
 
+            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'tahti' ? 'active' : '' }"
+                 t-on-click="() => this.setSection('tahti')"
+                 title="Tahti">
+                <i class="fa fa-institution"/>
+                <span>Tahti</span>
+            </div>
+
         </div>
 
         <!-- Toggle di paling bawah -->
@@ -961,8 +968,177 @@
 
         </t><!-- /sabhara -->
 
+        <!-- ══════════════════════════════════════════════════════════════
+             Tahti Dashboard
+             ══════════════════════════════════════════════════════════════ -->
+        <t t-if="state.activeSection === 'tahti'">
+
+            <div class="dkm-header">
+                <div class="dkm-header-left">
+                    <i class="fa fa-institution dkm-header-icon"/>
+                    <h1>Dashboard Tahti</h1>
+                </div>
+                <div class="dkm-header-right">
+                    <button class="dkm-refresh-btn" t-on-click="loadTahti">
+                        <i t-attf-class="fa fa-refresh #{state.tahti.loading ? 'fa-spin' : ''}"/>
+                    </button>
+                </div>
+            </div>
+
+            <t t-if="state.tahti.loading">
+                <div class="dkm-loading">
+                    <i class="fa fa-spinner fa-spin"/>
+                    <span>Memuat data...</span>
+                </div>
+            </t>
+
+            <t t-if="!state.tahti.loading">
+
+                <!-- ── KPI Cards ──────────────────────────────────────────── -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-tachometer"/> Ringkasan
+                </div>
+
+                <div class="dkm-kpi-row">
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openKunjunganList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--blue">
+                            <i class="fa fa-calendar-check-o"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.tahti.kpi.kunjunganHariIni"/>
+                            <div class="dkm-kpi-label">Kunjungan Hari Ini</div>
+                            <div class="dkm-kpi-sub">Buku tamu hari ini</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openKunjunganList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--purple">
+                            <i class="fa fa-book"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.tahti.kpi.kunjunganTotal"/>
+                            <div class="dkm-kpi-label">Total Kunjungan</div>
+                            <div class="dkm-kpi-sub">Semua waktu</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--teal">
+                            <i class="fa fa-users"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.tahti.kpi.tamuTotal"/>
+                            <div class="dkm-kpi-label">Total Tamu Terdaftar</div>
+                            <div class="dkm-kpi-sub">Data pengunjung unik</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openTahananList([['state','=','ditahan']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--orange">
+                            <i class="fa fa-lock"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.tahti.kpi.tahananTotal"/>
+                            <div class="dkm-kpi-label">Tahanan Aktif</div>
+                            <div class="dkm-kpi-sub">Sedang ditahan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Statistik Buku Tamu ────────────────────────────────── -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-bar-chart"/> Statistik Buku Tamu
+                </div>
+
+                <div class="dkm-charts-row">
+                    <div class="dkm-chart-card" style="flex:1.6">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-bar-chart" style="color:#714B67;"/>
+                            Kunjungan 7 Hari Terakhir
+                        </div>
+                        <div t-ref="thTrendChart" class="dkm-echarts"/>
+                    </div>
+                    <div class="dkm-chart-card" style="flex:1">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-pie-chart" style="color:#00A09D;"/>
+                            Hubungan Tamu dengan Tahanan
+                        </div>
+                        <div t-ref="thHubChart" class="dkm-echarts"/>
+                    </div>
+                </div>
+
+                <!-- ── Statistik Tahanan ──────────────────────────────────── -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-lock"/> Statistik Tahanan
+                </div>
+
+                <div class="dkm-charts-row">
+                    <div class="dkm-chart-card" style="flex:1">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-pie-chart" style="color:#714B67;"/>
+                            Tahanan Berdasarkan Jenis Perkara
+                        </div>
+                        <div t-ref="thPerkaraChart" class="dkm-echarts"/>
+                    </div>
+                    <div class="dkm-chart-card" style="flex:1.2">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-bar-chart" style="color:#f59e0b;"/>
+                            Kapasitas vs Isi Sel / Kamar
+                        </div>
+                        <div t-ref="thSelChart" class="dkm-echarts"/>
+                    </div>
+                </div>
+
+                <div class="dkm-panel" style="margin-bottom:20px;">
+                    <div class="dkm-panel-header">
+                        <span>
+                            <i class="fa fa-list" style="color:#714B67; margin-right:6px;"/>
+                            5 Kunjungan Terakhir
+                        </span>
+                        <span class="dkm-count-badge dkm-count-badge--blue"
+                              t-esc="state.tahti.kunjunganTerbaru.length"/>
+                    </div>
+                    <table class="dkm-table">
+                        <thead>
+                            <tr>
+                                <th>No. Kunjungan</th>
+                                <th>Tamu / Pengunjung</th>
+                                <th>Tahanan Dikunjungi</th>
+                                <th>Hubungan</th>
+                                <th>Waktu Masuk</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="!state.tahti.kunjunganTerbaru.length">
+                                <td colspan="6" class="dkm-table-empty">Belum ada data kunjungan</td>
+                            </tr>
+                            <tr t-foreach="state.tahti.kunjunganTerbaru" t-as="r" t-key="r.id"
+                                class="dkm-tr"
+                                t-on-click="() => this.openKunjunganRecord(r.id)">
+                                <td class="dkm-code" t-esc="r.code"/>
+                                <td t-esc="r.tamu_id ? r.tamu_id[1] : '-'"/>
+                                <td t-esc="r.tahanan_id ? r.tahanan_id[1] : '-'"/>
+                                <td t-esc="thHubunganLabel(r.hubungan)"/>
+                                <td t-esc="_fmtWib(r.waktu_masuk)"/>
+                                <td>
+                                    <span t-attf-class="dkm-badge dkm-badge--#{r.state === 'berlangsung' ? 'orange' : 'green'}"
+                                          t-esc="r.state === 'berlangsung' ? 'Berlangsung' : 'Selesai'"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </t><!-- /!tahti.loading -->
+
+        </t><!-- /tahti -->
+
         <!-- ── Under Construction sections ──────────────────────────────── -->
-        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba' and state.activeSection !== 'satreskrim' and state.activeSection !== 'sabhara'">
+        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba' and state.activeSection !== 'satreskrim' and state.activeSection !== 'sabhara' and state.activeSection !== 'tahti'">
 
             <div class="dkm-header">
                 <div class="dkm-header-left">

@@ -1,0 +1,613 @@
+/* Buku Tamu Tahti — Kiosk Web App
+   OWL 2 standalone, IIFE pattern
+   Route: /tahti/buku-tamu  auth=public */
+(function () {
+    'use strict';
+
+    const { Component, useState, mount, xml, onMounted, onWillUnmount } = owl;
+
+    // ── RPC helper ────────────────────────────────────────────────────────────
+
+    async function rpc(route, params) {
+        const res = await fetch(route, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: params || {} }),
+        });
+        const json = await res.json();
+        if (json.error) {
+            const msg = (json.error.data && json.error.data.message) || json.error.message || 'Error';
+            throw new Error(msg);
+        }
+        return json.result;
+    }
+
+    // ── Date / time ───────────────────────────────────────────────────────────
+
+    const DAYS   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli',
+                    'Agustus','September','Oktober','November','Desember'];
+
+    function fmtClock(d) {
+        return String(d.getHours()).padStart(2,'0') + ':' +
+               String(d.getMinutes()).padStart(2,'0') + ':' +
+               String(d.getSeconds()).padStart(2,'0');
+    }
+    function fmtDate(d) {
+        return DAYS[d.getDay()] + ', ' + d.getDate() + ' ' +
+               MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    // ── Constants ─────────────────────────────────────────────────────────────
+
+    const HUBUNGAN = [
+        { v: 'keluarga',  l: 'Keluarga' },
+        { v: 'pengacara', l: 'Pengacara / Kuasa Hukum' },
+        { v: 'teman',     l: 'Teman / Kenalan' },
+        { v: 'lainnya',   l: 'Lainnya' },
+    ];
+
+    // ── App ───────────────────────────────────────────────────────────────────
+
+    class TahtiKioskApp extends Component {
+
+        static template = xml/* xml */`
+<div class="ok-root">
+
+<!-- ══════════════════ IDLE ══════════════════════════════════════════════════ -->
+<div t-if="state.phase === 'idle'" class="ok-idle" t-on-click="startFlow">
+    <img class="ok-idle-logo" src="/digital_kamtibmas/static/img/logo_polda.png" alt="Logo"/>
+    <div class="ok-idle-title">Buku Tamu Tahti</div>
+    <div class="ok-idle-org">Polrestabes Palembang</div>
+    <div class="ok-idle-divider"/>
+    <div class="ok-idle-clock" t-esc="state.clock"/>
+    <div class="ok-idle-date"  t-esc="state.date"/>
+    <div class="ok-idle-cta">
+        <span>&#9654;</span>
+        <span>Sentuh untuk mulai</span>
+    </div>
+</div>
+
+<!-- ══════════════════ SUCCESS ═══════════════════════════════════════════════ -->
+<div t-elif="state.phase === 'sukses'" class="ok-success" t-on-click="goIdle">
+    <div class="ok-success-ring">&#10003;</div>
+    <div class="ok-success-title">Kunjungan Berhasil Didaftarkan</div>
+    <div class="ok-success-code" t-esc="state.successCode"/>
+    <div class="ok-success-msg">
+        <b t-esc="state.successTamuNama"/> telah tercatat<br/>
+        mengunjungi <b t-esc="state.successTahananNama"/>.
+    </div>
+    <div class="ok-success-countdown">
+        Layar kembali otomatis dalam <b t-esc="state.countdown"/> detik
+        &#160;·&#160; sentuh untuk menutup
+    </div>
+</div>
+
+<!-- ══════════════════ WIZARD ════════════════════════════════════════════════ -->
+<div t-elif="true" class="ok-screen">
+
+    <!-- Nav bar — Odoo breadcrumb/step style -->
+    <div class="ok-nav">
+        <div class="ok-nav-brand">
+            <img class="ok-nav-logo"
+                 src="/digital_kamtibmas/static/img/logo_polda.png" alt=""/>
+            <span class="ok-nav-name">Buku Tamu Tahti</span>
+        </div>
+
+        <div class="ok-steps">
+            <!-- Step 1 -->
+            <div t-att-class="'ok-step ' + stepClass(1)">
+                <div class="ok-step-num">
+                    <span t-if="state.phase === 'data_tamu' or state.phase === 'konfirmasi'">&#10003;</span>
+                    <span t-else="">1</span>
+                </div>
+                <span class="ok-step-label">Pilih Tahanan</span>
+            </div>
+            <span class="ok-step-arrow">&#8250;</span>
+            <!-- Step 2 -->
+            <div t-att-class="'ok-step ' + stepClass(2)">
+                <div class="ok-step-num">
+                    <span t-if="state.phase === 'konfirmasi'">&#10003;</span>
+                    <span t-else="">2</span>
+                </div>
+                <span class="ok-step-label">Data Pengunjung</span>
+            </div>
+            <span class="ok-step-arrow">&#8250;</span>
+            <!-- Step 3 -->
+            <div t-att-class="'ok-step ' + stepClass(3)">
+                <div class="ok-step-num">3</div>
+                <span class="ok-step-label">Konfirmasi</span>
+            </div>
+        </div>
+
+        <button class="ok-nav-cancel" t-on-click="goIdle">
+            <span>&#x2715;</span> Batalkan
+        </button>
+    </div>
+
+    <!-- ── Step 1: Cari Tahanan ──────────────────────────────────────── -->
+    <t t-if="state.phase === 'cari_tahanan'">
+        <div class="ok-body">
+            <div class="ok-card">
+                <div class="ok-card-head">
+                    <div class="ok-card-head-icon">&#128269;</div>
+                    <div class="ok-card-head-title">Pilih Tahanan yang Akan Dikunjungi</div>
+                </div>
+                <div class="ok-card-body">
+                    <div class="ok-field">
+                        <div class="ok-search-wrap">
+                            <span class="ok-search-icon fa fa-search"/>
+                            <input class="ok-search-input"
+                                   type="text"
+                                   placeholder="Cari nama tahanan..."
+                                   autocomplete="off"
+                                   t-att-value="state.searchKw"
+                                   t-on-input="onSearchInput"/>
+                        </div>
+                    </div>
+
+                    <div t-if="state.loadingTahanan" class="ok-loading">
+                        <div class="ok-spinner"/>
+                        <span>Memuat data...</span>
+                    </div>
+
+                    <div t-elif="state.tahananList.length === 0" class="ok-empty">
+                        <div class="ok-empty-icon">&#128100;</div>
+                        <div class="ok-empty-text">
+                            <span t-if="state.searchKw">Tidak ada tahanan dengan nama tersebut</span>
+                            <span t-else="">Belum ada data tahanan aktif</span>
+                        </div>
+                    </div>
+
+                    <div t-else="" class="ok-list">
+                        <t t-foreach="state.tahananList" t-as="t" t-key="t.id">
+                            <div class="ok-list-item" t-on-click="() => this.selectTahanan(t)">
+                                <div t-att-class="'ok-avatar' + (t.jenis_kelamin === 'perempuan' ? ' female' : '')">
+                                    <span t-if="t.jenis_kelamin === 'perempuan'">&#128105;</span>
+                                    <span t-else="">&#128104;</span>
+                                </div>
+                                <div class="ok-list-body">
+                                    <div class="ok-list-name" t-esc="t.nama"/>
+                                    <div class="ok-list-meta" t-esc="t.jenis_perkara || '—'"/>
+                                </div>
+                                <span class="ok-badge" t-esc="t.sel_nama"/>
+                                <span class="ok-list-arrow">&#8250;</span>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ok-footer">
+            <div class="ok-footer-left"/>
+            <div class="ok-footer-right">
+                <button class="ok-btn ok-btn-light" t-on-click="goIdle">Batalkan</button>
+            </div>
+        </div>
+    </t>
+
+    <!-- ── Step 2: Data Tamu ─────────────────────────────────────────── -->
+    <t t-if="state.phase === 'data_tamu'">
+        <div class="ok-body">
+
+            <!-- Tahanan terpilih (ringkasan singkat) -->
+            <div class="ok-card">
+                <div class="ok-card-head">
+                    <div class="ok-card-head-icon">&#128100;</div>
+                    <div class="ok-card-head-title">Tahanan yang Dikunjungi</div>
+                </div>
+                <div class="ok-card-body">
+                    <div class="ok-selected-item">
+                        <div t-att-class="'ok-avatar' + (state.selectedTahanan.jenis_kelamin === 'perempuan' ? ' female' : '')">
+                            <span t-if="state.selectedTahanan.jenis_kelamin === 'perempuan'">&#128105;</span>
+                            <span t-else="">&#128104;</span>
+                        </div>
+                        <div>
+                            <div class="ok-selected-name" t-esc="state.selectedTahanan.nama"/>
+                            <div class="ok-selected-meta">
+                                Sel / Kamar: <t t-esc="state.selectedTahanan.sel_nama"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Identitas pengunjung -->
+            <div class="ok-card">
+                <div class="ok-card-head">
+                    <div class="ok-card-head-icon">&#128203;</div>
+                    <div class="ok-card-head-title">Identitas Pengunjung</div>
+                </div>
+                <div class="ok-card-body">
+
+                    <div class="ok-field">
+                        <label class="ok-label">NIK<span class="ok-req">*</span></label>
+                        <input t-att-class="'ok-input' + (state.errors.nik ? ' is-invalid' : '')"
+                               type="tel"
+                               inputmode="numeric"
+                               maxlength="16"
+                               placeholder="16 digit NIK sesuai KTP"
+                               autocomplete="off"
+                               t-att-value="state.nik"
+                               t-on-input="onNikInput"/>
+                        <div t-if="state.errors.nik" class="ok-errmsg" t-esc="state.errors.nik"/>
+
+                        <div t-if="state.nikStatus === 'checking'" class="ok-loading" style="padding:10px 0">
+                            <div class="ok-spinner"/>
+                            <span>Memeriksa data...</span>
+                        </div>
+                        <div t-elif="state.nikStatus === 'found'" class="ok-nik-status ok-nik-found">
+                            &#10003;&#160; Data ditemukan: <b t-esc="state.nikData.nama"/>
+                        </div>
+                        <div t-elif="state.nikStatus === 'not_found'" class="ok-nik-status ok-nik-new">
+                            &#8505;&#160; NIK belum terdaftar — isi data di bawah
+                        </div>
+                    </div>
+
+                    <div class="ok-field">
+                        <label class="ok-label">Nama Lengkap<span class="ok-req">*</span></label>
+                        <input t-att-class="'ok-input' + (state.errors.nama ? ' is-invalid' : '')"
+                               type="text"
+                               placeholder="Nama sesuai KTP"
+                               t-att-value="state.nama"
+                               t-att-readonly="state.nikStatus === 'found'"
+                               t-on-input="onNamaInput"/>
+                        <div t-if="state.errors.nama" class="ok-errmsg" t-esc="state.errors.nama"/>
+                    </div>
+
+                    <div class="ok-field" style="margin-bottom:0">
+                        <label class="ok-label">No. HP / WhatsApp</label>
+                        <input class="ok-input"
+                               type="tel"
+                               inputmode="tel"
+                               placeholder="Opsional"
+                               t-att-value="state.no_hp"
+                               t-on-input="onHpInput"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hubungan + keperluan -->
+            <div class="ok-card">
+                <div class="ok-card-head">
+                    <div class="ok-card-head-icon">&#128172;</div>
+                    <div class="ok-card-head-title">Detail Kunjungan</div>
+                </div>
+                <div class="ok-card-body">
+                    <div class="ok-field">
+                        <label class="ok-label">Hubungan dengan Tahanan<span class="ok-req">*</span></label>
+                        <div class="ok-chips">
+                            <t t-foreach="hubunganOpts" t-as="h" t-key="h.v">
+                                <button t-att-class="'ok-chip' + (state.hubungan === h.v ? ' is-active' : '')"
+                                        t-on-click="() => this.setHubungan(h.v)"
+                                        t-esc="h.l"/>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="ok-field" style="margin-bottom:0">
+                        <label class="ok-label">Keperluan / Tujuan Kunjungan</label>
+                        <textarea class="ok-textarea"
+                                  placeholder="Opsional — jelaskan tujuan kunjungan"
+                                  t-att-value="state.keperluan"
+                                  t-on-input="onKepInput"/>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="ok-footer">
+            <div class="ok-footer-left">
+                <button class="ok-btn ok-btn-light" t-on-click="backToStep1">
+                    &#8592; Kembali
+                </button>
+            </div>
+            <div class="ok-footer-right">
+                <button class="ok-btn ok-btn-primary ok-btn-lg" t-on-click="goKonfirmasi">
+                    Lanjut ke Konfirmasi &#160;&#8250;
+                </button>
+            </div>
+        </div>
+    </t>
+
+    <!-- ── Step 3: Konfirmasi ─────────────────────────────────────────── -->
+    <t t-if="state.phase === 'konfirmasi'">
+        <div class="ok-body">
+            <div class="ok-card">
+                <div class="ok-card-head">
+                    <div class="ok-card-head-icon">&#128203;</div>
+                    <div class="ok-card-head-title">Ringkasan Kunjungan</div>
+                </div>
+                <div class="ok-card-body">
+                    <div class="ok-summary">
+                        <div class="ok-summary-row">
+                            <div class="ok-summary-lbl">Tahanan</div>
+                            <div class="ok-summary-val" t-esc="state.selectedTahanan.nama"/>
+                        </div>
+                        <div class="ok-summary-row">
+                            <div class="ok-summary-lbl">Sel / Kamar</div>
+                            <div class="ok-summary-val" t-esc="state.selectedTahanan.sel_nama"/>
+                        </div>
+                        <div class="ok-divider" style="margin:0"/>
+                        <div class="ok-summary-row">
+                            <div class="ok-summary-lbl">Pengunjung</div>
+                            <div class="ok-summary-val" t-esc="state.nama"/>
+                        </div>
+                        <div class="ok-summary-row">
+                            <div class="ok-summary-lbl">NIK</div>
+                            <div class="ok-summary-val" t-esc="state.nik"/>
+                        </div>
+                        <div t-if="state.no_hp" class="ok-summary-row">
+                            <div class="ok-summary-lbl">No. HP</div>
+                            <div class="ok-summary-val" t-esc="state.no_hp"/>
+                        </div>
+                        <div class="ok-summary-row">
+                            <div class="ok-summary-lbl">Hubungan</div>
+                            <div class="ok-summary-val" t-esc="hubunganLabel"/>
+                        </div>
+                        <div t-if="state.keperluan" class="ok-summary-row">
+                            <div class="ok-summary-lbl">Keperluan</div>
+                            <div class="ok-summary-val" t-esc="state.keperluan"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div t-if="state.submitError" class="ok-alert ok-alert-danger">
+                <span>&#9888;</span>
+                <span t-esc="state.submitError"/>
+            </div>
+        </div>
+
+        <div class="ok-footer">
+            <div class="ok-footer-left">
+                <button class="ok-btn ok-btn-light"
+                        t-att-disabled="state.submitting"
+                        t-on-click="backToStep2">
+                    &#8592; Ubah Data
+                </button>
+            </div>
+            <div class="ok-footer-right">
+                <button class="ok-btn ok-btn-success ok-btn-lg"
+                        t-att-disabled="state.submitting"
+                        t-on-click="submitKunjungan">
+                    <t t-if="state.submitting">
+                        <div class="ok-spinner-sm"/>
+                        Mendaftarkan...
+                    </t>
+                    <t t-else="">
+                        &#10003;&#160; Daftar Kunjungan
+                    </t>
+                </button>
+            </div>
+        </div>
+    </t>
+
+</div><!-- end wizard -->
+
+</div><!-- end ok-root -->
+        `;
+
+        setup() {
+            this.hubunganOpts = HUBUNGAN;
+            this.state = useState({
+                phase: 'idle',
+                clock: fmtClock(new Date()),
+                date:  fmtDate(new Date()),
+                // step 1
+                searchKw:        '',
+                tahananList:     [],
+                loadingTahanan:  false,
+                selectedTahanan: null,
+                // step 2
+                nik:       '',
+                nikStatus: null,
+                nikData:   null,
+                nama:      '',
+                no_hp:     '',
+                hubungan:  'keluarga',
+                keperluan: '',
+                errors:    {},
+                // step 3
+                submitting:  false,
+                submitError: '',
+                // success
+                successCode:        '',
+                successTahananNama: '',
+                successTamuNama:    '',
+                countdown: 10,
+            });
+
+            this._clockTimer     = null;
+            this._countdownTimer = null;
+            this._nikTimer       = null;
+            this._searchTimer    = null;
+
+            onMounted(() => {
+                this._clockTimer = setInterval(() => {
+                    const now = new Date();
+                    this.state.clock = fmtClock(now);
+                    this.state.date  = fmtDate(now);
+                }, 1000);
+            });
+
+            onWillUnmount(() => {
+                clearInterval(this._clockTimer);
+                clearInterval(this._countdownTimer);
+                clearTimeout(this._nikTimer);
+                clearTimeout(this._searchTimer);
+            });
+        }
+
+        // ── Navigation ────────────────────────────────────────────────────────
+
+        startFlow() {
+            this._resetData();
+            this.state.phase = 'cari_tahanan';
+            this._loadTahanan('');
+        }
+
+        goIdle() {
+            clearInterval(this._countdownTimer);
+            clearTimeout(this._nikTimer);
+            clearTimeout(this._searchTimer);
+            this._resetData();
+            this.state.phase = 'idle';
+        }
+
+        backToStep1() { this.state.phase = 'cari_tahanan'; }
+        backToStep2() { this.state.submitError = ''; this.state.phase = 'data_tamu'; }
+
+        _resetData() {
+            Object.assign(this.state, {
+                searchKw: '', tahananList: [], loadingTahanan: false, selectedTahanan: null,
+                nik: '', nikStatus: null, nikData: null,
+                nama: '', no_hp: '', hubungan: 'keluarga', keperluan: '',
+                errors: {}, submitting: false, submitError: '',
+                successCode: '', successTahananNama: '', successTamuNama: '', countdown: 10,
+            });
+        }
+
+        // ── Step 1 ────────────────────────────────────────────────────────────
+
+        onSearchInput(ev) {
+            this.state.searchKw = ev.target.value;
+            clearTimeout(this._searchTimer);
+            this._searchTimer = setTimeout(() => this._loadTahanan(this.state.searchKw), 400);
+        }
+
+        async _loadTahanan(kw) {
+            this.state.loadingTahanan = true;
+            try {
+                const list = await rpc('/tahti/api/cari_tahanan', { keyword: kw });
+                this.state.tahananList = list || [];
+            } catch (_) {
+                this.state.tahananList = [];
+            } finally {
+                this.state.loadingTahanan = false;
+            }
+        }
+
+        selectTahanan(t) {
+            this.state.selectedTahanan = { ...t };
+            Object.assign(this.state, {
+                nik: '', nikStatus: null, nikData: null,
+                nama: '', no_hp: '', errors: {},
+            });
+            this.state.phase = 'data_tamu';
+        }
+
+        // ── Step 2 ────────────────────────────────────────────────────────────
+
+        onNikInput(ev) {
+            this.state.nik       = ev.target.value;
+            this.state.nikStatus = null;
+            this.state.nikData   = null;
+            this.state.errors    = { ...this.state.errors, nik: null };
+            clearTimeout(this._nikTimer);
+            if (this.state.nik.trim().length === 16) {
+                this.state.nikStatus = 'checking';
+                this._nikTimer = setTimeout(() => this._cekNik(this.state.nik.trim()), 600);
+            }
+        }
+
+        async _cekNik(nik) {
+            try {
+                const res = await rpc('/tahti/api/cek_nik', { nik });
+                if (res && res.found) {
+                    this.state.nikStatus = 'found';
+                    this.state.nikData   = res;
+                    this.state.nama      = res.nama  || '';
+                    this.state.no_hp     = res.no_hp || '';
+                } else {
+                    this.state.nikStatus = 'not_found';
+                    this.state.nama = '';
+                }
+            } catch (_) {
+                this.state.nikStatus = 'not_found';
+            }
+        }
+
+        onNamaInput(ev)  { this.state.nama      = ev.target.value; }
+        onHpInput(ev)    { this.state.no_hp     = ev.target.value; }
+        onKepInput(ev)   { this.state.keperluan  = ev.target.value; }
+        setHubungan(val) { this.state.hubungan   = val; }
+
+        goKonfirmasi() {
+            const errs = {};
+            const nik = this.state.nik.trim();
+            if (!nik)               errs.nik  = 'NIK wajib diisi';
+            else if (nik.length !== 16) errs.nik = 'NIK harus 16 digit';
+            if (!this.state.nama.trim()) errs.nama = 'Nama wajib diisi';
+            this.state.errors = errs;
+            if (Object.keys(errs).length > 0) return;
+            this.state.submitError = '';
+            this.state.phase = 'konfirmasi';
+        }
+
+        // ── Step 3 ────────────────────────────────────────────────────────────
+
+        async submitKunjungan() {
+            if (this.state.submitting) return;
+            this.state.submitting  = true;
+            this.state.submitError = '';
+            try {
+                const res = await rpc('/tahti/api/daftar_kunjungan', {
+                    data: {
+                        tahanan_id: this.state.selectedTahanan.id,
+                        nik:        this.state.nik.trim(),
+                        nama:       this.state.nama.trim(),
+                        no_hp:      this.state.no_hp.trim(),
+                        hubungan:   this.state.hubungan,
+                        keperluan:  this.state.keperluan.trim(),
+                    },
+                });
+                if (!res || res.error) {
+                    this.state.submitError = (res && res.error) || 'Terjadi kesalahan. Silakan coba lagi.';
+                    return;
+                }
+                this.state.successCode        = res.code         || '-';
+                this.state.successTahananNama = res.tahanan_nama || '';
+                this.state.successTamuNama    = res.tamu_nama    || '';
+                this.state.countdown = 10;
+                this.state.phase = 'sukses';
+                this._startCountdown();
+            } catch (_) {
+                this.state.submitError = 'Koneksi gagal. Silakan coba lagi.';
+            } finally {
+                this.state.submitting = false;
+            }
+        }
+
+        _startCountdown() {
+            clearInterval(this._countdownTimer);
+            this._countdownTimer = setInterval(() => {
+                this.state.countdown--;
+                if (this.state.countdown <= 0) {
+                    clearInterval(this._countdownTimer);
+                    this.goIdle();
+                }
+            }, 1000);
+        }
+
+        // ── Computed ─────────────────────────────────────────────────────────
+
+        get hubunganLabel() {
+            const h = HUBUNGAN.find(x => x.v === this.state.hubungan);
+            return h ? h.l : this.state.hubungan;
+        }
+
+        stepClass(n) {
+            const map = { cari_tahanan: 1, data_tamu: 2, konfirmasi: 3 };
+            const cur = map[this.state.phase] || 1;
+            if (n < cur)  return 'is-done';
+            if (n === cur) return 'is-active';
+            return '';
+        }
+    }
+
+    // ── Mount ─────────────────────────────────────────────────────────────────
+
+    const el = document.getElementById('tahti-kiosk-app');
+    if (el) mount(TahtiKioskApp, el);
+
+})();

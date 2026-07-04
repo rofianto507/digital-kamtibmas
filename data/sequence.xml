@@ -45,5 +45,23 @@
             <field name="number_next">1</field>
             <field name="number_increment">1</field>
         </record>
+
+        <record id="seq_tahti_kunjungan" model="ir.sequence">
+            <field name="name">Kunjungan Tahti</field>
+            <field name="code">digital_kamtibmas.tahti_kunjungan</field>
+            <field name="prefix">KUJ</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_tahanan" model="ir.sequence">
+            <field name="name">Data Tahanan Tahti</field>
+            <field name="code">digital_kamtibmas.tahanan</field>
+            <field name="prefix">THN</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
     </data>
 </odoo>

@@ -26,6 +26,11 @@
         'views/rehab_views.xml',
         'views/barang_bukti_views.xml',
         'views/patroli_views.xml',
+        'views/tahti_sel_views.xml',
+        'views/tahanan_views.xml',
+        'views/tahti_tamu_views.xml',
+        'views/tahti_kunjungan_views.xml',
+        'views/tahti_kiosk_template.xml',
         'views/menu.xml',
     ],
     'assets': {

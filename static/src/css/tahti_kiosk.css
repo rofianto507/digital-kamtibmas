@@ -1,0 +1,838 @@
+/* ══════════════════════════════════════════════════════════════
+   Tahti Kiosk — Buku Tamu
+   Design language: Odoo 17/18/19 enterprise style
+   Optimized for 10–13" tablet, portrait / landscape
+   ══════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    /* Odoo brand */
+    --o-brand:       #714B67;
+    --o-brand-dark:  #5c3d54;
+    --o-brand-light: #9b6c8f;
+    --o-brand-bg:    #f3eff2;
+    --o-brand-bg2:   #ede8ec;
+
+    /* Backgrounds */
+    --o-bg:      #f0eef3;
+    --o-surface: #ffffff;
+
+    /* Borders */
+    --o-border:    #d4cfd9;
+    --o-border-lt: #e8e4ec;
+
+    /* Text */
+    --o-text:      #1f1f1f;
+    --o-text-md:   #4a4a5a;
+    --o-text-muted:#7c7c92;
+
+    /* Semantic */
+    --o-success:    #28a745;
+    --o-success-bg: #d4edda;
+    --o-danger:     #dc3545;
+    --o-danger-bg:  #f8d7da;
+    --o-warning-bg: #fff8e1;
+    --o-warning-bd: #ffe082;
+    --o-warning-tx: #7d5700;
+
+    /* Shape */
+    --o-radius:    4px;
+    --o-radius-md: 8px;
+    --o-radius-lg: 12px;
+    --o-shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 0 1px rgba(0,0,0,.04);
+    --o-shadow:    0 2px 8px rgba(0,0,0,.10), 0 0 1px rgba(0,0,0,.04);
+    --o-shadow-lg: 0 4px 20px rgba(0,0,0,.12), 0 0 1px rgba(0,0,0,.06);
+}
+
+html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    background: var(--o-bg);
+    color: var(--o-text);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+}
+
+#tahti-kiosk-app, .ok-root { height: 100%; }
+
+
+/* ════════════════════════════════════════════
+   IDLE SCREEN
+   ════════════════════════════════════════════ */
+
+.ok-idle {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* Odoo-style dark gradient using brand purple */
+    background: linear-gradient(145deg, #1c0e19 0%, #3a2035 50%, #5c3d54 100%);
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle texture overlay */
+.ok-idle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(113,75,103,.3) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.ok-idle-logo {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    margin-bottom: 28px;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,.5));
+    position: relative;
+}
+
+.ok-idle-title {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -.4px;
+    color: #fff;
+    margin-bottom: 4px;
+    position: relative;
+}
+
+.ok-idle-org {
+    font-size: 14px;
+    color: rgba(255,255,255,.55);
+    letter-spacing: .3px;
+    margin-bottom: 52px;
+    position: relative;
+}
+
+.ok-idle-divider {
+    width: 48px;
+    height: 2px;
+    background: rgba(255,255,255,.2);
+    border-radius: 2px;
+    margin-bottom: 28px;
+    position: relative;
+}
+
+.ok-idle-clock {
+    font-size: 64px;
+    font-weight: 300;
+    letter-spacing: -3px;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.ok-idle-date {
+    font-size: 16px;
+    color: rgba(255,255,255,.5);
+    margin-bottom: 60px;
+    position: relative;
+}
+
+.ok-idle-cta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    border: 1.5px solid rgba(255,255,255,.2);
+    border-radius: 40px;
+    font-size: 14px;
+    color: rgba(255,255,255,.7);
+    letter-spacing: .3px;
+    position: relative;
+    animation: ok-pulse-border 2.5s ease-in-out infinite;
+}
+
+@keyframes ok-pulse-border {
+    0%, 100% { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.6); }
+    50%       { border-color: rgba(255,255,255,.5); color: rgba(255,255,255,.9); }
+}
+
+
+/* ════════════════════════════════════════════
+   WIZARD WRAPPER
+   ════════════════════════════════════════════ */
+
+.ok-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--o-bg);
+}
+
+
+/* ════════════════════════════════════════════
+   TOP NAV — Odoo-style header with step pills
+   ════════════════════════════════════════════ */
+
+.ok-nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--o-surface);
+    border-bottom: 1px solid var(--o-border);
+    box-shadow: var(--o-shadow-sm);
+    flex-shrink: 0;
+    min-height: 64px;
+    padding: 0 20px;
+}
+
+.ok-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 20px;
+    border-right: 1px solid var(--o-border-lt);
+    flex-shrink: 0;
+}
+
+.ok-nav-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.ok-nav-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--o-text);
+    white-space: nowrap;
+}
+
+/* Odoo breadcrumb-style step indicator */
+.ok-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    padding: 0 20px;
+    overflow: hidden;
+}
+
+.ok-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--o-radius-md);
+    white-space: nowrap;
+    transition: all .2s;
+}
+
+.ok-step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all .2s;
+}
+
+.ok-step-label {
+    font-size: 13px;
+    font-weight: 600;
+    transition: color .2s;
+}
+
+/* Future step */
+.ok-step {
+    color: var(--o-text-muted);
+}
+.ok-step .ok-step-num {
+    background: var(--o-border-lt);
+    color: var(--o-text-muted);
+}
+
+/* Active step */
+.ok-step.is-active {
+    background: var(--o-brand-bg);
+}
+.ok-step.is-active .ok-step-num {
+    background: var(--o-brand);
+    color: #fff;
+}
+.ok-step.is-active .ok-step-label {
+    color: var(--o-brand);
+}
+
+/* Done step */
+.ok-step.is-done .ok-step-num {
+    background: var(--o-success);
+    color: #fff;
+}
+.ok-step.is-done .ok-step-label {
+    color: var(--o-text-md);
+}
+
+.ok-step-arrow {
+    color: var(--o-border);
+    font-size: 18px;
+    font-weight: 300;
+    padding: 0 4px;
+    flex-shrink: 0;
+}
+
+.ok-nav-cancel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--o-border);
+    border-radius: var(--o-radius);
+    background: var(--o-surface);
+    color: var(--o-text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all .15s;
+}
+.ok-nav-cancel:hover { border-color: var(--o-danger); color: var(--o-danger); }
+
+
+/* ════════════════════════════════════════════
+   BODY / SCROLLABLE
+   ════════════════════════════════════════════ */
+
+.ok-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px 32px;
+}
+
+/* ════════════════════════════════════════════
+   FOOTER ACTIONS
+   ════════════════════════════════════════════ */
+
+.ok-footer {
+    padding: 14px 28px;
+    background: var(--o-surface);
+    border-top: 1px solid var(--o-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.ok-footer-left  { display: flex; gap: 10px; }
+.ok-footer-right { display: flex; gap: 10px; }
+
+
+/* ════════════════════════════════════════════
+   BUTTONS — Odoo style
+   ════════════════════════════════════════════ */
+
+.ok-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: var(--o-radius);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 13px 28px;
+    border: 1px solid transparent;
+    transition: all .15s;
+    min-height: 50px;
+    white-space: nowrap;
+    line-height: 1;
+}
+.ok-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.ok-btn-primary {
+    background: var(--o-brand);
+    color: #fff;
+    border-color: var(--o-brand);
+    box-shadow: 0 1px 4px rgba(113,75,103,.25);
+}
+.ok-btn-primary:not(:disabled):active {
+    background: var(--o-brand-dark);
+    border-color: var(--o-brand-dark);
+}
+
+.ok-btn-secondary {
+    background: var(--o-surface);
+    color: var(--o-brand);
+    border-color: var(--o-brand);
+}
+.ok-btn-secondary:not(:disabled):active {
+    background: var(--o-brand-bg);
+}
+
+.ok-btn-light {
+    background: var(--o-surface);
+    color: var(--o-text-muted);
+    border-color: var(--o-border);
+}
+.ok-btn-light:not(:disabled):hover { border-color: var(--o-text-muted); }
+
+.ok-btn-success {
+    background: var(--o-success);
+    color: #fff;
+    border-color: var(--o-success);
+    box-shadow: 0 1px 4px rgba(40,167,69,.25);
+}
+.ok-btn-success:not(:disabled):active { background: #218838; border-color: #1e7e34; }
+
+.ok-btn-lg {
+    padding: 15px 36px;
+    font-size: 16px;
+    min-height: 56px;
+}
+
+.ok-btn-icon {
+    padding: 13px 16px;
+    min-height: 50px;
+}
+
+
+/* ════════════════════════════════════════════
+   CARD — Odoo o_form_sheet style
+   ════════════════════════════════════════════ */
+
+.ok-card {
+    background: var(--o-surface);
+    border-radius: var(--o-radius-md);
+    border: 1px solid var(--o-border);
+    box-shadow: var(--o-shadow-sm);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.ok-card:last-child { margin-bottom: 0; }
+
+.ok-card-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--o-border-lt);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.ok-card-head-icon {
+    width: 30px; height: 30px;
+    border-radius: var(--o-radius);
+    background: var(--o-brand-bg);
+    color: var(--o-brand);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.ok-card-head-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--o-text);
+    letter-spacing: -.1px;
+}
+
+.ok-card-body { padding: 20px; }
+
+
+/* ════════════════════════════════════════════
+   FORM FIELDS — Odoo form style
+   ════════════════════════════════════════════ */
+
+.ok-field { margin-bottom: 18px; }
+.ok-field:last-child { margin-bottom: 0; }
+
+.ok-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--o-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-bottom: 7px;
+}
+.ok-label .ok-req { color: var(--o-danger); margin-left: 2px; }
+
+.ok-input, .ok-textarea {
+    width: 100%;
+    border: 1px solid var(--o-border);
+    border-radius: var(--o-radius);
+    padding: 13px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    background: var(--o-surface);
+    color: var(--o-text);
+    transition: border-color .15s, box-shadow .15s;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+.ok-input:focus, .ok-textarea:focus {
+    border-color: var(--o-brand-light);
+    box-shadow: 0 0 0 3px rgba(113,75,103,.12);
+}
+.ok-input.is-invalid { border-color: var(--o-danger); }
+.ok-input.is-invalid:focus { box-shadow: 0 0 0 3px rgba(220,53,69,.12); }
+.ok-input[readonly] {
+    background: var(--o-brand-bg);
+    color: var(--o-text-md);
+    cursor: default;
+}
+
+.ok-errmsg {
+    font-size: 12px;
+    color: var(--o-danger);
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ok-textarea { resize: none; min-height: 88px; line-height: 1.5; }
+
+
+/* ════════════════════════════════════════════
+   NIK STATUS BANNERS
+   ════════════════════════════════════════════ */
+
+.ok-nik-status {
+    margin-top: 8px;
+    padding: 10px 14px;
+    border-radius: var(--o-radius);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ok-nik-found {
+    background: var(--o-success-bg);
+    border: 1px solid #b8dfc2;
+    color: #155724;
+}
+.ok-nik-new {
+    background: var(--o-warning-bg);
+    border: 1px solid var(--o-warning-bd);
+    color: var(--o-warning-tx);
+}
+
+
+/* ════════════════════════════════════════════
+   SEARCH BOX
+   ════════════════════════════════════════════ */
+
+.ok-search-wrap { position: relative; }
+.ok-search-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--o-text-muted);
+    font-size: 15px;
+    pointer-events: none;
+}
+.ok-search-input {
+    width: 100%;
+    border: 1px solid var(--o-border);
+    border-radius: var(--o-radius);
+    padding: 13px 14px 13px 42px;
+    font-size: 16px;
+    font-family: inherit;
+    background: var(--o-surface);
+    color: var(--o-text);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+.ok-search-input:focus {
+    border-color: var(--o-brand-light);
+    box-shadow: 0 0 0 3px rgba(113,75,103,.12);
+}
+
+
+/* ════════════════════════════════════════════
+   TAHANAN LIST ITEMS
+   ════════════════════════════════════════════ */
+
+.ok-list { display: flex; flex-direction: column; gap: 1px; }
+
+.ok-list-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--o-surface);
+    border: 1px solid var(--o-border-lt);
+    border-radius: var(--o-radius);
+    cursor: pointer;
+    transition: all .15s;
+    margin-bottom: 8px;
+}
+.ok-list-item:last-child { margin-bottom: 0; }
+.ok-list-item:hover,
+.ok-list-item:active {
+    border-color: var(--o-brand-light);
+    background: var(--o-brand-bg);
+    box-shadow: var(--o-shadow-sm);
+}
+
+.ok-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+    background: var(--o-brand-bg2);
+}
+.ok-avatar.female { background: #fce4ec; }
+
+.ok-list-body { flex: 1; min-width: 0; }
+.ok-list-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--o-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ok-list-meta {
+    font-size: 13px;
+    color: var(--o-text-muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ok-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--o-brand-bg);
+    color: var(--o-brand);
+    border: 1px solid var(--o-brand-bg2);
+    flex-shrink: 0;
+}
+
+.ok-list-arrow {
+    color: var(--o-border);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+
+/* ════════════════════════════════════════════
+   HUBUNGAN CHIPS
+   ════════════════════════════════════════════ */
+
+.ok-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.ok-chip {
+    padding: 10px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--o-border);
+    background: var(--o-surface);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--o-text-md);
+}
+.ok-chip.is-active {
+    background: var(--o-brand);
+    border-color: var(--o-brand);
+    color: #fff;
+    font-weight: 600;
+}
+
+
+/* ════════════════════════════════════════════
+   KONFIRMASI — Summary table
+   ════════════════════════════════════════════ */
+
+.ok-summary { display: flex; flex-direction: column; }
+.ok-summary-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--o-border-lt);
+}
+.ok-summary-row:first-child { padding-top: 0; }
+.ok-summary-row:last-child  { border-bottom: none; padding-bottom: 0; }
+.ok-summary-lbl {
+    width: 140px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--o-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    flex-shrink: 0;
+    padding-top: 1px;
+}
+.ok-summary-val {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--o-text);
+    word-break: break-word;
+}
+
+/* Tahanan terpilih highlight in step 2 */
+.ok-selected-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--o-brand-bg);
+    border: 1px solid var(--o-brand-bg2);
+    border-radius: var(--o-radius);
+}
+.ok-selected-name { font-size: 16px; font-weight: 700; color: var(--o-text); }
+.ok-selected-meta { font-size: 13px; color: var(--o-text-muted); margin-top: 2px; }
+
+
+/* ════════════════════════════════════════════
+   SUCCESS SCREEN
+   ════════════════════════════════════════════ */
+
+.ok-success {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #0a2e1c 0%, #1a5c35 50%, #28a745 100%);
+    color: #fff;
+    text-align: center;
+    padding: 40px 32px;
+    cursor: pointer;
+}
+
+.ok-success-ring {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    border: 2px solid rgba(255,255,255,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+    margin-bottom: 28px;
+}
+
+.ok-success-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -.3px;
+}
+
+.ok-success-code {
+    font-size: 20px;
+    font-weight: 700;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    padding: 8px 28px;
+    border-radius: 30px;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+}
+
+.ok-success-msg {
+    font-size: 16px;
+    opacity: .8;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    max-width: 340px;
+}
+
+.ok-success-countdown {
+    font-size: 13px;
+    opacity: .5;
+    letter-spacing: .2px;
+}
+
+
+/* ════════════════════════════════════════════
+   EMPTY & LOADING
+   ════════════════════════════════════════════ */
+
+.ok-empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--o-text-muted);
+}
+.ok-empty-icon {
+    font-size: 40px;
+    opacity: .25;
+    margin-bottom: 12px;
+}
+.ok-empty-text { font-size: 14px; }
+
+.ok-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 36px 24px;
+    color: var(--o-text-muted);
+    font-size: 14px;
+}
+
+.ok-spinner {
+    width: 22px; height: 22px;
+    border: 2.5px solid var(--o-border);
+    border-top-color: var(--o-brand);
+    border-radius: 50%;
+    animation: ok-spin .7s linear infinite;
+    flex-shrink: 0;
+}
+@keyframes ok-spin { to { transform: rotate(360deg); } }
+
+.ok-spinner-sm {
+    width: 16px; height: 16px;
+    border-width: 2px;
+    animation: ok-spin .7s linear infinite;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+}
+
+
+/* ════════════════════════════════════════════
+   ALERTS
+   ════════════════════════════════════════════ */
+
+.ok-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--o-radius);
+    font-size: 14px;
+    border: 1px solid;
+    margin-bottom: 16px;
+}
+.ok-alert-danger {
+    background: var(--o-danger-bg);
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+
+/* ════════════════════════════════════════════
+   UTILITIES
+   ════════════════════════════════════════════ */
+
+.ok-divider {
+    height: 1px;
+    background: var(--o-border-lt);
+    margin: 16px 0;
+}

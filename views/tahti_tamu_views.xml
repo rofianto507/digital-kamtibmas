@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahti_tamu_form" model="ir.ui.view">
+        <field name="name">dkm.tahti_tamu.form</field>
+        <field name="model">digital_kamtibmas.tahti_tamu</field>
+        <field name="arch" type="xml">
+            <form string="Data Tamu">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_kunjungan" type="object"
+                                class="oe_stat_button" icon="fa-sign-in">
+                            <field name="kunjungan_count" widget="statinfo" string="Kunjungan"/>
+                        </button>
+                    </div>
+
+                    <field name="foto_ktp" widget="image"
+                           style="float:right;width:160px;height:100px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;margin-left:16px;"/>
+                    <div class="oe_title">
+                        <h1><field name="nama" placeholder="Nama Lengkap"/></h1>
+                        <h4 class="text-muted"><field name="nik" placeholder="NIK (16 digit)"/></h4>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="no_hp"/>
+                            <field name="alamat" widget="text" rows="3"/>
+                        </group>
+                    </group>
+
+                    <separator string="Riwayat Kunjungan"/>
+                    <field name="kunjungan_ids" readonly="1">
+                        <list default_order="waktu_masuk desc">
+                            <field name="code" string="No."/>
+                            <field name="tahanan_id"/>
+                            <field name="hubungan"/>
+                            <field name="waktu_masuk"/>
+                            <field name="waktu_keluar"/>
+                            <field name="state" widget="badge"
+                                   decoration-warning="state == 'berlangsung'"
+                                   decoration-success="state == 'selesai'"/>
+                        </list>
+                    </field>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahti_tamu_list" model="ir.ui.view">
+        <field name="name">dkm.tahti_tamu.list</field>
+        <field name="model">digital_kamtibmas.tahti_tamu</field>
+        <field name="arch" type="xml">
+            <list string="Data Tamu" default_order="nama">
+                <field name="nama"/>
+                <field name="nik"/>
+                <field name="no_hp"/>
+                <field name="alamat" optional="hide"/>
+                <field name="kunjungan_count" string="Kunjungan"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahti_tamu_search" model="ir.ui.view">
+        <field name="name">dkm.tahti_tamu.search</field>
+        <field name="model">digital_kamtibmas.tahti_tamu</field>
+        <field name="arch" type="xml">
+            <search string="Cari Tamu">
+                <field name="nama"/>
+                <field name="nik" string="NIK"/>
+                <field name="no_hp" string="No. HP"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_tahti_tamu" model="ir.actions.act_window">
+        <field name="name">Data Tamu</field>
+        <field name="res_model">digital_kamtibmas.tahti_tamu</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_tahti_tamu_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Belum ada data tamu.</p>
+            <p>Data tamu otomatis tersimpan saat pencatatan kunjungan.</p>
+        </field>
+    </record>
+
+</odoo>
