@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List View (editable, cukup untuk master sederhana) ────────────── -->
+    <record id="view_dkm_tahti_sel_list" model="ir.ui.view">
+        <field name="name">dkm.tahti_sel.list</field>
+        <field name="model">digital_kamtibmas.tahti_sel</field>
+        <field name="arch" type="xml">
+            <list string="Sel / Kamar Tahanan" editable="bottom">
+                <field name="name"/>
+                <field name="jenis"/>
+                <field name="kapasitas"/>
+                <field name="keterangan"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_tahti_sel" model="ir.actions.act_window">
+        <field name="name">Sel / Kamar Tahanan</field>
+        <field name="res_model">digital_kamtibmas.tahti_sel</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Belum ada data sel.</p>
+            <p>Klik <strong>Baru</strong> untuk menambahkan sel baru.</p>
+        </field>
+    </record>
+
+</odoo>

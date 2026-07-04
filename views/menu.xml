@@ -106,6 +106,46 @@
             groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
             sequence="1"/>
 
+        <!-- Tahti -->
+        <menuitem
+            id="menu_dkm_tahti"
+            name="Tahti"
+            parent="menu_dkm_root"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="50"/>
+
+        <menuitem
+            id="menu_dkm_tahanan"
+            name="Data Tahanan"
+            parent="menu_dkm_tahti"
+            action="action_dkm_tahanan"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="1"/>
+
+        <menuitem
+            id="menu_dkm_tahanan_all"
+            name="Semua Tahanan"
+            parent="menu_dkm_tahti"
+            action="action_dkm_tahanan_all"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="2"/>
+
+        <menuitem
+            id="menu_dkm_tahti_kunjungan"
+            name="Buku Tamu"
+            parent="menu_dkm_tahti"
+            action="action_dkm_tahti_kunjungan"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="3"/>
+
+        <menuitem
+            id="menu_dkm_tahti_tamu"
+            name="Data Tamu"
+            parent="menu_dkm_tahti"
+            action="action_dkm_tahti_tamu"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="4"/>
+
         <!-- Configuration: admin only -->
         <menuitem
             id="menu_dkm_configuration"
@@ -161,6 +201,14 @@
             action="action_dkm_config_loket"
             groups="digital_kamtibmas.group_dkm_admin"
             sequence="11"/>
+
+        <menuitem
+            id="menu_dkm_config_tahti_sel"
+            name="Sel / Kamar Tahanan"
+            parent="menu_dkm_configuration"
+            action="action_dkm_tahti_sel"
+            groups="digital_kamtibmas.group_dkm_admin"
+            sequence="20"/>
 
     </data>
 </odoo>

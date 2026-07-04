@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahti_kunjungan_form" model="ir.ui.view">
+        <field name="name">dkm.tahti_kunjungan.form</field>
+        <field name="model">digital_kamtibmas.tahti_kunjungan</field>
+        <field name="arch" type="xml">
+            <form string="Kunjungan Tahanan">
+                <header>
+                    <button name="action_selesaikan" type="object" string="Selesaikan Kunjungan"
+                            class="btn-success" invisible="state != 'berlangsung'"/>
+                    <button name="action_buka_kembali" type="object" string="Buka Kembali"
+                            invisible="state != 'selesai'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="berlangsung,selesai"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="code" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Identitas Tamu">
+                            <field name="tamu_id"
+                                   options="{'no_open': false, 'no_create_edit': false}"
+                                   context="{'show_nik': True}"/>
+                            <field name="tamu_nik" readonly="1" string="NIK"/>
+                            <field name="tamu_no_hp" readonly="1" string="No. HP"/>
+                            <field name="hubungan"/>
+                        </group>
+                        <group string="Tahanan yang Dikunjungi">
+                            <field name="tahanan_id"/>
+                            <field name="keperluan" widget="text" rows="3"/>
+                        </group>
+                    </group>
+
+                    <group string="Waktu &amp; Petugas">
+                        <group>
+                            <field name="waktu_masuk"/>
+                            <field name="waktu_keluar" readonly="state == 'berlangsung'"/>
+                        </group>
+                        <group>
+                            <field name="petugas_id"/>
+                            <field name="keterangan" widget="text" rows="2"/>
+                        </group>
+                    </group>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahti_kunjungan_list" model="ir.ui.view">
+        <field name="name">dkm.tahti_kunjungan.list</field>
+        <field name="model">digital_kamtibmas.tahti_kunjungan</field>
+        <field name="arch" type="xml">
+            <list string="Buku Tamu" default_order="waktu_masuk desc"
+                  decoration-warning="state == 'berlangsung'"
+                  decoration-muted="state == 'selesai'">
+                <field name="code" string="No."/>
+                <field name="tamu_id" string="Tamu / Pengunjung"/>
+                <field name="tamu_nik" string="NIK" optional="show"/>
+                <field name="tahanan_id" string="Tahanan Dikunjungi"/>
+                <field name="hubungan"/>
+                <field name="waktu_masuk"/>
+                <field name="waktu_keluar" optional="show"/>
+                <field name="petugas_id" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'berlangsung'"
+                       decoration-success="state == 'selesai'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahti_kunjungan_search" model="ir.ui.view">
+        <field name="name">dkm.tahti_kunjungan.search</field>
+        <field name="model">digital_kamtibmas.tahti_kunjungan</field>
+        <field name="arch" type="xml">
+            <search string="Cari Kunjungan">
+                <field name="tamu_id" string="Nama / NIK Tamu"
+                       filter_domain="['|', ('tamu_id.nama', 'ilike', self), ('tamu_nik', 'ilike', self)]"/>
+                <field name="tahanan_id" string="Nama Tahanan"/>
+                <field name="code" string="No. Kunjungan"/>
+                <separator/>
+                <filter string="Sedang Berlangsung" name="f_berlangsung"
+                        domain="[('state','=','berlangsung')]"/>
+                <filter string="Selesai" name="f_selesai"
+                        domain="[('state','=','selesai')]"/>
+                <separator/>
+                <filter string="Hari Ini" name="f_hari_ini"
+                        domain="[('waktu_masuk','&gt;=',(datetime.datetime.combine(context_today(), datetime.time(0,0,0)) - datetime.timedelta(hours=7)).strftime('%Y-%m-%d %H:%M:%S')),('waktu_masuk','&lt;',(datetime.datetime.combine(context_today() + datetime.timedelta(days=1), datetime.time(0,0,0)) - datetime.timedelta(hours=7)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                <group>
+                    <filter string="Tahanan"   name="grp_tahanan" context="{'group_by': 'tahanan_id'}"/>
+                    <filter string="Hubungan"  name="grp_hub"     context="{'group_by': 'hubungan'}"/>
+                    <filter string="Tanggal"   name="grp_tgl"     context="{'group_by': 'waktu_masuk:date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_tahti_kunjungan" model="ir.actions.act_window">
+        <field name="name">Buku Tamu</field>
+        <field name="res_model">digital_kamtibmas.tahti_kunjungan</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_tahti_kunjungan_search"/>
+        <field name="context">{'search_default_f_hari_ini': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Belum ada data kunjungan.</p>
+            <p>Klik <strong>Baru</strong> untuk mencatat kunjungan masuk.</p>
+        </field>
+    </record>
+
+</odoo>

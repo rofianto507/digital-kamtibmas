@@ -77,6 +77,16 @@ class DkmDashboard extends Component {
                 livePatroli:    [],
                 liveLastUpdate: null,
             },
+            // ── Tahti ──────────────────────────────────────────────────
+            tahti: {
+                loading: false,
+                kpi: { kunjunganHariIni: 0, kunjunganTotal: 0, tamuTotal: 0, tahananTotal: 0 },
+                trend7Hari:       [],
+                hubunganData:     [],
+                perkaraData:      [],
+                selData:          [],
+                kunjunganTerbaru: [],
+            },
         });
 
         this.mapState = useState({
@@ -100,6 +110,11 @@ class DkmDashboard extends Component {
         this.sbStatusRef = useRef("sbStatusChart");
         // Sabhara live map ref
         this.sbLiveMapRef = useRef("sbLiveMap");
+        // Tahti chart refs
+        this.thTrendRef   = useRef("thTrendChart");
+        this.thHubRef     = useRef("thHubChart");
+        this.thPerkaraRef = useRef("thPerkaraChart");
+        this.thSelRef     = useRef("thSelChart");
 
         this._trendChart     = null;
         this._statusChart    = null;
@@ -123,6 +138,11 @@ class DkmDashboard extends Component {
         this._sbLiveMarkers      = {};
         this._sbLivePollTimer    = null;
         this._sbLiveBoundsFitted = false;
+        // Tahti chart instances
+        this._thTrendChart   = null;
+        this._thHubChart     = null;
+        this._thPerkaraChart = null;
+        this._thSelChart     = null;
 
         onMounted(async () => await this.loadData());
 
@@ -155,6 +175,10 @@ class DkmDashboard extends Component {
             if (this._leafMap) { this._leafMap.remove(); this._leafMap = null; }
             this._stopLivePoll();
             if (this._sbLiveMap) { this._sbLiveMap.remove(); this._sbLiveMap = null; }
+            this._thTrendChart?.dispose();
+            this._thHubChart?.dispose();
+            this._thPerkaraChart?.dispose();
+            this._thSelChart?.dispose();
         });
     }
 
@@ -1490,6 +1514,12 @@ class DkmDashboard extends Component {
             this._sbLiveMarkers      = {};
             this._sbLiveBoundsFitted = false;
         }
+        if (prev === 'tahti') {
+            this._thTrendChart?.dispose();   this._thTrendChart   = null;
+            this._thHubChart?.dispose();     this._thHubChart     = null;
+            this._thPerkaraChart?.dispose(); this._thPerkaraChart = null;
+            this._thSelChart?.dispose();     this._thSelChart     = null;
+        }
 
         this.state.activeSection = section;
 
@@ -1509,6 +1539,9 @@ class DkmDashboard extends Component {
         }
         if (section === 'sabhara') {
             this.loadSabhara();
+        }
+        if (section === 'tahti') {
+            this.loadTahti();
         }
     }
 
@@ -1535,6 +1568,252 @@ class DkmDashboard extends Component {
     async onPeriodChange(ev) {
         this.state.period = ev.target.value;
         await this.loadData();
+    }
+
+    // ── Tahti Dashboard ────────────────────────────────────────────────────────
+
+    async loadTahti() {
+        this.state.tahti.loading = true;
+
+        // WIB today boundaries in UTC
+        const nowWib         = new Date(Date.now() + 7 * 3600000);
+        const todayStartMs   = Date.UTC(nowWib.getUTCFullYear(), nowWib.getUTCMonth(), nowWib.getUTCDate()) - 7 * 3600000;
+        const todayEndMs     = todayStartMs + 24 * 3600000;
+        const sevenAgoMs     = todayStartMs - 6 * 24 * 3600000;
+        const todayStartStr  = this._dt(new Date(todayStartMs));
+        const todayEndStr    = this._dt(new Date(todayEndMs));
+        const sevenAgoStr    = this._dt(new Date(sevenAgoMs));
+
+        const [
+            kunjunganHariIni, kunjunganTotal, tamuTotal, tahananTotal,
+            kunjungan7Hari, hubunganRaw, perkaraRaw,
+            selRaw, tahananPerSelRaw, kunjunganTerbaru,
+        ] = await Promise.all([
+            this.orm.searchCount('digital_kamtibmas.tahti_kunjungan', [
+                ['waktu_masuk', '>=', todayStartStr], ['waktu_masuk', '<', todayEndStr],
+            ]),
+            this.orm.searchCount('digital_kamtibmas.tahti_kunjungan', []),
+            this.orm.searchCount('digital_kamtibmas.tahti_tamu', []),
+            this.orm.searchCount('digital_kamtibmas.tahanan', [['state', '=', 'ditahan']]),
+            this.orm.searchRead(
+                'digital_kamtibmas.tahti_kunjungan',
+                [['waktu_masuk', '>=', sevenAgoStr]],
+                ['waktu_masuk'], { limit: 2000 }
+            ),
+            this.orm.searchRead(
+                'digital_kamtibmas.tahti_kunjungan', [],
+                ['hubungan'], { limit: 5000 }
+            ),
+            this.orm.searchRead(
+                'digital_kamtibmas.tahanan', [['state', '=', 'ditahan']],
+                ['jenis_perkara'], { limit: 5000 }
+            ),
+            this.orm.searchRead(
+                'digital_kamtibmas.tahti_sel', [],
+                ['name', 'kapasitas'], { order: 'name asc' }
+            ),
+            this.orm.searchRead(
+                'digital_kamtibmas.tahanan',
+                [['state', '=', 'ditahan'], ['sel_id', '!=', false]],
+                ['sel_id'], { limit: 5000 }
+            ),
+            this.orm.searchRead(
+                'digital_kamtibmas.tahti_kunjungan', [],
+                ['code', 'tamu_id', 'tahanan_id', 'hubungan', 'waktu_masuk', 'state'],
+                { order: 'waktu_masuk desc', limit: 5 }
+            ),
+        ]);
+
+        // 7-day trend
+        const dayMap = {}, dayLabel = {};
+        for (let i = 0; i < 7; i++) {
+            const ms  = sevenAgoMs + i * 24 * 3600000;
+            const wib = new Date(ms + 7 * 3600000);
+            const k   = `${wib.getUTCFullYear()}-${String(wib.getUTCMonth()+1).padStart(2,'0')}-${String(wib.getUTCDate()).padStart(2,'0')}`;
+            dayMap[k]   = 0;
+            dayLabel[k] = `${wib.getUTCDate()}/${wib.getUTCMonth()+1}`;
+        }
+        for (const r of kunjungan7Hari) {
+            if (!r.waktu_masuk) continue;
+            const wib = this._wib(r.waktu_masuk);
+            if (!wib) continue;
+            const k = `${wib.getUTCFullYear()}-${String(wib.getUTCMonth()+1).padStart(2,'0')}-${String(wib.getUTCDate()).padStart(2,'0')}`;
+            if (k in dayMap) dayMap[k]++;
+        }
+        const trend7Hari = Object.keys(dayMap).map(k => ({ tgl: dayLabel[k], count: dayMap[k] }));
+
+        // Hubungan donut
+        const HUB_LBL = { keluarga: 'Keluarga', pengacara: 'Pengacara', teman: 'Teman/Kenalan', lainnya: 'Lainnya' };
+        const hubMap  = { keluarga: 0, pengacara: 0, teman: 0, lainnya: 0 };
+        for (const r of hubunganRaw) { if (r.hubungan in hubMap) hubMap[r.hubungan]++; }
+        const hubunganData = Object.entries(hubMap)
+            .filter(([, v]) => v > 0)
+            .map(([k, v]) => ({ label: HUB_LBL[k], count: v }));
+
+        // Jenis perkara pie
+        const PKR_LBL = {
+            pencurian: 'Pencurian', penipuan: 'Penipuan', penganiayaan: 'Penganiayaan',
+            narkoba: 'Narkotika', korupsi: 'Korupsi', cybercrime: 'Cyber Crime',
+            kesusilaan: 'Kesusilaan', pembunuhan: 'Pembunuhan', lainnya: 'Lainnya',
+        };
+        const pkrMap = {};
+        for (const r of perkaraRaw) { const k = r.jenis_perkara || 'lainnya'; pkrMap[k] = (pkrMap[k] || 0) + 1; }
+        const perkaraData = Object.entries(pkrMap)
+            .map(([k, v]) => ({ label: PKR_LBL[k] || k, count: v }))
+            .sort((a, b) => b.count - a.count);
+
+        // Sel kapasitas vs terisi
+        const terisiMap = {};
+        for (const r of tahananPerSelRaw) {
+            if (r.sel_id) { const id = r.sel_id[0]; terisiMap[id] = (terisiMap[id] || 0) + 1; }
+        }
+        const selData = selRaw.map(s => ({
+            nama:      s.name,
+            kapasitas: s.kapasitas || 0,
+            terisi:    terisiMap[s.id] || 0,
+        }));
+
+        this.state.tahti.kpi              = { kunjunganHariIni, kunjunganTotal, tamuTotal, tahananTotal };
+        this.state.tahti.trend7Hari       = trend7Hari;
+        this.state.tahti.hubunganData     = hubunganData;
+        this.state.tahti.perkaraData      = perkaraData;
+        this.state.tahti.selData          = selData;
+        this.state.tahti.kunjunganTerbaru = kunjunganTerbaru;
+        this.state.tahti.loading          = false;
+
+        setTimeout(() => this._renderTahtiCharts(), 50);
+    }
+
+    _renderTahtiCharts() {
+        this._renderThTrend();
+        this._renderThHub();
+        this._renderThPerkara();
+        this._renderThSel();
+    }
+
+    _renderThTrend() {
+        const el = this.thTrendRef?.el;
+        if (!el) return;
+        this._thTrendChart?.dispose();
+        this._thTrendChart = echarts.init(el);
+        const data = this.state.tahti.trend7Hari;
+        this._thTrendChart.setOption({
+            grid: { top: 16, right: 16, bottom: 28, left: 36 },
+            xAxis: {
+                type: 'category', data: data.map(d => d.tgl),
+                axisLine: { show: false }, axisTick: { show: false },
+                axisLabel: { fontSize: 11 },
+            },
+            yAxis: {
+                type: 'value', minInterval: 1,
+                splitLine: { lineStyle: { type: 'dashed', color: '#e5e7eb' } },
+                axisLabel: { fontSize: 11 },
+            },
+            series: [{
+                type: 'bar',
+                data: data.map(d => d.count),
+                itemStyle: { color: '#714B67', borderRadius: [4, 4, 0, 0] },
+                barMaxWidth: 44,
+            }],
+            tooltip: { trigger: 'axis', formatter: p => `${p[0].axisValue}<br/><b>${p[0].value}</b> kunjungan` },
+        });
+    }
+
+    _renderThHub() {
+        const el = this.thHubRef?.el;
+        if (!el) return;
+        this._thHubChart?.dispose();
+        this._thHubChart = echarts.init(el);
+        const data = this.state.tahti.hubunganData;
+        if (!data.length) { this._thHubChart.setOption({ title: { text: 'Belum ada data', left: 'center', top: 'center', textStyle: { color: '#9ca3af', fontSize: 13 } } }); return; }
+        const COLORS = ['#714B67', '#00A09D', '#f59e0b', '#6b7280'];
+        this._thHubChart.setOption({
+            tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+            legend: { bottom: 4, textStyle: { fontSize: 11 }, itemWidth: 12, itemHeight: 12 },
+            series: [{
+                type: 'pie', radius: ['42%', '68%'], center: ['50%', '44%'],
+                data: data.map((d, i) => ({ name: d.label, value: d.count, itemStyle: { color: COLORS[i % COLORS.length] } })),
+                label: { show: false },
+                emphasis: { label: { show: true, fontSize: 13, fontWeight: 'bold' } },
+            }],
+        });
+    }
+
+    _renderThPerkara() {
+        const el = this.thPerkaraRef?.el;
+        if (!el) return;
+        this._thPerkaraChart?.dispose();
+        this._thPerkaraChart = echarts.init(el);
+        const data = this.state.tahti.perkaraData;
+        if (!data.length) { this._thPerkaraChart.setOption({ title: { text: 'Belum ada data', left: 'center', top: 'center', textStyle: { color: '#9ca3af', fontSize: 13 } } }); return; }
+        const COLORS = ['#714B67','#00A09D','#f59e0b','#3b82f6','#10b981','#ef4444','#8b5cf6','#ec4899','#6b7280'];
+        this._thPerkaraChart.setOption({
+            tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+            legend: { bottom: 0, textStyle: { fontSize: 11 }, type: 'scroll', itemWidth: 12, itemHeight: 12 },
+            series: [{
+                type: 'pie', radius: ['0%', '62%'], center: ['50%', '42%'],
+                data: data.map((d, i) => ({ name: d.label, value: d.count, itemStyle: { color: COLORS[i % COLORS.length] } })),
+                label: { fontSize: 11, formatter: '{b}\n{c}' },
+                emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,.2)' } },
+            }],
+        });
+    }
+
+    _renderThSel() {
+        const el = this.thSelRef?.el;
+        if (!el) return;
+        this._thSelChart?.dispose();
+        this._thSelChart = echarts.init(el);
+        const data = this.state.tahti.selData;
+        if (!data.length) { this._thSelChart.setOption({ title: { text: 'Belum ada data sel', left: 'center', top: 'center', textStyle: { color: '#9ca3af', fontSize: 13 } } }); return; }
+        const terisi = data.map(d => d.terisi);
+        const sisa   = data.map(d => Math.max(0, d.kapasitas - d.terisi));
+        this._thSelChart.setOption({
+            tooltip: {
+                trigger: 'axis', axisPointer: { type: 'shadow' },
+                formatter: params => {
+                    const t = params[0].value || 0, s = params[1].value || 0;
+                    return `<b>${params[0].axisValue}</b><br/>Terisi: ${t}<br/>Sisa: ${s}<br/>Kapasitas: ${t+s}`;
+                },
+            },
+            legend: { bottom: 0, data: ['Terisi', 'Sisa Kapasitas'], textStyle: { fontSize: 11 }, itemWidth: 12, itemHeight: 12 },
+            grid: { top: 10, right: 16, bottom: 44, left: 80 },
+            xAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { type: 'dashed', color: '#e5e7eb' } } },
+            yAxis: { type: 'category', data: data.map(d => d.nama), axisLabel: { fontSize: 11 } },
+            series: [
+                { name: 'Terisi',        type: 'bar', stack: 'total', data: terisi, itemStyle: { color: '#714B67' } },
+                { name: 'Sisa Kapasitas', type: 'bar', stack: 'total', data: sisa,   itemStyle: { color: '#e8e4ec' }, label: { show: false } },
+            ],
+        });
+    }
+
+    thHubunganLabel(v) {
+        const m = { keluarga: 'Keluarga', pengacara: 'Pengacara', teman: 'Teman', lainnya: 'Lainnya' };
+        return m[v] || v;
+    }
+
+    openTahananList(domain) {
+        this.action.doAction({
+            type: 'ir.actions.act_window', name: 'Data Tahanan',
+            res_model: 'digital_kamtibmas.tahanan', view_mode: 'list,form',
+            domain: domain || [],
+        });
+    }
+
+    openKunjunganList(domain) {
+        this.action.doAction({
+            type: 'ir.actions.act_window', name: 'Buku Tamu',
+            res_model: 'digital_kamtibmas.tahti_kunjungan', view_mode: 'list,form',
+            domain: domain || [],
+        });
+    }
+
+    openKunjunganRecord(id) {
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: 'digital_kamtibmas.tahti_kunjungan',
+            res_id: id, views: [[false, 'form']],
+        });
     }
 
     // ── Navigation ─────────────────────────────────────────────────────────────

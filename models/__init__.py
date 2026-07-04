@@ -11,3 +11,7 @@ from . import konseling
 from . import rehab
 from . import barang_bukti
 from . import patroli
+from . import tahti_sel
+from . import tahanan
+from . import tahti_tamu
+from . import tahti_kunjungan

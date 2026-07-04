@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahanan_form" model="ir.ui.view">
+        <field name="name">dkm.tahanan.form</field>
+        <field name="model">digital_kamtibmas.tahanan</field>
+        <field name="arch" type="xml">
+            <form string="Data Tahanan">
+                <header>
+                    <button name="action_bebaskan" type="object" string="Bebaskan"
+                            class="btn-success" invisible="state != 'ditahan'"/>
+                    <button name="action_tahan_kembali" type="object" string="Tahan Kembali"
+                            invisible="state != 'bebas'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="ditahan,bebas"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_kunjungan" type="object"
+                                class="oe_stat_button" icon="fa-users">
+                            <field name="kunjungan_count" widget="statinfo" string="Kunjungan"/>
+                        </button>
+                    </div>
+
+                    <field name="foto" widget="image"
+                           style="float:right;width:100px;height:130px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;margin-left:16px;"/>
+                    <div class="oe_title">
+                        <h1><field name="nama" placeholder="Nama Lengkap"/></h1>
+                        <h4 class="text-muted"><field name="code" readonly="1"/></h4>
+                    </div>
+
+                    <group>
+                        <group string="Identitas">
+                            <field name="nik"/>
+                            <field name="jenis_kelamin" widget="radio" options="{'horizontal': true}"/>
+                            <field name="tanggal_lahir"/>
+                            <field name="alamat" widget="text" rows="2"/>
+                        </group>
+                        <group string="Perkara">
+                            <field name="nomor_perkara"/>
+                            <field name="jenis_perkara"/>
+                            <field name="pasal"/>
+                            <field name="penyidik_id"/>
+                        </group>
+                    </group>
+
+                    <group string="Penahanan">
+                        <group>
+                            <field name="tanggal_masuk"/>
+                            <field name="tanggal_keluar" readonly="state == 'ditahan'"/>
+                            <field name="sel_id"/>
+                        </group>
+                        <group>
+                            <field name="keterangan" widget="text" rows="3"/>
+                        </group>
+                    </group>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahanan_list" model="ir.ui.view">
+        <field name="name">dkm.tahanan.list</field>
+        <field name="model">digital_kamtibmas.tahanan</field>
+        <field name="arch" type="xml">
+            <list string="Data Tahanan" default_order="id desc"
+                  decoration-muted="state == 'bebas'">
+                <field name="code" string="No."/>
+                <field name="nama"/>
+                <field name="nik" optional="hide"/>
+                <field name="jenis_kelamin"/>
+                <field name="jenis_perkara"/>
+                <field name="nomor_perkara" optional="show"/>
+                <field name="tanggal_masuk"/>
+                <field name="tanggal_keluar" optional="show"/>
+                <field name="sel_id"/>
+                <field name="penyidik_id" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'ditahan'"
+                       decoration-muted="state == 'bebas'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahanan_search" model="ir.ui.view">
+        <field name="name">dkm.tahanan.search</field>
+        <field name="model">digital_kamtibmas.tahanan</field>
+        <field name="arch" type="xml">
+            <search string="Cari Tahanan">
+                <field name="nama"/>
+                <field name="nik" string="NIK"/>
+                <field name="nomor_perkara" string="No. Perkara"/>
+                <field name="sel_id"/>
+                <field name="penyidik_id"/>
+                <separator/>
+                <filter string="Sedang Ditahan" name="f_ditahan" domain="[('state','=','ditahan')]"/>
+                <filter string="Bebas"           name="f_bebas"   domain="[('state','=','bebas')]"/>
+                <separator/>
+                <filter string="Laki-laki"  name="f_laki"     domain="[('jenis_kelamin','=','laki')]"/>
+                <filter string="Perempuan"  name="f_perempuan" domain="[('jenis_kelamin','=','perempuan')]"/>
+                <group>
+                    <filter string="Status"        name="grp_state"   context="{'group_by': 'state'}"/>
+                    <filter string="Jenis Perkara" name="grp_perkara" context="{'group_by': 'jenis_perkara'}"/>
+                    <filter string="Sel"           name="grp_sel"     context="{'group_by': 'sel_id'}"/>
+                    <filter string="Bulan Masuk"   name="grp_bulan"   context="{'group_by': 'tanggal_masuk:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_tahanan" model="ir.actions.act_window">
+        <field name="name">Data Tahanan</field>
+        <field name="res_model">digital_kamtibmas.tahanan</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_tahanan_search"/>
+        <field name="context">{'search_default_f_ditahan': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Belum ada data tahanan.</p>
+            <p>Klik <strong>Baru</strong> untuk mendaftarkan tahanan baru.</p>
+        </field>
+    </record>
+
+    <record id="action_dkm_tahanan_all" model="ir.actions.act_window">
+        <field name="name">Semua Tahanan</field>
+        <field name="res_model">digital_kamtibmas.tahanan</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_tahanan_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Belum ada data tahanan.</p>
+        </field>
+    </record>
+
+</odoo>
