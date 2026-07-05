@@ -87,6 +87,17 @@ class DkmDashboard extends Component {
                 selData:          [],
                 kunjunganTerbaru: [],
             },
+            // ── Intelkam ───────────────────────────────────────────────
+            intelkam: {
+                loading: false,
+                kpi: { distribusiTotal: 0, distribusiBulan: 0, terkirimBulan: 0, responTotal: 0, responHariIni: 0 },
+                trendData:         [],
+                responPerGroup:    [],
+                distribusiTerbaru: [],
+                responTerbaru:     [],
+                calResponData: [],
+                calYear:           new Date().getFullYear(),
+            },
         });
 
         this.mapState = useState({
@@ -115,6 +126,10 @@ class DkmDashboard extends Component {
         this.thHubRef     = useRef("thHubChart");
         this.thPerkaraRef = useRef("thPerkaraChart");
         this.thSelRef     = useRef("thSelChart");
+        // Intelkam chart refs
+        this.ikTrendRef  = useRef("ikTrendChart");
+        this.ikResponRef = useRef("ikResponChart");
+        this.ikCalWaRef  = useRef("ikCalWaChart");
 
         this._trendChart     = null;
         this._statusChart    = null;
@@ -143,6 +158,10 @@ class DkmDashboard extends Component {
         this._thHubChart     = null;
         this._thPerkaraChart = null;
         this._thSelChart     = null;
+        // Intelkam chart instances
+        this._ikTrendChart  = null;
+        this._ikResponChart = null;
+        this._ikCalWaChart  = null;
 
         onMounted(async () => await this.loadData());
 
@@ -179,6 +198,9 @@ class DkmDashboard extends Component {
             this._thHubChart?.dispose();
             this._thPerkaraChart?.dispose();
             this._thSelChart?.dispose();
+            this._ikTrendChart?.dispose();
+            this._ikResponChart?.dispose();
+            this._ikCalWaChart?.dispose();
         });
     }
 
@@ -1520,6 +1542,11 @@ class DkmDashboard extends Component {
             this._thPerkaraChart?.dispose(); this._thPerkaraChart = null;
             this._thSelChart?.dispose();     this._thSelChart     = null;
         }
+        if (prev === 'intelkam') {
+            this._ikTrendChart?.dispose();  this._ikTrendChart  = null;
+            this._ikResponChart?.dispose(); this._ikResponChart = null;
+            this._ikCalWaChart?.dispose();  this._ikCalWaChart  = null;
+        }
 
         this.state.activeSection = section;
 
@@ -1542,6 +1569,9 @@ class DkmDashboard extends Component {
         }
         if (section === 'tahti') {
             this.loadTahti();
+        }
+        if (section === 'intelkam') {
+            this.loadIntelkam();
         }
     }
 
@@ -1812,6 +1842,269 @@ class DkmDashboard extends Component {
         this.action.doAction({
             type: 'ir.actions.act_window',
             res_model: 'digital_kamtibmas.tahti_kunjungan',
+            res_id: id, views: [[false, 'form']],
+        });
+    }
+
+    // ── Intelkam Dashboard ─────────────────────────────────────────────────────
+
+    async loadIntelkam() {
+        this.state.intelkam.loading = true;
+
+        const nowWib        = new Date(Date.now() + 7 * 3600000);
+        const calYear       = nowWib.getUTCFullYear();
+        const todayStartMs  = Date.UTC(calYear, nowWib.getUTCMonth(), nowWib.getUTCDate()) - 7 * 3600000;
+        const todayEndMs    = todayStartMs + 24 * 3600000;
+        const monthStartMs  = Date.UTC(calYear, nowWib.getUTCMonth(), 1) - 7 * 3600000;
+        const sixAgoMs      = Date.UTC(calYear, nowWib.getUTCMonth() - 5, 1) - 7 * 3600000;
+        const yearStartMs   = Date.UTC(calYear, 0, 1) - 7 * 3600000;
+        const todayStartStr = this._dt(new Date(todayStartMs));
+        const todayEndStr   = this._dt(new Date(todayEndMs));
+        const monthStartStr = this._dt(new Date(monthStartMs));
+        const sixAgoStr     = this._dt(new Date(sixAgoMs));
+        const yearStartStr  = this._dt(new Date(yearStartMs));
+
+        const [
+            distribusiTotal, distribusiBulan, terkirimBulan,
+            responTotal, responHariIni,
+            distribusiRaw, responRaw,
+            distribusiTerbaru, responTerbaru,
+            responCalRaw,
+        ] = await Promise.all([
+            this.orm.searchCount('intelkam.distribusi.info', []),
+            this.orm.searchCount('intelkam.distribusi.info', [
+                ['tanggal_kirim', '>=', monthStartStr],
+            ]),
+            this.orm.searchCount('intelkam.distribusi.info', [
+                ['state', '=', 'terkirim'],
+                ['tanggal_kirim', '>=', monthStartStr],
+            ]),
+            this.orm.searchCount('intelkam.respon.wa', []),
+            this.orm.searchCount('intelkam.respon.wa', [
+                ['tanggal', '>=', todayStartStr], ['tanggal', '<', todayEndStr],
+            ]),
+            this.orm.searchRead(
+                'intelkam.distribusi.info',
+                [['tanggal_kirim', '>=', sixAgoStr], ['tanggal_kirim', '!=', false]],
+                ['tanggal_kirim'], { limit: 2000 }
+            ),
+            this.orm.searchRead(
+                'intelkam.respon.wa',
+                [['wa_group_id', '!=', false]],
+                ['wa_group_id'], { limit: 5000 }
+            ),
+            this.orm.searchRead(
+                'intelkam.distribusi.info', [],
+                ['code', 'perihal', 'state', 'tanggal_kirim', 'pengirim_id'],
+                { order: 'tanggal_kirim desc, id desc', limit: 5 }
+            ),
+            this.orm.searchRead(
+                'intelkam.respon.wa', [],
+                ['pengirim', 'nama_pengirim', 'wa_group_id', 'pesan', 'tanggal', 'has_media'],
+                { order: 'tanggal desc, id desc', limit: 5 }
+            ),
+            // Calendar: respon WA selama 1 tahun berjalan
+            this.orm.searchRead(
+                'intelkam.respon.wa',
+                [['tanggal', '>=', yearStartStr]],
+                ['tanggal'], { limit: 10000 }
+            ),
+        ]);
+
+        // 6-month trend
+        const monthMap = {}, monthLabel = {};
+        for (let i = 0; i < 6; i++) {
+            const wib = new Date(Date.UTC(nowWib.getUTCFullYear(), nowWib.getUTCMonth() - 5 + i, 1));
+            const key = `${wib.getUTCFullYear()}-${String(wib.getUTCMonth()+1).padStart(2,'0')}`;
+            monthMap[key]   = 0;
+            monthLabel[key] = BULAN[wib.getUTCMonth()];
+        }
+        for (const r of distribusiRaw) {
+            if (!r.tanggal_kirim) continue;
+            const wib = this._wib(r.tanggal_kirim);
+            if (!wib) continue;
+            const key = `${wib.getUTCFullYear()}-${String(wib.getUTCMonth()+1).padStart(2,'0')}`;
+            if (key in monthMap) monthMap[key]++;
+        }
+        const trendData = Object.keys(monthMap).map(k => ({ bulan: monthLabel[k], count: monthMap[k] }));
+
+        // Respon per group WA
+        const grpMap = {};
+        for (const r of responRaw) {
+            if (!r.wa_group_id) continue;
+            const label = r.wa_group_id[1] || 'Unknown';
+            grpMap[label] = (grpMap[label] || 0) + 1;
+        }
+        const responPerGroup = Object.entries(grpMap)
+            .map(([label, count]) => ({ label, count }))
+            .sort((a, b) => b.count - a.count);
+
+        // Calendar heatmap: respon WA per hari
+        const calWaMap = {};
+        for (const r of responCalRaw) {
+            if (!r.tanggal) continue;
+            const wib = this._wib(r.tanggal);
+            if (!wib) continue;
+            const k = `${wib.getUTCFullYear()}-${String(wib.getUTCMonth()+1).padStart(2,'0')}-${String(wib.getUTCDate()).padStart(2,'0')}`;
+            calWaMap[k] = (calWaMap[k] || 0) + 1;
+        }
+        const calResponData = Object.entries(calWaMap).map(([d, c]) => [d, c]);
+
+        this.state.intelkam.kpi               = { distribusiTotal, distribusiBulan, terkirimBulan, responTotal, responHariIni };
+        this.state.intelkam.trendData         = trendData;
+        this.state.intelkam.responPerGroup    = responPerGroup;
+        this.state.intelkam.distribusiTerbaru = distribusiTerbaru;
+        this.state.intelkam.responTerbaru     = responTerbaru;
+        this.state.intelkam.calResponData = calResponData;
+        this.state.intelkam.calYear           = calYear;
+        this.state.intelkam.loading           = false;
+
+        setTimeout(() => this._renderIntelkamCharts(), 50);
+    }
+
+    _renderIntelkamCharts() {
+        this._renderIkTrend();
+        this._renderIkRespon();
+        this._renderIkCalWa();
+    }
+
+    _renderIkTrend() {
+        const el = this.ikTrendRef?.el;
+        if (!el) return;
+        this._ikTrendChart?.dispose();
+        this._ikTrendChart = echarts.init(el);
+        const data = this.state.intelkam.trendData;
+        this._ikTrendChart.setOption({
+            grid: { top: 16, right: 16, bottom: 28, left: 36 },
+            xAxis: {
+                type: 'category', data: data.map(d => d.bulan),
+                axisLine: { show: false }, axisTick: { show: false },
+                axisLabel: { fontSize: 11 },
+            },
+            yAxis: {
+                type: 'value', minInterval: 1,
+                splitLine: { lineStyle: { type: 'dashed', color: '#e5e7eb' } },
+                axisLabel: { fontSize: 11 },
+            },
+            series: [{
+                type: 'bar',
+                data: data.map(d => d.count),
+                itemStyle: { color: '#4f46e5', borderRadius: [4, 4, 0, 0] },
+                barMaxWidth: 44,
+            }],
+            tooltip: { trigger: 'axis', formatter: p => `${p[0].axisValue}<br/><b>${p[0].value}</b> distribusi` },
+        });
+    }
+
+    _renderIkRespon() {
+        const el = this.ikResponRef?.el;
+        if (!el) return;
+        this._ikResponChart?.dispose();
+        this._ikResponChart = echarts.init(el);
+        const data = this.state.intelkam.responPerGroup;
+        if (!data.length) {
+            this._ikResponChart.setOption({
+                title: { text: 'Belum ada data', left: 'center', top: 'center',
+                         textStyle: { color: '#9ca3af', fontSize: 13 } }
+            });
+            return;
+        }
+        const COLORS = ['#4f46e5','#06b6d4','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#6b7280'];
+        this._ikResponChart.setOption({
+            tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+            legend: { bottom: 4, textStyle: { fontSize: 11 }, type: 'scroll', itemWidth: 12, itemHeight: 12 },
+            series: [{
+                type: 'pie', radius: ['42%', '68%'], center: ['50%', '44%'],
+                data: data.map((d, i) => ({
+                    name: d.label, value: d.count,
+                    itemStyle: { color: COLORS[i % COLORS.length] },
+                })),
+                label: { show: false },
+                emphasis: { label: { show: true, fontSize: 13, fontWeight: 'bold' } },
+            }],
+        });
+    }
+
+    _renderIkCalWa() {
+        const el = this.ikCalWaRef?.el;
+        if (!el) return;
+        this._ikCalWaChart?.dispose();
+        this._ikCalWaChart = echarts.init(el);
+        const year = this.state.intelkam.calYear;
+        const data = this.state.intelkam.calResponData;
+        const maxVal = data.length ? Math.max(...data.map(d => d[1])) : 5;
+        this._ikCalWaChart.setOption({
+            tooltip: {
+                formatter: p => {
+                    if (!p.data) return '';
+                    return `<b>${p.data[0]}</b><br/>${p.data[1]} respon masuk`;
+                },
+            },
+            visualMap: {
+                show: false, min: 0, max: maxVal || 5,
+                inRange: { color: ['#ebedf0', '#99f6e4', '#2dd4bf', '#0d9488', '#134e4a'] },
+            },
+            calendar: [{
+                range: String(year), left: 70, right: 20, top: 30, bottom: 10,
+                cellSize: ['auto', 14],
+                splitLine: { show: false },
+                yearLabel: { show: false },
+                monthLabel: {
+                    nameMap: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
+                    fontSize: 11, color: '#6b7280',
+                },
+                dayLabel: {
+                    firstDay: 1,
+                    nameMap: ['Min','Sen','Sel','Rab','Kam','Jum','Sab'],
+                    fontSize: 11, color: '#6b7280',
+                },
+                itemStyle: { borderColor: '#fff', borderWidth: 3, color: '#ebedf0' },
+            }],
+            series: [{
+                type: 'heatmap', coordinateSystem: 'calendar',
+                calendarIndex: 0, data: data,
+            }],
+        });
+    }
+
+    ikDistribusiStateBadge(state) {
+        const m = { draft: 'secondary', mengirim: 'warning', terkirim: 'success', gagal: 'danger' };
+        return m[state] || 'secondary';
+    }
+
+    ikDistribusiStateLabel(state) {
+        const m = { draft: 'Draft', mengirim: 'Mengirim', terkirim: 'Terkirim', gagal: 'Gagal' };
+        return m[state] || (state || '-');
+    }
+
+    openIntelkamDistribusiList(domain) {
+        this.action.doAction({
+            type: 'ir.actions.act_window', name: 'Distribusi Informasi',
+            res_model: 'intelkam.distribusi.info', view_mode: 'list,form',
+            domain: domain || [],
+        });
+    }
+
+    openIntelkamDistribusiRecord(id) {
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: 'intelkam.distribusi.info',
+            res_id: id, views: [[false, 'form']],
+        });
+    }
+
+    openIntelkamResponList(domain) {
+        this.action.doAction({
+            type: 'ir.actions.act_window', name: 'Respon WhatsApp Masuk',
+            res_model: 'intelkam.respon.wa', view_mode: 'list,form',
+            domain: domain || [],
+        });
+    }
+
+    openIntelkamResponRecord(id) {
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: 'intelkam.respon.wa',
             res_id: id, views: [[false, 'form']],
         });
     }

@@ -758,8 +758,14 @@
 .dkm-badge--sb-berjalan  { background: #fef3c7; color: #92400e; }
 .dkm-badge--sb-selesai   { background: #d1fae5; color: #065f46; }
 /* Tahti kunjungan states */
-.dkm-badge--orange { background: #fef3c7; color: #92400e; }
-.dkm-badge--green  { background: #d1fae5; color: #065f46; }
+.dkm-badge--orange    { background: #fef3c7; color: #92400e; }
+.dkm-badge--green     { background: #d1fae5; color: #065f46; }
+/* Intelkam distribusi states */
+.dkm-badge--secondary { background: #f3f4f6; color: #4b5563; }
+.dkm-badge--warning   { background: #fef3c7; color: #92400e; }
+.dkm-badge--success   { background: #d1fae5; color: #065f46; }
+.dkm-badge--danger    { background: #fee2e2; color: #991b1b; }
+.dkm-badge--blue      { background: #dbeafe; color: #1d4ed8; }
 
 /* Count badge di panel header */
 .dkm-count-badge {

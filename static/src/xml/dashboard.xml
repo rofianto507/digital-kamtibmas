@@ -52,6 +52,13 @@
                 <span>Tahti</span>
             </div>
 
+            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'intelkam' ? 'active' : '' }"
+                 t-on-click="() => this.setSection('intelkam')"
+                 title="Intelkam">
+                <i class="fa fa-eye"/>
+                <span>Intelkam</span>
+            </div>
+
         </div>
 
         <!-- Toggle di paling bawah -->
@@ -1137,8 +1144,223 @@
 
         </t><!-- /tahti -->
 
+        <!-- ── Intelkam ──────────────────────────────────────────────────── -->
+        <t t-if="state.activeSection === 'intelkam'">
+
+            <div class="dkm-header">
+                <div class="dkm-header-left">
+                    <i class="fa fa-eye dkm-header-icon"/>
+                    <h1>Dashboard Intelkam</h1>
+                </div>
+                <div class="dkm-header-right">
+                    <button class="dkm-refresh-btn" t-on-click="loadIntelkam">
+                        <i t-attf-class="fa fa-refresh #{state.intelkam.loading ? 'fa-spin' : ''}"/>
+                    </button>
+                </div>
+            </div>
+
+            <t t-if="state.intelkam.loading">
+                <div class="dkm-loading">
+                    <i class="fa fa-spinner fa-spin"/>
+                    <span>Memuat data...</span>
+                </div>
+            </t>
+
+            <t t-if="!state.intelkam.loading">
+
+                <!-- ── KPI Cards ──────────────────────────────────────────── -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-tachometer"/> Ringkasan
+                </div>
+
+                <div class="dkm-kpi-row">
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openIntelkamDistribusiList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--blue">
+                            <i class="fa fa-paper-plane"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.intelkam.kpi.distribusiBulan"/>
+                            <div class="dkm-kpi-label">Distribusi Bulan Ini</div>
+                            <div class="dkm-kpi-sub">Total dikirim bulan ini</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openIntelkamDistribusiList([['state','=','terkirim']])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--green">
+                            <i class="fa fa-check-circle"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.intelkam.kpi.terkirimBulan"/>
+                            <div class="dkm-kpi-label">Terkirim Bulan Ini</div>
+                            <div class="dkm-kpi-sub">Status terkirim</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openIntelkamResponList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--teal">
+                            <i class="fa fa-comment"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.intelkam.kpi.responHariIni"/>
+                            <div class="dkm-kpi-label">Respon Hari Ini</div>
+                            <div class="dkm-kpi-sub">Pesan masuk hari ini</div>
+                        </div>
+                    </div>
+
+                    <div class="dkm-kpi-card"
+                         t-on-click="() => this.openIntelkamResponList([])">
+                        <div class="dkm-kpi-icon dkm-kpi-icon--purple">
+                            <i class="fa fa-comments"/>
+                        </div>
+                        <div class="dkm-kpi-body">
+                            <div class="dkm-kpi-value" t-esc="state.intelkam.kpi.responTotal"/>
+                            <div class="dkm-kpi-label">Total Respon WA</div>
+                            <div class="dkm-kpi-sub">Semua waktu</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Statistik ─────────────────────────────────────────── -->
+                <div class="dkm-section-label">
+                    <i class="fa fa-bar-chart"/> Statistik Distribusi
+                </div>
+
+                <div class="dkm-charts-row">
+                    <div class="dkm-chart-card" style="flex:1.6">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-bar-chart" style="color:#4f46e5;"/>
+                            Trend Distribusi 6 Bulan Terakhir
+                        </div>
+                        <div t-ref="ikTrendChart" class="dkm-echarts"/>
+                    </div>
+                    <div class="dkm-chart-card" style="flex:1">
+                        <div class="dkm-chart-header">
+                            <i class="fa fa-pie-chart" style="color:#06b6d4;"/>
+                            Respon per Group WhatsApp
+                        </div>
+                        <div t-ref="ikResponChart" class="dkm-echarts"/>
+                    </div>
+                </div>
+
+                <!-- ── 5 Distribusi Terbaru ──────────────────────────────── -->
+                <!-- Calendar: Respon WhatsApp -->
+                <div class="dkm-calendar-card">
+                    <div class="dkm-chart-header">
+                        <span class="dkm-chart-title">Aktivitas Respon WhatsApp</span>
+                        <span class="dkm-chart-sub">
+                            <t t-esc="state.intelkam.calYear"/> — Jumlah Respon Masuk per Hari
+                        </span>
+                    </div>
+                    <div t-ref="ikCalWaChart" class="dkm-echarts-calendar"/>
+                    <div class="dkm-cal-legend">
+                        <span class="dkm-cal-legend-label">Sedikit</span>
+                        <span class="dkm-cal-cell" style="background:#ebedf0"/>
+                        <span class="dkm-cal-cell" style="background:#99f6e4"/>
+                        <span class="dkm-cal-cell" style="background:#2dd4bf"/>
+                        <span class="dkm-cal-cell" style="background:#0d9488"/>
+                        <span class="dkm-cal-cell" style="background:#134e4a"/>
+                        <span class="dkm-cal-legend-label">Banyak</span>
+                    </div>
+                </div>
+
+                <div class="dkm-section-label">
+                    <i class="fa fa-list"/> Data Terbaru
+                </div>
+
+                <div class="dkm-panel" style="margin-bottom:16px;">
+                    <div class="dkm-panel-header">
+                        <span>
+                            <i class="fa fa-paper-plane" style="color:#4f46e5; margin-right:6px;"/>
+                            5 Distribusi Terbaru
+                        </span>
+                        <span class="dkm-count-badge dkm-count-badge--blue"
+                              style="cursor:pointer"
+                              t-on-click="() => this.openIntelkamDistribusiList([])"
+                              t-esc="state.intelkam.kpi.distribusiTotal"/>
+                    </div>
+                    <table class="dkm-table">
+                        <thead>
+                            <tr>
+                                <th>Nomor</th>
+                                <th>Perihal</th>
+                                <th>Pengirim</th>
+                                <th>Waktu Kirim</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="!state.intelkam.distribusiTerbaru.length">
+                                <td colspan="5" class="dkm-table-empty">Belum ada data distribusi</td>
+                            </tr>
+                            <tr t-foreach="state.intelkam.distribusiTerbaru" t-as="r" t-key="r.id"
+                                class="dkm-tr"
+                                t-on-click="() => this.openIntelkamDistribusiRecord(r.id)">
+                                <td class="dkm-code" t-esc="r.code || '-'"/>
+                                <td t-esc="r.perihal"/>
+                                <td t-esc="r.pengirim_id ? r.pengirim_id[1] : '-'"/>
+                                <td t-esc="_fmtWib(r.tanggal_kirim)"/>
+                                <td>
+                                    <span t-attf-class="dkm-badge dkm-badge--#{ikDistribusiStateBadge(r.state)}"
+                                          t-esc="ikDistribusiStateLabel(r.state)"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ── 5 Respon Terbaru ──────────────────────────────────── -->
+                <div class="dkm-panel" style="margin-bottom:20px;">
+                    <div class="dkm-panel-header">
+                        <span>
+                            <i class="fa fa-comment" style="color:#06b6d4; margin-right:6px;"/>
+                            5 Respon WA Terbaru
+                        </span>
+                        <span class="dkm-count-badge dkm-count-badge--blue"
+                              style="cursor:pointer"
+                              t-on-click="() => this.openIntelkamResponList([])"
+                              t-esc="state.intelkam.kpi.responTotal"/>
+                    </div>
+                    <table class="dkm-table">
+                        <thead>
+                            <tr>
+                                <th>Group</th>
+                                <th>Pengirim</th>
+                                <th>Pesan</th>
+                                <th>Waktu</th>
+                                <th>Media</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="!state.intelkam.responTerbaru.length">
+                                <td colspan="5" class="dkm-table-empty">Belum ada respon masuk</td>
+                            </tr>
+                            <tr t-foreach="state.intelkam.responTerbaru" t-as="r" t-key="r.id"
+                                class="dkm-tr"
+                                t-on-click="() => this.openIntelkamResponRecord(r.id)">
+                                <td t-esc="r.wa_group_id ? r.wa_group_id[1] : '-'"/>
+                                <td t-esc="r.nama_pengirim || r.pengirim || '-'"/>
+                                <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                    t-esc="r.pesan || '(media)'"/>
+                                <td t-esc="_fmtWib(r.tanggal)"/>
+                                <td>
+                                    <span t-if="r.has_media" class="dkm-badge dkm-badge--blue">
+                                        <i class="fa fa-image"/>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </t><!-- /!intelkam.loading -->
+
+        </t><!-- /intelkam -->
+
         <!-- ── Under Construction sections ──────────────────────────────── -->
-        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba' and state.activeSection !== 'satreskrim' and state.activeSection !== 'sabhara' and state.activeSection !== 'tahti'">
+        <t t-if="state.activeSection !== 'satlantas' and state.activeSection !== 'satnarkoba' and state.activeSection !== 'satreskrim' and state.activeSection !== 'sabhara' and state.activeSection !== 'tahti' and state.activeSection !== 'intelkam'">
 
             <div class="dkm-header">
                 <div class="dkm-header-left">
