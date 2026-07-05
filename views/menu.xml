@@ -146,6 +146,46 @@
             groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
             sequence="4"/>
 
+        <!-- Intelkam -->
+        <menuitem
+            id="menu_dkm_intelkam"
+            name="Intelkam"
+            parent="menu_dkm_root"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="60"/>
+
+        <menuitem
+            id="menu_dkm_intelkam_distribusi"
+            name="Distribusi Informasi"
+            parent="menu_dkm_intelkam"
+            action="action_intelkam_distribusi"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="1"/>
+
+        <menuitem
+            id="menu_dkm_intelkam_respon"
+            name="Respon WhatsApp"
+            parent="menu_dkm_intelkam"
+            action="action_intelkam_respon"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="2"/>
+
+        <menuitem
+            id="menu_dkm_intelkam_wa_group"
+            name="Master Group WhatsApp"
+            parent="menu_dkm_intelkam"
+            action="action_intelkam_wa_group"
+            groups="digital_kamtibmas.group_dkm_admin"
+            sequence="10"/>
+
+        <menuitem
+            id="menu_dkm_intelkam_wa_config"
+            name="Konfigurasi Wablas"
+            parent="menu_dkm_intelkam"
+            action="action_intelkam_wa_config"
+            groups="digital_kamtibmas.group_dkm_admin"
+            sequence="20"/>
+
         <!-- Configuration: admin only -->
         <menuitem
             id="menu_dkm_configuration"

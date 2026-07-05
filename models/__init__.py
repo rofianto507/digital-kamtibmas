@@ -15,3 +15,7 @@ from . import tahti_sel
 from . import tahanan
 from . import tahti_tamu
 from . import tahti_kunjungan
+from . import intelkam_wa_config
+from . import intelkam_wa_group
+from . import intelkam_distribusi
+from . import intelkam_respon

@@ -31,6 +31,7 @@
         'views/tahti_tamu_views.xml',
         'views/tahti_kunjungan_views.xml',
         'views/tahti_kiosk_template.xml',
+        'views/intelkam_views.xml',
         'views/menu.xml',
     ],
     'assets': {

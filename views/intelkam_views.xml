@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== WA CONFIG ==================== -->
+    <record id="view_intelkam_wa_config_form" model="ir.ui.view">
+        <field name="name">intelkam.wa.config.form</field>
+        <field name="model">intelkam.wa.config</field>
+        <field name="arch" type="xml">
+            <form string="Konfigurasi Wablas">
+                <header>
+                    <button name="action_test_connection" string="Test Koneksi" type="object"
+                            class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nama Konfigurasi"/></h1>
+                    </div>
+                    <group>
+                        <group string="Wablas API">
+                            <field name="base_url" placeholder="https://jogja.wablas.com"/>
+                            <field name="token" password="True"/>
+                            <field name="secret_key" password="True"/>
+                            <field name="nomor_bot" placeholder="6285608855007"/>
+                        </group>
+                        <group string="Status">
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Catatan">
+                        <field name="notes" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Cara mendapatkan Token dan Secret Key:</strong><br/>
+                        Masuk ke akun Wablas &#8594; Device &#8594; pilih device &#8594; klik Settings.
+                        Token tersedia di halaman tersebut. Secret Key dapat di-generate dan akan dikirim ke nomor bot.
+                        <br/><br/>
+                        <strong>Cara mendapatkan Group ID:</strong><br/>
+                        Aktifkan webhook "Get Incoming Message" di Wablas, masukkan bot ke group WA,
+                        minta anggota kirim pesan di group, lalu buka <em>Wablas &gt; Inbox</em>.
+                        Group ID adalah nomor yang muncul di daftar chat (contoh: <strong>120363428002197043</strong>).
+                        <br/><br/>
+                        <strong>URL Webhook (Get Incoming Message):</strong><br/>
+                        <code>https://palembang.polisibaik.id/intelkam/webhook/wablas</code>
+                        <br/><br/>
+                        <strong>URL Tracking (Get Status Message) — untuk update status Delivered/Read:</strong><br/>
+                        <code>https://palembang.polisibaik.id/intelkam/webhook/wablas/tracking</code><br/>
+                        Isi kedua URL ini di Wablas &gt; Device &gt; Settings.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_intelkam_wa_config_list" model="ir.ui.view">
+        <field name="name">intelkam.wa.config.list</field>
+        <field name="model">intelkam.wa.config</field>
+        <field name="arch" type="xml">
+            <list string="Konfigurasi Wablas">
+                <field name="name"/>
+                <field name="base_url"/>
+                <field name="nomor_bot"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_intelkam_wa_config" model="ir.actions.act_window">
+        <field name="name">Konfigurasi Wablas</field>
+        <field name="res_model">intelkam.wa.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ==================== WA GROUP ==================== -->
+    <record id="view_intelkam_wa_group_form" model="ir.ui.view">
+        <field name="name">intelkam.wa.group.form</field>
+        <field name="model">intelkam.wa.group</field>
+        <field name="arch" type="xml">
+            <form string="Group WhatsApp">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_respon" icon="fa-comments">
+                            <field name="respon_count" widget="statinfo" string="Pesan Masuk"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_distribusi" icon="fa-send">
+                            <field name="distribusi_count" widget="statinfo" string="Distribusi"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Nama Group WhatsApp..."/></h1>
+                    </div>
+                    <group>
+                        <group string="Informasi Group">
+                            <field name="group_id" placeholder="120363428002197043"/>
+                            <field name="satker"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Keterangan">
+                            <field name="keterangan" nolabel="1" colspan="2"
+                                   placeholder="Keterangan tambahan tentang group ini..."/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Cara mendapatkan Group ID:</strong>
+                        Masukkan bot ke group WA, minta anggota kirim pesan, lalu buka
+                        <em>Wablas &gt; Inbox</em>. Group ID adalah nomor di daftar chat
+                        (contoh: <strong>120363428002197043</strong>) — bukan format @g.us.
+                    </div>
+                    <notebook>
+                        <page string="Pesan Masuk" name="respon">
+                            <field name="respon_ids" nolabel="1" create="false" delete="false">
+                                <list string="Pesan Masuk" default_order="tanggal desc">
+                                    <field name="tanggal"/>
+                                    <field name="nama_pengirim"/>
+                                    <field name="pengirim"/>
+                                    <field name="pesan"/>
+                                    <field name="distribusi_id" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Riwayat Distribusi" name="distribusi">
+                            <field name="distribusi_ids" nolabel="1" create="false" delete="false">
+                                <list string="Distribusi" default_order="tanggal_kirim desc">
+                                    <field name="code"/>
+                                    <field name="perihal"/>
+                                    <field name="pengirim_id"/>
+                                    <field name="tanggal_kirim"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_intelkam_wa_group_list" model="ir.ui.view">
+        <field name="name">intelkam.wa.group.list</field>
+        <field name="model">intelkam.wa.group</field>
+        <field name="arch" type="xml">
+            <list string="Group WhatsApp">
+                <field name="name"/>
+                <field name="group_id"/>
+                <field name="satker"/>
+                <field name="keterangan"/>
+                <field name="respon_count" string="Pesan Masuk"/>
+                <field name="distribusi_count" string="Distribusi"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_intelkam_wa_group_search" model="ir.ui.view">
+        <field name="name">intelkam.wa.group.search</field>
+        <field name="model">intelkam.wa.group</field>
+        <field name="arch" type="xml">
+            <search string="Cari Group WhatsApp">
+                <field name="name" string="Nama Group"/>
+                <field name="group_id" string="Group ID"/>
+                <field name="keterangan" string="Keterangan"/>
+                <separator/>
+                <filter name="f_aktif" string="Aktif" domain="[('active','=',True)]"/>
+                <filter name="f_nonaktif" string="Nonaktif" domain="[('active','=',False)]"/>
+                <separator/>
+                <filter name="f_polrestabes" string="Polrestabes" domain="[('satker','=','polrestabes')]"/>
+                <filter name="f_satlantas" string="Satlantas" domain="[('satker','=','satlantas')]"/>
+                <filter name="f_satnarkoba" string="Satnarkoba" domain="[('satker','=','satnarkoba')]"/>
+                <filter name="f_satreskrim" string="Satreskrim" domain="[('satker','=','satreskrim')]"/>
+                <filter name="f_sabhara" string="Sabhara" domain="[('satker','=','sabhara')]"/>
+                <filter name="f_intelkam" string="Intelkam" domain="[('satker','=','intelkam')]"/>
+                <filter name="f_binmas" string="Binmas" domain="[('satker','=','binmas')]"/>
+                <filter name="f_polsek" string="Polsek" domain="[('satker','=','polsek')]"/>
+                <group>
+                    <filter name="grp_satker" string="Satuan Kerja" domain="[]"
+                            context="{'group_by': 'satker'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_intelkam_wa_group" model="ir.actions.act_window">
+        <field name="name">Master Group WhatsApp</field>
+        <field name="res_model">intelkam.wa.group</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_intelkam_wa_group_search"/>
+        <field name="context">{'search_default_f_aktif': 1}</field>
+    </record>
+
+    <!-- ==================== DISTRIBUSI INFO ==================== -->
+    <record id="view_intelkam_distribusi_log_list_inline" model="ir.ui.view">
+        <field name="name">intelkam.distribusi.log.list.inline</field>
+        <field name="model">intelkam.distribusi.log</field>
+        <field name="arch" type="xml">
+            <list string="Log Pengiriman" create="false" delete="false">
+                <field name="group_id"/>
+                <field name="status" decoration-success="status in ('delivered','read')"
+                       decoration-warning="status == 'pending'"
+                       decoration-danger="status == 'failed'"/>
+                <field name="wablas_message_id"/>
+                <field name="tanggal"/>
+                <field name="error_message" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_intelkam_distribusi_form" model="ir.ui.view">
+        <field name="name">intelkam.distribusi.info.form</field>
+        <field name="model">intelkam.distribusi.info</field>
+        <field name="arch" type="xml">
+            <form string="Distribusi Informasi">
+                <header>
+                    <button name="action_kirim" string="Kirim ke WhatsApp" type="object"
+                            class="btn-primary"
+                            invisible="state not in ('draft', 'gagal')"
+                            confirm="Kirim pesan ini ke semua group yang dipilih?"
+                            data-hotkey="q"/>
+                    <button name="action_refresh_status" string="Refresh Status" type="object"
+                            class="btn-secondary"
+                            invisible="state not in ('mengirim', 'terkirim')"/>
+                    <button name="action_reset_draft" string="Reset ke Draft" type="object"
+                            class="btn-secondary"
+                            invisible="state != 'gagal'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,mengirim,terkirim"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <div class="oe_title">
+                        <label for="code" class="oe_edit_only"/>
+                        <h1>
+                            <field name="code" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Informasi Distribusi">
+                            <field name="perihal" placeholder="Perihal instruksi / informasi..."/>
+                            <field name="pengirim_id"/>
+                            <field name="tanggal_kirim" readonly="1"/>
+                        </group>
+                        <group string="Status Pengiriman" invisible="state == 'draft'">
+                            <field name="jumlah_pending" readonly="1" string="Pending"/>
+                            <field name="jumlah_terkirim" readonly="1" string="Terkirim"/>
+                            <field name="jumlah_gagal" readonly="1" string="Gagal"/>
+                        </group>
+                    </group>
+                    <group string="Tujuan Group WhatsApp">
+                        <field name="group_ids" widget="many2many_tags" nolabel="1"
+                               options="{'color_field': 'satker'}"
+                               placeholder="Pilih group tujuan..."/>
+                    </group>
+                    <group string="Isi Instruksi / Pesan">
+                        <field name="isi_instruksi" nolabel="1" placeholder="Tulis isi instruksi atau informasi yang akan didistribusikan..."
+                               widget="text" colspan="2"/>
+                    </group>
+                    <notebook>
+                        <page string="Log Pengiriman" name="log_pengiriman"
+                              invisible="state == 'draft'">
+                            <field name="log_ids" widget="one2many" nolabel="1">
+                                <list string="Log Pengiriman" create="false" delete="false">
+                                    <field name="group_id"/>
+                                    <field name="status"
+                                           decoration-success="status in ('delivered','read')"
+                                           decoration-warning="status == 'pending'"
+                                           decoration-danger="status == 'failed'"/>
+                                    <field name="wablas_message_id"/>
+                                    <field name="tanggal"/>
+                                    <field name="error_message" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_intelkam_distribusi_list" model="ir.ui.view">
+        <field name="name">intelkam.distribusi.info.list</field>
+        <field name="model">intelkam.distribusi.info</field>
+        <field name="arch" type="xml">
+            <list string="Distribusi Informasi" decoration-muted="state == 'draft'"
+                  decoration-success="state == 'terkirim'" decoration-danger="state == 'gagal'">
+                <field name="code"/>
+                <field name="perihal"/>
+                <field name="pengirim_id"/>
+                <field name="tanggal_kirim"/>
+                <field name="jumlah_terkirim" string="Terkirim"/>
+                <field name="jumlah_gagal" string="Gagal"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_intelkam_distribusi_search" model="ir.ui.view">
+        <field name="name">intelkam.distribusi.info.search</field>
+        <field name="model">intelkam.distribusi.info</field>
+        <field name="arch" type="xml">
+            <search string="Cari Distribusi Informasi">
+                <field name="code" string="Nomor"/>
+                <field name="perihal" string="Perihal"/>
+                <field name="pengirim_id" string="Pengirim"/>
+                <field name="group_ids" string="Group Tujuan"/>
+                <separator/>
+                <filter name="f_draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="f_terkirim" string="Terkirim" domain="[('state','=','terkirim')]"/>
+                <filter name="f_gagal" string="Gagal" domain="[('state','=','gagal')]"/>
+                <separator/>
+                <filter name="f_bulan" string="Bulan Ini"
+                        domain="[('tanggal_kirim','&gt;=',(context_today()+relativedelta(day=1)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group>
+                    <filter name="grp_state" string="Status" domain="[]"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="grp_pengirim" string="Pengirim" domain="[]"
+                            context="{'group_by': 'pengirim_id'}"/>
+                    <filter name="grp_bulan" string="Bulan Kirim" domain="[]"
+                            context="{'group_by': 'tanggal_kirim:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_intelkam_distribusi_calendar" model="ir.ui.view">
+        <field name="name">intelkam.distribusi.info.calendar</field>
+        <field name="model">intelkam.distribusi.info</field>
+        <field name="arch" type="xml">
+            <calendar string="Kalender Distribusi" date_start="tanggal_kirim"
+                      color="state" mode="month" quick_create="False">
+                <field name="perihal"/>
+                <field name="pengirim_id"/>
+                <field name="state" filters="1" invisible="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_intelkam_distribusi" model="ir.actions.act_window">
+        <field name="name">Distribusi Informasi</field>
+        <field name="res_model">intelkam.distribusi.info</field>
+        <field name="view_mode">list,calendar,form</field>
+        <field name="search_view_id" ref="view_intelkam_distribusi_search"/>
+    </record>
+
+    <!-- ==================== RESPON WA ==================== -->
+    <record id="view_intelkam_respon_search" model="ir.ui.view">
+        <field name="name">intelkam.respon.wa.search</field>
+        <field name="model">intelkam.respon.wa</field>
+        <field name="arch" type="xml">
+            <search string="Cari Respon WhatsApp">
+                <field name="nama_pengirim" string="Nama Pengirim"/>
+                <field name="pengirim" string="No. Pengirim"/>
+                <field name="pesan" string="Isi Pesan"/>
+                <field name="wa_group_id" string="Group"/>
+                <separator/>
+                <filter name="has_group" string="Ada Group"
+                        domain="[('wa_group_id', '!=', False)]"/>
+                <filter name="no_group" string="Tanpa Group"
+                        domain="[('wa_group_id', '=', False)]"/>
+                <filter name="has_distribusi" string="Ada Distribusi Terkait"
+                        domain="[('distribusi_id', '!=', False)]"/>
+                <filter name="has_media" string="Ada Gambar / File"
+                        domain="[('has_media', '=', True)]"/>
+                <separator/>
+                <filter name="f_bulan" string="Bulan Ini"
+                        domain="[('tanggal','&gt;=',(context_today()+relativedelta(day=1)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group>
+                    <filter name="grp_wa_group" string="Group WA" domain="[]"
+                            context="{'group_by': 'wa_group_id'}"/>
+                    <filter name="grp_distribusi" string="Distribusi Terkait" domain="[]"
+                            context="{'group_by': 'distribusi_id'}"/>
+                    <filter name="grp_tanggal" string="Tanggal" domain="[]"
+                            context="{'group_by': 'tanggal:day'}"/>
+                    <filter name="grp_bulan" string="Bulan" domain="[]"
+                            context="{'group_by': 'tanggal:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_intelkam_respon_list" model="ir.ui.view">
+        <field name="name">intelkam.respon.wa.list</field>
+        <field name="model">intelkam.respon.wa</field>
+        <field name="arch" type="xml">
+            <list string="Respon WhatsApp Masuk" create="false" delete="false">
+                <field name="tanggal"/>
+                <field name="wa_group_id" string="Group"/>
+                <field name="pengirim" string="No. Pengirim"/>
+                <field name="pesan"/>
+                <field name="has_media" string="📎" widget="boolean" optional="show"/>
+                <field name="distribusi_id" string="Distribusi Terkait" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_intelkam_respon_form" model="ir.ui.view">
+        <field name="name">intelkam.respon.wa.form</field>
+        <field name="model">intelkam.respon.wa</field>
+        <field name="arch" type="xml">
+            <form string="Respon WhatsApp" create="false">
+                <sheet>
+                    <group>
+                        <group string="Informasi Group">
+                            <field name="tanggal" readonly="1"/>
+                            <field name="wa_group_id" readonly="1"/>
+                            <field name="distribusi_id" readonly="1"/>
+                        </group>
+                        <group string="Pengirim">
+                            <field name="pengirim" readonly="1" string="No. WhatsApp"/>
+                            <field name="nama_pengirim" readonly="1" invisible="not nama_pengirim"/>
+                            <field name="wablas_message_id" readonly="1" groups="base.group_no_one"/>
+                        </group>
+                    </group>
+                    <group string="Pesan" invisible="not pesan">
+                        <field name="pesan" nolabel="1" readonly="1" colspan="2"/>
+                    </group>
+                    <group string="Media" invisible="not file_url">
+                        <field name="mime_type" readonly="1" string="Tipe File"
+                               invisible="not mime_type"/>
+                        <field name="file_url" readonly="1" string="URL File" colspan="2"
+                               widget="url"/>
+                        <field name="media_preview" nolabel="1" readonly="1" colspan="2"
+                               widget="html" invisible="not file_url"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_intelkam_respon_calendar" model="ir.ui.view">
+        <field name="name">intelkam.respon.wa.calendar</field>
+        <field name="model">intelkam.respon.wa</field>
+        <field name="arch" type="xml">
+            <calendar string="Kalender Respon WA" date_start="tanggal"
+                      color="wa_group_id" mode="month" quick_create="False">
+                <field name="pengirim"/>
+                <field name="wa_group_id" filters="1" invisible="1"/>
+                <field name="pesan"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_intelkam_respon" model="ir.actions.act_window">
+        <field name="name">Respon WhatsApp Masuk</field>
+        <field name="res_model">intelkam.respon.wa</field>
+        <field name="view_mode">list,calendar,form</field>
+        <field name="search_view_id" ref="view_intelkam_respon_search"/>
+        <field name="context">{'search_default_has_group': 1, 'search_default_grp_wa_group': 1}</field>
+    </record>
+
+</odoo>
