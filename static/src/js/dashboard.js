@@ -1019,7 +1019,7 @@ class DkmDashboard extends Component {
 
     openKonselingList(extraDomain) {
         this.action.doAction({ type:'ir.actions.act_window', name:'Konseling Online',
-            res_model:'digital_kamtibmas.konseling', view_mode:'list,form',
+            res_model:'digital_kamtibmas.konseling', views:[[false,'list'],[false,'form']],
             domain: extraDomain || [] });
     }
 
@@ -1031,7 +1031,7 @@ class DkmDashboard extends Component {
 
     openRehabList(extraDomain) {
         this.action.doAction({ type:'ir.actions.act_window', name:'Permohonan Rehabilitasi',
-            res_model:'digital_kamtibmas.rehab', view_mode:'list,form',
+            res_model:'digital_kamtibmas.rehab', views:[[false,'list'],[false,'form']],
             domain: extraDomain || [] });
     }
 
@@ -1195,7 +1195,7 @@ class DkmDashboard extends Component {
 
     openBBList(domain) {
         this.action.doAction({ type:'ir.actions.act_window', name:'Barang Bukti',
-            res_model:'digital_kamtibmas.barang_bukti', view_mode:'list,form',
+            res_model:'digital_kamtibmas.barang_bukti', views:[[false,'list'],[false,'form']],
             domain: domain || [] });
     }
 
@@ -1485,7 +1485,7 @@ class DkmDashboard extends Component {
 
     openPatroliList(domain) {
         this.action.doAction({ type:'ir.actions.act_window', name:'Patroli',
-            res_model:'digital_kamtibmas.patroli', view_mode:'list,form',
+            res_model:'digital_kamtibmas.patroli', views:[[false,'list'],[false,'form']],
             domain: domain || [] });
     }
 
@@ -1825,7 +1825,7 @@ class DkmDashboard extends Component {
     openTahananList(domain) {
         this.action.doAction({
             type: 'ir.actions.act_window', name: 'Data Tahanan',
-            res_model: 'digital_kamtibmas.tahanan', view_mode: 'list,form',
+            res_model: 'digital_kamtibmas.tahanan', views: [[false,'list'],[false,'form']],
             domain: domain || [],
         });
     }
@@ -1833,7 +1833,7 @@ class DkmDashboard extends Component {
     openKunjunganList(domain) {
         this.action.doAction({
             type: 'ir.actions.act_window', name: 'Buku Tamu',
-            res_model: 'digital_kamtibmas.tahti_kunjungan', view_mode: 'list,form',
+            res_model: 'digital_kamtibmas.tahti_kunjungan', views: [[false,'list'],[false,'form']],
             domain: domain || [],
         });
     }
@@ -2080,7 +2080,7 @@ class DkmDashboard extends Component {
     openIntelkamDistribusiList(domain) {
         this.action.doAction({
             type: 'ir.actions.act_window', name: 'Distribusi Informasi',
-            res_model: 'intelkam.distribusi.info', view_mode: 'list,form',
+            res_model: 'intelkam.distribusi.info', views: [[false,'list'],[false,'form']],
             domain: domain || [],
         });
     }
@@ -2096,7 +2096,7 @@ class DkmDashboard extends Component {
     openIntelkamResponList(domain) {
         this.action.doAction({
             type: 'ir.actions.act_window', name: 'Respon WhatsApp Masuk',
-            res_model: 'intelkam.respon.wa', view_mode: 'list,form',
+            res_model: 'intelkam.respon.wa', views: [[false,'list'],[false,'form']],
             domain: domain || [],
         });
     }
@@ -2126,7 +2126,7 @@ class DkmDashboard extends Component {
             type: 'ir.actions.act_window',
             name: 'Antrian Satlantas',
             res_model: 'digital_kamtibmas.antrian',
-            view_mode: 'list,form',
+            views: [[false,'list'],[false,'form']],
             domain: [['tanggal_booking', '=', todayStr], ...(extraDomain || [])],
         });
     }
@@ -2145,7 +2145,7 @@ class DkmDashboard extends Component {
             type: 'ir.actions.act_window',
             name: 'e-Form Laka',
             res_model: 'digital_kamtibmas.eform_laka',
-            view_mode: 'list,form',
+            views: [[false,'list'],[false,'form']],
             domain: [...this._lakaDomain(), ...(extraDomain || [])],
         });
     }

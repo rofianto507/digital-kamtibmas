@@ -41,11 +41,16 @@ digital_kamtibmas/
 │   ├── tahti_sel.py                  # Master sel/kamar tahanan
 │   ├── tahanan.py                    # Data tahanan Tahti
 │   ├── tahti_tamu.py                 # Master data tamu pengunjung
-│   └── tahti_kunjungan.py            # Buku tamu / kunjungan
+│   ├── tahti_kunjungan.py            # Buku tamu / kunjungan
+│   ├── intelkam_wa_config.py         # Konfigurasi Wablas API
+│   ├── intelkam_wa_group.py          # Master Group WhatsApp
+│   ├── intelkam_distribusi.py        # Distribusi Informasi + Log
+│   └── intelkam_respon.py            # Respon WA Masuk
 ├── controllers/
 │   ├── __init__.py
 │   ├── display_controller.py         # Controller display antrian
-│   └── tahti_public.py               # Kiosk buku tamu (auth=public)
+│   ├── tahti_public.py               # Kiosk buku tamu (auth=public)
+│   └── intelkam_webhook.py           # Webhook Wablas (incoming + tracking)
 ├── views/
 │   ├── menu.xml
 │   ├── kabupaten_views.xml
@@ -67,12 +72,13 @@ digital_kamtibmas/
 │   ├── tahanan_views.xml             # Form/list tahanan
 │   ├── tahti_tamu_views.xml          # Form/list data tamu
 │   ├── tahti_kunjungan_views.xml     # Form/list buku tamu
-│   └── tahti_kiosk_template.xml      # HTML template kiosk publik
+│   ├── tahti_kiosk_template.xml      # HTML template kiosk publik
+│   └── intelkam_views.xml            # Semua view Intelkam
 ├── security/
 │   ├── security.xml
 │   └── ir.model.access.csv
 ├── data/
-│   └── sequence.xml                  # FL, PAT, KSL, RHB, BBK, KUJ, THN
+│   └── sequence.xml                  # FL, PAT, KSL, RHB, BBK, KUJ, THN, DIST
 └── static/
     ├── description/icon.png
     ├── img/logo_polda.png
@@ -348,6 +354,176 @@ Pattern: IIFE, OWL 2 standalone, single Component.
 
 ---
 
+## Intelkam — Model
+
+### intelkam.wa.config
+
+Konfigurasi koneksi ke Wablas API. Hanya boleh ada 1 record aktif.
+
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `name` | Char | Label konfigurasi |
+| `api_url` | Char | Base URL Wablas (misal `https://xxx.wablas.com`) |
+| `token` | Char | API Token Wablas |
+| `device_id` | Char | Device ID (opsional) |
+| `active` | Boolean | Aktif/nonaktif |
+
+**Methods**: `get_config()` (classmethod, return config aktif), `send_message()`, `check_message_status()`, `action_test_connection()`
+
+**Send message** endpoint: `POST {api_url}/api/send-message`, body `{"phone": ..., "message": ...}`.
+Untuk group: `phone = group_id` (tanpa `@g.us`).
+
+### intelkam.wa.group
+
+Master grup WhatsApp tujuan distribusi.
+
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `name` | Char | Nama grup (required) |
+| `group_id` | Char | ID grup Wablas — **tanpa** suffix `@g.us` |
+| `deskripsi` | Text | Keterangan |
+| `active` | Boolean | Aktif/nonaktif (default True) |
+
+> **Penting**: `group_id` disimpan **tanpa** `@g.us`. Webhook Wablas kadang kirim ID dengan suffix `@g.us` → harus di-strip sebelum lookup.
+
+### intelkam.distribusi.info
+
+Distribusi informasi ke grup WhatsApp.
+
+Inherits: `mail.thread`, `mail.activity.mixin`
+
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `code` | Char | Auto (prefix DIST, sequence `intelkam.distribusi.info`) |
+| `perihal` | Char | Perihal/judul (required) |
+| `isi_instruksi` | Text | Isi pesan/instruksi (required) |
+| `group_ids` | Many2many | → intelkam.wa.group (required) |
+| `pengirim_id` | Many2one | → res.users (default current user) |
+| `tanggal_kirim` | Datetime | Diisi saat `action_kirim()` |
+| `state` | Selection | draft / mengirim / terkirim / gagal |
+| `log_ids` | One2many | → intelkam.distribusi.log |
+| `jumlah_terkirim` | Integer | Computed dari log |
+| `jumlah_gagal` | Integer | Computed dari log |
+| `jumlah_pending` | Integer | Computed dari log |
+
+**Actions**: `action_kirim()`, `action_refresh_status()`, `action_reset_draft()`
+
+`action_kirim()` return dict harus menyertakan `'views': [[False, 'form']]` di bagian `next` → wajib di Odoo 19 agar `_preprocessAction` tidak error.
+
+**Auto-refresh** status pending saat form dibuka via override `web_read()`.
+
+### intelkam.distribusi.log
+
+Log per-group pengiriman distribusi.
+
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `distribusi_id` | Many2one | → distribusi.info (ondelete: cascade) |
+| `group_id` | Many2one | → wa.group |
+| `wablas_message_id` | Char | ID pesan dari Wablas |
+| `status` | Selection | pending / delivered / read / failed |
+| `error_message` | Text | Pesan error jika gagal |
+| `tanggal` | Datetime | Waktu log |
+
+### intelkam.respon.wa
+
+Pesan masuk dari grup WhatsApp (via webhook Wablas).
+
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `group_id_wa` | Char | Group ID raw dari Wablas (mungkin ada `@g.us`) |
+| `wa_group_id` | Many2one | → wa.group, computed dari `group_id_wa` (store=True) |
+| `pengirim` | Char | Nomor HP pengirim (dari `group.sender`) |
+| `nama_pengirim` | Char | Nama pengirim (`pushName`, sering kosong untuk group) |
+| `pesan` | Text | Isi pesan |
+| `file_url` | Char | URL file/gambar (jika ada media) |
+| `mime_type` | Char | Tipe MIME media |
+| `has_media` | Boolean | Computed, True jika ada `file_url` |
+| `media_preview` | Html | Computed HTML preview (`sanitize=False`) |
+| `tanggal` | Datetime | Waktu pesan masuk |
+| `wablas_message_id` | Char | ID pesan Wablas |
+| `distribusi_id` | Many2one | → distribusi.info, computed (distribusi terakhir ke group ini) |
+| `raw_payload` | Text | JSON payload mentah dari Wablas |
+
+`_rec_name = 'pengirim'`
+
+**Computed `_compute_wa_group`**: Strip `@g.us` dari `group_id_wa` sebelum lookup ke `intelkam.wa.group`.
+
+**Computed `_compute_distribusi`**: Cari distribusi terakhir ke group yang sama (exclude draft), domain `('group_ids', 'in', [rec.wa_group_id.id])`.
+
+**`media_preview`** menggunakan `fields.Html(sanitize=False)` karena Odoo 19 melarang OWL directive (`t-if`, `t-att-*`) langsung di form view arch. Render via `widget="html"`.
+
+---
+
+## Intelkam — Webhook Wablas
+
+### Controller (`controllers/intelkam_webhook.py`)
+
+| Route | Method | Auth | Fungsi |
+|---|---|---|---|
+| `/intelkam/webhook/wablas` | POST | public | Pesan masuk dari grup WA |
+| `/intelkam/webhook/wablas/tracking` | POST | public | Status update pengiriman |
+
+### Logika Filtering Pesan Masuk
+
+```python
+# Skip jika tidak ada konten (read receipt, notifikasi grup)
+has_text = bool((msg.get('message') or '').strip())
+has_file = bool((msg.get('file') or msg.get('url') or '').strip())
+if not has_text and not has_file:
+    continue
+```
+
+### Struktur Payload Wablas (Group Message)
+
+```python
+# Pengirim asli ada di group.sender, bukan sender (sender = nomor bot)
+group_info = msg.get('group') or {}
+pengirim_no = group_info.get('sender') or msg.get('sender') or msg.get('phone', '')
+
+# pushName sering kosong untuk pesan grup
+nama = (msg.get('pushName') or msg.get('pushname') or
+        msg.get('senderName') or group_info.get('pushName') or '')
+
+# Timestamp bisa ISO string "2026-07-04T23:57:12Z" atau Unix int
+ts = msg.get('timestamp')
+try:
+    tanggal = datetime.utcfromtimestamp(int(ts))
+except (ValueError, TypeError):
+    ts_str = str(ts).rstrip('Z').replace('T', ' ')
+    tanggal = datetime.strptime(ts_str[:19], '%Y-%m-%d %H:%M:%S')
+```
+
+---
+
+## Intelkam — Views (`views/intelkam_views.xml`)
+
+Semua view Intelkam dalam satu file. Views yang ada:
+
+| View | Model | Tipe |
+|---|---|---|
+| `view_intelkam_wa_config_form` | wa.config | form |
+| `view_intelkam_wa_config_list` | wa.config | list |
+| `view_intelkam_wa_group_form` | wa.group | form |
+| `view_intelkam_wa_group_list` | wa.group | list |
+| `view_intelkam_wa_group_search` | wa.group | search (default filter: aktif) |
+| `view_intelkam_distribusi_form` | distribusi.info | form |
+| `view_intelkam_distribusi_list` | distribusi.info | list |
+| `view_intelkam_distribusi_search` | distribusi.info | search |
+| `view_intelkam_distribusi_calendar` | distribusi.info | calendar (color=state, quick_create="False") |
+| `view_intelkam_respon_form` | respon.wa | form |
+| `view_intelkam_respon_list` | respon.wa | list (default groupby: wa_group_id) |
+| `view_intelkam_respon_search` | respon.wa | search (default filter: has_group) |
+| `view_intelkam_respon_calendar` | respon.wa | calendar (color=wa_group_id, filters="1") |
+
+**Actions**:
+- `action_intelkam_distribusi`: view_mode `list,calendar,form`
+- `action_intelkam_respon_wa`: view_mode `list,calendar,form`
+- `action_intelkam_wa_group`: view_mode `list,form`
+- `action_intelkam_wa_config`: view_mode `list,form`
+
+---
+
 ## Menu Struktur
 
 ```
@@ -368,12 +544,17 @@ Digital Kamtibmas (root, sequence 2)
 │   ├── Semua Tahanan                   [admin, operator]
 │   ├── Buku Tamu                       [admin, operator]   (filter default: hari ini)
 │   └── Data Tamu                       [admin, operator]
+├── Intelkam (sequence 60)
+│   ├── Distribusi Informasi            [admin, operator]
+│   ├── Respon WhatsApp Masuk           [admin, operator]
+│   └── Master Group WhatsApp           [admin, operator]
 └── Configuration                       [admin only]
     ├── Polsek
     ├── Kabupaten
     ├── Kecamatan
     ├── Desa/Kelurahan
-    └── Sel/Kamar Tahanan (sequence 20)
+    ├── Sel/Kamar Tahanan (sequence 20)
+    └── Konfigurasi Wablas              [admin only]
 ```
 
 ---
@@ -400,6 +581,16 @@ ir.module.category (module_category_dkm)
 | `tahti_tamu` | CRUD | CRU (no delete) |
 | `tahti_kunjungan` | CRUD | CRU (no delete) |
 
+### Akses Model Intelkam
+
+| Model | Admin | Operator |
+|---|---|---|
+| `intelkam.wa.config` | CRUD | R |
+| `intelkam.wa.group` | CRUD | CRU |
+| `intelkam.distribusi.info` | CRUD | CRU |
+| `intelkam.distribusi.log` | CRUD | CRU |
+| `intelkam.respon.wa` | CRUD | R |
+
 ---
 
 ## Sequences (`data/sequence.xml`)
@@ -413,6 +604,7 @@ ir.module.category (module_category_dkm)
 | `seq_barang_bukti` | `digital_kamtibmas.barang_bukti` | BBK | 5 |
 | `seq_tahti_kunjungan` | `digital_kamtibmas.tahti_kunjungan` | KUJ | 5 |
 | `seq_tahanan` | `digital_kamtibmas.tahanan` | THN | 5 |
+| `seq_intelkam_distribusi` | `intelkam.distribusi.info` | DIST | 5 |
 
 ---
 
@@ -452,10 +644,11 @@ Sidebar kiri, `state.activeSection` mengontrol seksi aktif.
 | `satreskrim` | fa-search | `loadSatreskrim()` |
 | `sabhara` | fa-binoculars | `loadSabhara()` |
 | `tahti` | fa-institution | `loadTahti()` |
+| `intelkam` | fa-eye | `loadIntelkam()` |
 
 ### Tahti Dashboard
 
-**KPI Cards** (4 cards, `dkm-kpi-card`):
+**KPI Cards** (4 cards):
 
 | KPI | Icon | Color | Action |
 |---|---|---|---|
@@ -469,18 +662,45 @@ Sidebar kiri, `state.activeSection` mengontrol seksi aktif.
 | Ref | Chart | Data |
 |---|---|---|
 | `thTrendChart` | Bar | Kunjungan 7 hari terakhir (WIB-aware grouping) |
-| `thHubChart` | Donut (`pie` radius 42%-68%) | Distribusi hubungan tamu |
+| `thHubChart` | Donut (pie 42%-68%) | Distribusi hubungan tamu |
 | `thPerkaraChart` | Pie (filled) | Jenis perkara tahanan aktif |
 | `thSelChart` | Stacked bar horizontal | Terisi vs sisa kapasitas per sel |
 
-**Tabel**: 5 kunjungan terakhir (dibungkus `dkm-panel` + `dkm-panel-header`)
+**Tabel**: 5 kunjungan terakhir
 
-**WIB-aware aggregation** (7-day trend):
+### Intelkam Dashboard
 
+**KPI Cards** (4 cards):
+
+| KPI | Icon | Color | Action |
+|---|---|---|---|
+| Distribusi Bulan Ini | fa-paper-plane | blue | openIntelkamDistribusiList |
+| Terkirim Bulan Ini | fa-check-circle | green | openIntelkamDistribusiList(terkirim) |
+| Respon Hari Ini | fa-comment | teal | openIntelkamResponList |
+| Total Respon WA | fa-comments | purple | openIntelkamResponList |
+
+**Charts** (ECharts):
+
+| Ref | Chart | Warna | Data |
+|---|---|---|---|
+| `ikTrendChart` | Bar | Indigo `#4f46e5` | Trend distribusi 6 bulan terakhir |
+| `ikResponChart` | Donut (pie 42%-68%) | Multi | Respon per group WA |
+| `ikCalWaChart` | Calendar heatmap | Teal `#0d9488` | Aktivitas respon WA selama 1 tahun |
+
+**Tabel**: 5 distribusi terbaru + 5 respon WA terbaru
+
+**State Intelkam**:
 ```js
-const nowWib       = new Date(Date.now() + 7 * 3600000);
-const todayStartMs = Date.UTC(nowWib.getUTCFullYear(), nowWib.getUTCMonth(), nowWib.getUTCDate()) - 7 * 3600000;
-// setiap record: _wib(r.waktu_masuk).getUTCFullYear/Month/Date() untuk WIB date key
+intelkam: {
+    loading: false,
+    kpi: { distribusiTotal, distribusiBulan, terkirimBulan, responTotal, responHariIni },
+    trendData: [],         // [{bulan, count}] — 6 bulan
+    responPerGroup: [],    // [{label, count}]
+    distribusiTerbaru: [], // 5 records
+    responTerbaru: [],     // 5 records
+    calResponData: [],     // [[date, count]] — 1 tahun berjalan
+    calYear: 2026,
+}
 ```
 
 ### Sabhara Live Map
@@ -534,11 +754,67 @@ Tabel terbaru selalu dibungkus `dkm-panel` + `dkm-panel-header`:
 
 ---
 
+## Dashboard — Badge Classes
+
+```css
+/* Generic state badges (tersedia di dashboard.css) */
+.dkm-badge--secondary  { background: #f3f4f6; color: #4b5563; }
+.dkm-badge--warning    { background: #fef3c7; color: #92400e; }
+.dkm-badge--success    { background: #d1fae5; color: #065f46; }
+.dkm-badge--danger     { background: #fee2e2; color: #991b1b; }
+.dkm-badge--blue       { background: #dbeafe; color: #1d4ed8; }
+.dkm-badge--orange     { background: #fef3c7; color: #92400e; }
+.dkm-badge--green      { background: #d1fae5; color: #065f46; }
+```
+
+---
+
+## Dashboard — Calendar Heatmap Pattern
+
+```xml
+<div class="dkm-calendar-card">
+    <div class="dkm-chart-header">
+        <span class="dkm-chart-title">Judul</span>
+        <span class="dkm-chart-sub">
+            <t t-esc="state.section.calYear"/> — Keterangan
+        </span>
+    </div>
+    <div t-ref="refName" class="dkm-echarts-calendar"/>
+    <div class="dkm-cal-legend">
+        <span class="dkm-cal-legend-label">Sedikit</span>
+        <span class="dkm-cal-cell" style="background:#ebedf0"/>
+        <!-- ... warna lainnya ... -->
+        <span class="dkm-cal-legend-label">Banyak</span>
+    </div>
+</div>
+```
+
+ECharts option untuk calendar heatmap:
+```js
+{
+    visualMap: { show: false, min: 0, max: maxVal,
+                 inRange: { color: ['#ebedf0', ...palette] } },
+    calendar: [{ range: String(year), left: 70, right: 20, top: 30, bottom: 10,
+                 cellSize: ['auto', 14], splitLine: { show: false },
+                 yearLabel: { show: false },
+                 monthLabel: { nameMap: ['Jan',...,'Des'], fontSize: 11, color: '#6b7280' },
+                 dayLabel: { firstDay: 1, nameMap: ['Min','Sen',...,'Sab'], fontSize: 11 },
+                 itemStyle: { borderColor: '#fff', borderWidth: 3, color: '#ebedf0' } }],
+    series: [{ type: 'heatmap', coordinateSystem: 'calendar', calendarIndex: 0, data }],
+}
+```
+
+---
+
 ## Views — Hal Penting Odoo 19
 
 - `<group>` dalam `<search>` **tidak** support atribut `expand` dan `string`
 - `widget="badge"` di list view bersifat **read-only** — tidak bisa dipakai di kolom editable
 - `invisible` di button/field menggunakan **Python expression string**: `invisible="state != 'berlangsung'"`
+- OWL directive (`t-if`, `t-att-*`) **dilarang** di form view arch → gunakan computed `fields.Html(sanitize=False)`
+- Action dict inline `ir.actions.act_window` **wajib** menyertakan `'views': [[false,'list'],[false,'form']]` (bukan `view_mode:'list,form'`) agar `_preprocessAction` tidak error. Odoo 19 `_preprocessAction` langsung memanggil `.map()` pada `action.views` — jika `views` undefined maka crash `TypeError: Cannot read properties of undefined (reading 'map')`
+- Calendar view: atribut `quick_create="False"` (bukan `quick_add="false"`)
+- Groupby filter di search view wajib ada `domain="[]"`: `<filter name="x" domain="[]" context="{'group_by': 'field'}"/>`
 
 ---
 
@@ -600,8 +876,9 @@ OWL XML parser **tidak** mengenal HTML named entities. Gunakan numeric:
 | Card radius | `4px` |
 | Live map header | `#1e1b4b` |
 | Pulse marker | `#f59e0b` |
-| BERLANGSUNG badge | `#fef3c7` / `#92400e` |
-| SELESAI badge | `#d1fae5` / `#065f46` |
+| Intelkam primary | `#4f46e5` (indigo) |
+| Intelkam accent | `#06b6d4` (cyan) |
+| Intelkam cal WA | `#0d9488` (teal) |
 
 ---
 
@@ -614,3 +891,5 @@ OWL XML parser **tidak** mengenal HTML named entities. Gunakan numeric:
 | 1.2.0 | Tahti: Master Sel, Data Tahanan, Buku Tamu (Tamu + Kunjungan), Menu Tahti |
 | 1.3.0 | Kiosk Web App (`/tahti/buku-tamu`) — OWL standalone, auth=public |
 | 1.4.0 | Dashboard Tahti — KPI, trend 7 hari, pie perkara, stacked bar kapasitas sel, tabel kunjungan |
+| 1.5.0 | Intelkam: Distribusi Informasi WA (Wablas), Respon WA Masuk, Master Group, Webhook, Dashboard Intelkam |
+| 1.5.1 | Bugfix: semua `openXxxList()` di `dashboard.js` — `view_mode:'list,form'` → `views:[[false,'list'],[false,'form']]` (Odoo 19 `_preprocessAction` requirement) |
