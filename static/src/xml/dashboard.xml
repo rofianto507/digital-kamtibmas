@@ -7,11 +7,11 @@
     <!-- ── Sidebar ────────────────────────────────────────────────────────── -->
     <div t-attf-class="dkm-sidebar #{ state.sidebarCollapsed ? 'collapsed' : '' }">
 
-        <!-- Logo only, no toggle -->
+        <!-- Logo company (Settings > Companies > Logo) -->
         <div class="dkm-sidebar-brand">
             <img class="dkm-sidebar-logo"
-                 src="/digital_kamtibmas/static/img/logo_polda.png"
-                 onerror="this.style.display='none'" alt="Polda Sumsel"/>
+                 src="/web/binary/company_logo"
+                 onerror="this.style.display='none'" alt="Logo"/>
         </div>
 
         <div class="dkm-sidebar-section">
