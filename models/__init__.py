@@ -19,3 +19,7 @@ from . import intelkam_wa_config
 from . import intelkam_wa_group
 from . import intelkam_distribusi
 from . import intelkam_respon
+from . import sertifikasi_soal
+from . import sertifikasi_profil
+from . import sertifikasi
+from . import sertifikasi_peserta
