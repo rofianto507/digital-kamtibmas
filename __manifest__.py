@@ -32,6 +32,10 @@
         'views/tahti_kunjungan_views.xml',
         'views/tahti_kiosk_template.xml',
         'views/intelkam_views.xml',
+        'views/sertifikasi_soal_views.xml',
+        'views/sertifikasi_profil_views.xml',
+        'views/sertifikasi_views.xml',
+        'views/sertifikasi_kiosk_template.xml',
         'views/menu.xml',
     ],
     'assets': {

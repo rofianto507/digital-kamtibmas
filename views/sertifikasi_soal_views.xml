@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_sertifikasi_soal_form" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.soal.form</field>
+        <field name="model">digital_kamtibmas.sertifikasi.soal</field>
+        <field name="arch" type="xml">
+            <form string="Soal Sertifikasi">
+                <sheet>
+                    <group>
+                        <group string="Informasi Soal">
+                            <field name="kategori"/>
+                            <field name="tingkat_kesulitan"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Statistik">
+                            <field name="jumlah_pilihan" readonly="1"/>
+                            <field name="has_kunci" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Teks Soal">
+                        <field name="name" widget="text" rows="4"
+                               nolabel="1" colspan="2"
+                               placeholder="Tuliskan pertanyaan soal di sini..."/>
+                    </group>
+
+                    <notebook>
+                        <page string="Pilihan Jawaban">
+                            <field name="pilihan_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name" string="Teks Pilihan"/>
+                                    <field name="is_correct" string="Kunci Jawaban"
+                                           widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_sertifikasi_soal_list" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.soal.list</field>
+        <field name="model">digital_kamtibmas.sertifikasi.soal</field>
+        <field name="arch" type="xml">
+            <list string="Soal Sertifikasi" default_order="sequence, id">
+                <field name="sequence" widget="handle"/>
+                <field name="name" string="Teks Soal"/>
+                <field name="kategori"/>
+                <field name="tingkat_kesulitan"/>
+                <field name="jumlah_pilihan" string="Jml. Pilihan"/>
+                <field name="has_kunci" string="Ada Kunci"
+                       widget="boolean"
+                       decoration-danger="not has_kunci"
+                       decoration-success="has_kunci"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_sertifikasi_soal_search" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.soal.search</field>
+        <field name="model">digital_kamtibmas.sertifikasi.soal</field>
+        <field name="arch" type="xml">
+            <search string="Cari Soal">
+                <field name="name" string="Teks Soal"/>
+                <separator/>
+                <filter string="Umum"         name="f_umum"       domain="[('kategori','=','umum')]"/>
+                <filter string="Hukum"        name="f_hukum"      domain="[('kategori','=','hukum')]"/>
+                <filter string="Kesehatan"    name="f_kesehatan"  domain="[('kategori','=','kesehatan')]"/>
+                <filter string="Pencegahan"   name="f_pencegahan" domain="[('kategori','=','pencegahan')]"/>
+                <separator/>
+                <filter string="Mudah"  name="f_mudah"  domain="[('tingkat_kesulitan','=','mudah')]"/>
+                <filter string="Sedang" name="f_sedang" domain="[('tingkat_kesulitan','=','sedang')]"/>
+                <filter string="Sulit"  name="f_sulit"  domain="[('tingkat_kesulitan','=','sulit')]"/>
+                <separator/>
+                <filter string="Belum Ada Kunci" name="f_no_kunci" domain="[('has_kunci','=',False)]"/>
+                <filter string="Arsip" name="f_arsip" domain="[('active','=',False)]"/>
+                <group>
+                    <filter string="Kategori"          name="grp_kategori" context="{'group_by': 'kategori'}"/>
+                    <filter string="Tingkat Kesulitan" name="grp_tingkat"  context="{'group_by': 'tingkat_kesulitan'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_sertifikasi_soal" model="ir.actions.act_window">
+        <field name="name">Soal Sertifikasi</field>
+        <field name="res_model">digital_kamtibmas.sertifikasi.soal</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_sertifikasi_soal_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada soal sertifikasi.
+            </p>
+            <p>Klik <strong>Baru</strong> untuk menambahkan soal beserta pilihan jawabannya.</p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ─────────────────────────────────────────────────────── -->
+    <record id="view_dkm_sertifikasi_profil_form" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.profil.form</field>
+        <field name="model">digital_kamtibmas.sertifikasi.profil</field>
+        <field name="arch" type="xml">
+            <form string="Profil Peserta Sertifikasi">
+                <sheet>
+                    <!-- Kontak terhubung -->
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <field name="partner_id"
+                               readonly="1"
+                               nolabel="1"
+                               style="flex:1"/>
+                        <button name="action_buka_partner"
+                                type="object"
+                                string="Lihat / Buat Kontak"
+                                class="btn btn-sm btn-secondary"/>
+                    </div>
+
+                    <!-- Stats badges -->
+                    <div class="d-flex gap-3 mb-3"
+                         invisible="total_sertifikasi == 0">
+                        <div class="badge bg-primary fs-6 px-3 py-2">
+                            <i class="fa fa-file-text me-1"/>
+                            Sertifikasi Diikuti:
+                            <field name="total_sertifikasi" readonly="1" nolabel="1"/>
+                        </div>
+                        <div class="badge bg-success fs-6 px-3 py-2">
+                            <i class="fa fa-check me-1"/>
+                            Lulus:
+                            <field name="total_lulus" readonly="1" nolabel="1"/>
+                        </div>
+                    </div>
+
+                    <group>
+                        <group string="Identitas">
+                            <field name="nik"/>
+                            <field name="nama"/>
+                            <field name="jenis_kelamin" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                        <group string="Data Diri">
+                            <field name="tempat_lahir"/>
+                            <field name="tanggal_lahir"/>
+                            <field name="no_hp"/>
+                            <field name="alamat"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Riwayat Sertifikasi">
+                            <field name="peserta_ids" readonly="1">
+                                <list default_order="waktu_mulai desc">
+                                    <field name="sertifikasi_id" string="Sertifikasi"/>
+                                    <field name="waktu_mulai"/>
+                                    <field name="waktu_selesai"/>
+                                    <field name="total_benar" string="Benar"/>
+                                    <field name="total_soal"  string="Total Soal"/>
+                                    <field name="nilai" string="Nilai"/>
+                                    <field name="lulus" widget="boolean"
+                                           decoration-success="lulus"
+                                           decoration-danger="not lulus"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'mengerjakan'"
+                                           decoration-success="state == 'selesai'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ─────────────────────────────────────────────────────── -->
+    <record id="view_dkm_sertifikasi_profil_list" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.profil.list</field>
+        <field name="model">digital_kamtibmas.sertifikasi.profil</field>
+        <field name="arch" type="xml">
+            <list string="Peserta Sertifikasi" default_order="nama">
+                <field name="nik"/>
+                <field name="nama"/>
+                <field name="jenis_kelamin"/>
+                <field name="no_hp"/>
+                <field name="total_sertifikasi" string="Sertifikasi Diikuti"/>
+                <field name="total_lulus"       string="Lulus"/>
+                <field name="partner_id"        string="Kontak"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ───────────────────────────────────────────────────── -->
+    <record id="view_dkm_sertifikasi_profil_search" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.profil.search</field>
+        <field name="model">digital_kamtibmas.sertifikasi.profil</field>
+        <field name="arch" type="xml">
+            <search string="Cari Peserta">
+                <field name="nik"  string="NIK"/>
+                <field name="nama" string="Nama"/>
+                <filter string="Laki-laki"  name="f_laki"      domain="[('jenis_kelamin','=','laki')]"/>
+                <filter string="Perempuan"  name="f_perempuan"  domain="[('jenis_kelamin','=','perempuan')]"/>
+                <filter string="Pernah Lulus"
+                        name="f_lulus"
+                        domain="[('total_lulus','>=',1)]"/>
+                <filter string="Belum Pernah Lulus"
+                        name="f_belum"
+                        domain="[('total_sertifikasi','>=',1),('total_lulus','=',0)]"/>
+                <group>
+                    <filter name="g_jk" string="Jenis Kelamin"
+                            context="{'group_by': 'jenis_kelamin'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_sertifikasi_profil" model="ir.actions.act_window">
+        <field name="name">Peserta Sertifikasi</field>
+        <field name="res_model">digital_kamtibmas.sertifikasi.profil</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_sertifikasi_profil_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada peserta sertifikasi.
+            </p>
+            <p>Peserta akan terdaftar otomatis saat mengikuti ujian melalui link publik.</p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Peserta Form View ══════════════════════════════════════════════════ -->
+    <record id="view_dkm_sertifikasi_peserta_form" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.peserta.form</field>
+        <field name="model">digital_kamtibmas.sertifikasi.peserta</field>
+        <field name="arch" type="xml">
+            <form string="Detail Peserta">
+                <header>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="mengerjakan,selesai"/>
+                </header>
+                <sheet>
+                    <!-- Hasil ujian banner -->
+                    <div class="alert alert-success mb-3"
+                         invisible="not lulus or state != 'selesai'">
+                        <i class="fa fa-check-circle fa-lg me-2"/>
+                        <strong>LULUS</strong> — Nilai: <field name="nilai" readonly="1" nolabel="1"/>
+                    </div>
+                    <div class="alert alert-danger mb-3"
+                         invisible="lulus or state != 'selesai'">
+                        <i class="fa fa-times-circle fa-lg me-2"/>
+                        <strong>TIDAK LULUS</strong> — Nilai: <field name="nilai" readonly="1" nolabel="1"/>
+                    </div>
+
+                    <group>
+                        <group string="Identitas Peserta">
+                            <field name="profil_id" readonly="1"/>
+                            <field name="nik"  readonly="1"/>
+                            <field name="nama" readonly="1" invisible="1"/>
+                            <field name="jenis_kelamin" readonly="1"/>
+                        </group>
+                        <group string="Sertifikasi">
+                            <field name="sertifikasi_id" readonly="1"/>
+                            <field name="waktu_mulai"  readonly="1"/>
+                            <field name="waktu_selesai" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Hasil Ujian" invisible="state != 'selesai'">
+                        <field name="total_soal"  readonly="1"/>
+                        <field name="total_benar" readonly="1"/>
+                        <field name="nilai"  readonly="1"/>
+                        <field name="lulus"  readonly="1" widget="boolean"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Detail Jawaban" invisible="state != 'selesai'">
+                            <field name="jawaban_ids" readonly="1">
+                                <list>
+                                    <field name="soal_id"    string="Soal"/>
+                                    <field name="pilihan_id" string="Jawaban Dipilih"/>
+                                    <field name="is_correct" string="Benar" widget="boolean"
+                                           decoration-success="is_correct"
+                                           decoration-danger="not is_correct"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ Peserta List View ══════════════════════════════════════════════════ -->
+    <record id="view_dkm_sertifikasi_peserta_list" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.peserta.list</field>
+        <field name="model">digital_kamtibmas.sertifikasi.peserta</field>
+        <field name="arch" type="xml">
+            <list string="Peserta" default_order="waktu_mulai desc">
+                <field name="sertifikasi_id"/>
+                <field name="profil_id" string="Peserta"/>
+                <field name="nik"/>
+                <field name="jenis_kelamin"/>
+                <field name="waktu_mulai"/>
+                <field name="waktu_selesai"/>
+                <field name="total_benar" string="Benar"/>
+                <field name="total_soal"  string="Total Soal"/>
+                <field name="nilai"  string="Nilai"/>
+                <field name="lulus" widget="boolean"
+                       decoration-success="lulus"
+                       decoration-danger="not lulus"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'mengerjakan'"
+                       decoration-success="state == 'selesai'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Sertifikasi Form View ══════════════════════════════════════════════ -->
+    <record id="view_dkm_sertifikasi_form" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.form</field>
+        <field name="model">digital_kamtibmas.sertifikasi</field>
+        <field name="arch" type="xml">
+            <form string="Sertifikasi Narkoba">
+                <header>
+                    <button name="action_aktifkan"
+                            type="object" string="Aktifkan"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_nonaktifkan"
+                            type="object" string="Nonaktifkan"
+                            class="btn-warning"
+                            invisible="state != 'aktif'"/>
+                    <button name="action_reset_draft"
+                            type="object" string="Reset ke Draft"
+                            invisible="state != 'nonaktif'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,aktif,nonaktif"/>
+                </header>
+
+                <sheet>
+                    <!-- Smart buttons -->
+                    <div class="oe_button_box" name="button_box"
+                         invisible="state == 'draft'">
+                        <button name="action_view_peserta" type="object"
+                                class="oe_stat_button" icon="fa-users">
+                            <field name="total_peserta" widget="statinfo" string="Peserta"/>
+                        </button>
+                        <button name="action_view_lulus" type="object"
+                                class="oe_stat_button" icon="fa-check-circle">
+                            <field name="total_lulus" widget="statinfo" string="Lulus"/>
+                        </button>
+                    </div>
+
+                    <!-- Banner link publik -->
+                    <div class="alert alert-success d-flex align-items-center gap-2 mb-3"
+                         invisible="state != 'aktif'">
+                        <i class="fa fa-link fa-lg"/>
+                        <div class="flex-grow-1">
+                            <strong>Link Ujian Publik:</strong><br/>
+                            <field name="url_public" readonly="1"
+                                   widget="CopyClipboardChar"
+                                   class="font-monospace small"/>
+                        </div>
+                        <button name="action_buka_link" type="object"
+                                string="Buka" class="btn btn-sm btn-success"/>
+                    </div>
+
+                    <group>
+                        <group string="Konfigurasi Ujian">
+                            <field name="name" placeholder="Contoh: Sertifikasi Anti Narkoba Batch 1"/>
+                            <field name="jumlah_soal"/>
+                            <field name="waktu_menit"/>
+                            <field name="nilai_kelulusan"/>
+                        </group>
+                        <group string="Jadwal">
+                            <field name="tanggal_aktif"/>
+                            <field name="tanggal_expired"/>
+                            <field name="access_token" readonly="1" invisible="not access_token"/>
+                        </group>
+                    </group>
+
+                    <group string="Catatan">
+                        <field name="notes" nolabel="1" colspan="2"
+                               widget="text" rows="3"
+                               placeholder="Keterangan tambahan..."/>
+                    </group>
+
+                    <notebook>
+                        <page string="Data Peserta">
+                            <field name="peserta_ids">
+                                <list create="0" default_order="waktu_mulai desc">
+                                    <field name="profil_id" string="Peserta"/>
+                                    <field name="nik"/>
+                                    <field name="jenis_kelamin"/>
+                                    <field name="waktu_mulai"/>
+                                    <field name="waktu_selesai"/>
+                                    <field name="total_benar" string="Benar"/>
+                                    <field name="total_soal"  string="Total Soal"/>
+                                    <field name="nilai" string="Nilai"/>
+                                    <field name="lulus" widget="boolean"
+                                           decoration-success="lulus"
+                                           decoration-danger="not lulus"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'mengerjakan'"
+                                           decoration-success="state == 'selesai'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ Sertifikasi List View ══════════════════════════════════════════════ -->
+    <record id="view_dkm_sertifikasi_list" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.list</field>
+        <field name="model">digital_kamtibmas.sertifikasi</field>
+        <field name="arch" type="xml">
+            <list string="Sertifikasi Narkoba" default_order="id desc">
+                <field name="name"/>
+                <field name="jumlah_soal"/>
+                <field name="waktu_menit"/>
+                <field name="nilai_kelulusan"/>
+                <field name="tanggal_aktif"/>
+                <field name="tanggal_expired"/>
+                <field name="total_peserta" string="Peserta"/>
+                <field name="total_lulus"   string="Lulus"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'draft'"
+                       decoration-success="state == 'aktif'"
+                       decoration-danger="state == 'nonaktif'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Sertifikasi Search View ════════════════════════════════════════════ -->
+    <record id="view_dkm_sertifikasi_search" model="ir.ui.view">
+        <field name="name">dkm.sertifikasi.search</field>
+        <field name="model">digital_kamtibmas.sertifikasi</field>
+        <field name="arch" type="xml">
+            <search string="Cari Sertifikasi">
+                <field name="name"/>
+                <filter string="Draft"    name="f_draft"    domain="[('state','=','draft')]"/>
+                <filter string="Aktif"    name="f_aktif"    domain="[('state','=','aktif')]"/>
+                <filter string="Nonaktif" name="f_nonaktif" domain="[('state','=','nonaktif')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Action: Sertifikasi ════════════════════════════════════════════════ -->
+    <record id="action_dkm_sertifikasi" model="ir.actions.act_window">
+        <field name="name">Sertifikasi Narkoba</field>
+        <field name="res_model">digital_kamtibmas.sertifikasi</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_sertifikasi_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Belum ada sertifikasi.</p>
+            <p>Klik <strong>Baru</strong> untuk membuat sertifikasi baru.</p>
+        </field>
+    </record>
+
+    <!-- ══ Action: Peserta (standalone, dibuka dari smart button) ════════════ -->
+    <record id="action_dkm_sertifikasi_peserta" model="ir.actions.act_window">
+        <field name="name">Peserta Sertifikasi</field>
+        <field name="res_model">digital_kamtibmas.sertifikasi.peserta</field>
+        <field name="view_mode">list,form</field>
+        <field name="views" eval="[(ref('view_dkm_sertifikasi_peserta_list'),'list'),(ref('view_dkm_sertifikasi_peserta_form'),'form')]"/>
+    </record>
+
+</odoo>

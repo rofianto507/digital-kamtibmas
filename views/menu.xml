@@ -74,6 +74,22 @@
             groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
             sequence="2"/>
 
+        <menuitem
+            id="menu_dkm_sertifikasi_narkoba"
+            name="Sertifikasi Narkoba"
+            parent="menu_dkm_satnarkoba"
+            action="action_dkm_sertifikasi"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="10"/>
+
+        <menuitem
+            id="menu_dkm_sertifikasi_profil"
+            name="Peserta Sertifikasi"
+            parent="menu_dkm_satnarkoba"
+            action="action_dkm_sertifikasi_profil"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            sequence="11"/>
+
         <!-- Satreskrim -->
         <menuitem
             id="menu_dkm_satreskrim"
@@ -249,6 +265,14 @@
             action="action_dkm_tahti_sel"
             groups="digital_kamtibmas.group_dkm_admin"
             sequence="20"/>
+
+        <menuitem
+            id="menu_dkm_config_sertifikasi_soal"
+            name="Soal Sertifikasi"
+            parent="menu_dkm_configuration"
+            action="action_dkm_sertifikasi_soal"
+            groups="digital_kamtibmas.group_dkm_admin"
+            sequence="30"/>
 
     </data>
 </odoo>

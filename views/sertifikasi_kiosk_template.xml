@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="sertifikasi_kiosk_template" name="Sertifikasi Narkoba — Kiosk">
+        <html lang="id">
+            <head>
+                <meta charset="UTF-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+                <meta name="theme-color" content="#0D1F3C"/>
+                <meta name="mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <title>Sertifikasi Anti Narkoba — Polrestabes Palembang</title>
+                <link rel="stylesheet" href="/digital_kamtibmas/static/lib/fontawesome/css/font-awesome.css"/>
+                <link rel="stylesheet" href="/digital_kamtibmas/static/src/css/sertifikasi_kiosk.css"/>
+            </head>
+            <body>
+                <div id="sertifikasi-kiosk-app"/>
+                <script type="text/javascript" src="/web/static/lib/owl/owl.js"/>
+                <script type="text/javascript" src="/digital_kamtibmas/static/src/js/sertifikasi_kiosk.js"/>
+            </body>
+        </html>
+    </template>
+</odoo>
