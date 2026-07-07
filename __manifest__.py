@@ -23,6 +23,8 @@
         'views/display_config_views.xml',
         'views/antrian_display_template.xml',
         'views/konseling_views.xml',
+        'views/rehab_tempat_views.xml',
+        'views/rehab_report.xml',
         'views/rehab_views.xml',
         'views/barang_bukti_views.xml',
         'views/patroli_views.xml',

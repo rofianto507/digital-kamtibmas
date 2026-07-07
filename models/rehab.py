@@ -1,3 +1,4 @@
+from datetime import date
 from odoo import models, fields, api
 
 
@@ -14,20 +15,20 @@ class Rehab(models.Model):
 
     # ── Identitas Pemohon ──────────────────────────────────────────────────────
     nama               = fields.Char('Nama Lengkap', required=True, tracking=True)
-    nik                = fields.Char('NIK', size=16)
-    no_hp              = fields.Char('No. HP / WA')
     jenis_kelamin      = fields.Selection([
-        ('laki',     'Laki-laki'),
+        ('laki',      'Laki-laki'),
         ('perempuan', 'Perempuan'),
     ], string='Jenis Kelamin')
     tempat_lahir       = fields.Char('Tempat Lahir')
     tanggal_lahir      = fields.Date('Tanggal Lahir')
+    umur               = fields.Integer('Umur', compute='_compute_umur', store=False)
     alamat             = fields.Text('Alamat Lengkap')
     foto_pemohon       = fields.Image('Foto Pemohon', max_width=512, max_height=512)
 
-    # ── Informasi Penggunaan ───────────────────────────────────────────────────
-    jenis_narkoba      = fields.Char('Jenis Narkoba / Zat')
-    lama_penggunaan    = fields.Char('Lama Penggunaan', help='Contoh: 2 tahun, 6 bulan')
+    # ── Rehabilitasi ───────────────────────────────────────────────────────────
+    tempat_rehab_id    = fields.Many2one(
+        'digital_kamtibmas.rehab.tempat', 'Tempat Rehabilitasi',
+        ondelete='set null', tracking=True)
     keterangan         = fields.Text('Keterangan / Alasan Permohonan')
 
     # ── Jadwal & Status ────────────────────────────────────────────────────────
@@ -39,6 +40,17 @@ class Rehab(models.Model):
         ('proses',     'Sedang Diproses'),
         ('selesai',    'Selesai'),
     ], string='Status', default='menunggu', required=True, tracking=True)
+
+    @api.depends('tanggal_lahir')
+    def _compute_umur(self):
+        today = date.today()
+        for rec in self:
+            if rec.tanggal_lahir:
+                tl = rec.tanggal_lahir
+                rec.umur = today.year - tl.year - (
+                    (today.month, today.day) < (tl.month, tl.day))
+            else:
+                rec.umur = 0
 
     # ── Workflow ──────────────────────────────────────────────────────────────
 

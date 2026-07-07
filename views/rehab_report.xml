@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Report Action ─────────────────────────────────────────────────── -->
+    <record id="action_report_rehab_informed_consent" model="ir.actions.report">
+        <field name="name">Pernyataan Kesediaan Rehabilitasi</field>
+        <field name="model">digital_kamtibmas.rehab</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">digital_kamtibmas.report_rehab_informed_consent</field>
+        <field name="report_file">digital_kamtibmas.report_rehab_informed_consent</field>
+        <field name="binding_model_id" ref="model_digital_kamtibmas_rehab"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- ── QWeb Template ─────────────────────────────────────────────────── -->
+    <template id="report_rehab_informed_consent">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="
+                    font-family: 'Times New Roman', Times, serif;
+                    font-size: 12pt;
+                    line-height: 1.6;
+                    padding: 40px 60px;
+                    color: #000;
+                ">
+                    <!-- ── Header ──────────────────────────────────────── -->
+                    <div style="text-align:center; margin-bottom:28px;">
+                        <p style="font-weight:bold; text-decoration:underline; font-size:13pt; margin:0;">
+                            INFORMED CONCENT
+                        </p>
+                        <p style="margin:6px 0 0;">
+                            PERNYATAAN KESEDIAAN MENJALANI REHABILITASI
+                        </p>
+                        <p style="margin:0;">
+                            DI <t t-esc="(o.tempat_rehab_id.name or '').upper()" />
+                        </p>
+                    </div>
+
+                    <!-- ── Intro ───────────────────────────────────────── -->
+                    <p style="margin-bottom:16px;">Saya yang bertanda tangan dibawah ini :</p>
+
+                    <!-- ── Identitas ───────────────────────────────────── -->
+                    <table style="border-collapse:collapse; margin-bottom:24px; width:100%;">
+                        <tr>
+                            <td style="width:130px; vertical-align:top; padding:3px 0;">Nama</td>
+                            <td style="width:12px; vertical-align:top; padding:3px 0;">:</td>
+                            <td style="padding:3px 0;" t-esc="o.nama or ''"/>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align:top; padding:3px 0;">Umur</td>
+                            <td style="vertical-align:top; padding:3px 0;">:</td>
+                            <td style="padding:3px 0;">
+                                <t t-if="o.umur">
+                                    <t t-esc="o.umur"/> tahun
+                                </t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align:top; padding:3px 0;">Jenis Kelamin</td>
+                            <td style="vertical-align:top; padding:3px 0;">:</td>
+                            <td style="padding:3px 0;">
+                                <t t-if="o.jenis_kelamin == 'laki'">Laki-laki</t>
+                                <t t-elif="o.jenis_kelamin == 'perempuan'">Perempuan</t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align:top; padding:3px 0;">TTL</td>
+                            <td style="vertical-align:top; padding:3px 0;">:</td>
+                            <td style="padding:3px 0;">
+                                <t t-esc="o.tempat_lahir or ''"/>
+                                <t t-if="o.tempat_lahir and o.tanggal_lahir">, </t>
+                                <t t-if="o.tanggal_lahir">
+                                    <t t-esc="o.tanggal_lahir.strftime('%d-%m-%Y')"/>
+                                </t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align:top; padding:3px 0;">Alamat</td>
+                            <td style="vertical-align:top; padding:3px 0;">:</td>
+                            <td style="padding:3px 0;" t-esc="o.alamat or ''"/>
+                        </tr>
+                    </table>
+
+                    <!-- ── Body ────────────────────────────────────────── -->
+                    <p style="text-align:justify; margin-bottom:40px;">Dengan ini menyatakan bahwa saya bersedia &amp; setuju menjalani Rehabilitasi Di <t t-esc="o.tempat_rehab_id.name or '...'"/>. Dan saya bersedia mengikuti dan mentaati peraturan, regulasi, dan ketentuan yang ada di <t t-esc="o.tempat_rehab_id.name or '...'"/>. Demikian pernyataan ini saya buat dalam keadaan sadar dan tanpa paksaan dari pihak manapun, Terima kasih.</p>
+
+                    <!-- ── Tanda Tangan ─────────────────────────────────── -->
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr>
+                            <td style="width:55%;"/>
+                            <td style="text-align:center;">
+                                <p style="margin:0;">
+                                    Palembang,
+                                    <t t-esc="o.tanggal_jadwal.strftime('%d %B %Y') if o.tanggal_jadwal else '..................'"/>
+                                </p>
+                                <br/><br/><br/><br/>
+                                <p style="margin:0;">Nama</p>
+                                <br/><br/><br/>
+                                <p style="margin:0; letter-spacing:2px;">.....................................</p>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>
