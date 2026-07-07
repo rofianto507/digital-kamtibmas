@@ -8,32 +8,27 @@
         <field name="arch" type="xml">
             <form string="Profil Peserta Sertifikasi">
                 <sheet>
-                    <!-- Kontak terhubung -->
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <field name="partner_id"
-                               readonly="1"
-                               nolabel="1"
-                               style="flex:1"/>
-                        <button name="action_buka_partner"
-                                type="object"
-                                string="Lihat / Buat Kontak"
-                                class="btn btn-sm btn-secondary"/>
+                    <!-- Smart buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_riwayat" type="object"
+                                class="oe_stat_button" icon="fa-file-text"
+                                invisible="total_sertifikasi == 0">
+                            <field name="total_sertifikasi" widget="statinfo" string="Sertifikasi"/>
+                        </button>
+                        <button name="action_view_lulus" type="object"
+                                class="oe_stat_button" icon="fa-check-circle"
+                                invisible="total_lulus == 0">
+                            <field name="total_lulus" widget="statinfo" string="Lulus"/>
+                        </button>
+                        <button name="action_buka_partner" type="object"
+                                class="oe_stat_button" icon="fa-address-card">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Kontak</span>
+                            </div>
+                        </button>
                     </div>
 
-                    <!-- Stats badges -->
-                    <div class="d-flex gap-3 mb-3"
-                         invisible="total_sertifikasi == 0">
-                        <div class="badge bg-primary fs-6 px-3 py-2">
-                            <i class="fa fa-file-text me-1"/>
-                            Sertifikasi Diikuti:
-                            <field name="total_sertifikasi" readonly="1" nolabel="1"/>
-                        </div>
-                        <div class="badge bg-success fs-6 px-3 py-2">
-                            <i class="fa fa-check me-1"/>
-                            Lulus:
-                            <field name="total_lulus" readonly="1" nolabel="1"/>
-                        </div>
-                    </div>
+                    <field name="partner_id" invisible="1"/>
 
                     <group>
                         <group string="Identitas">
