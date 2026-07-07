@@ -13,7 +13,7 @@
                 <link rel="stylesheet" href="/digital_kamtibmas/static/src/css/sertifikasi_kiosk.css"/>
             </head>
             <body>
-                <div id="sertifikasi-kiosk-app"/>
+                <div id="sertifikasi-kiosk-app" t-att-data-logo="company_logo_url"/>
                 <script type="text/javascript" src="/web/static/lib/owl/owl.js"/>
                 <script type="text/javascript" src="/digital_kamtibmas/static/src/js/sertifikasi_kiosk.js"/>
             </body>

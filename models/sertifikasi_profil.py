@@ -53,6 +53,26 @@ class SertifikasiProfil(models.Model):
                 rec.partner_id = partner.id
         return records
 
+    def action_view_riwayat(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Riwayat Sertifikasi — ' + self.nama,
+            'res_model': 'digital_kamtibmas.sertifikasi.peserta',
+            'domain': [('profil_id', '=', self.id), ('state', '=', 'selesai')],
+            'view_mode': 'list,form',
+        }
+
+    def action_view_lulus(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Sertifikasi Lulus — ' + self.nama,
+            'res_model': 'digital_kamtibmas.sertifikasi.peserta',
+            'domain': [('profil_id', '=', self.id), ('state', '=', 'selesai'), ('lulus', '=', True)],
+            'view_mode': 'list,form',
+        }
+
     def action_buka_partner(self):
         self.ensure_one()
         if not self.partner_id:

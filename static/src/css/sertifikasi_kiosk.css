@@ -105,10 +105,30 @@ html, body {
 }
 .sk-btn:disabled { opacity: .45; cursor: not-allowed; }
 
+/* ── Animated gradient ──────────────────────────────────────────────────── */
+
+@keyframes sk-gradient-flow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 /* ── Idle screen ────────────────────────────────────────────────────────── */
 
 .sk-idle {
-    background: linear-gradient(160deg, #0D1F3C 0%, #1E3A5F 100%);
+    background: linear-gradient(
+        -45deg,
+        #06101F,
+        #0D1F3C,
+        #1E3A5F,
+        #0A2440,
+        #122E56,
+        #1A3A60,
+        #0D1F3C,
+        #06101F
+    );
+    background-size: 400% 400%;
+    animation: sk-gradient-flow 14s ease infinite;
     min-height: 100vh;
     text-align: center;
     padding: 32px 20px;
@@ -192,7 +212,19 @@ html, body {
 /* ── Error screen ───────────────────────────────────────────────────────── */
 
 .sk-error {
-    background: var(--navy);
+    background: linear-gradient(
+        -45deg,
+        #06101F,
+        #0D1F3C,
+        #1E3A5F,
+        #0A2440,
+        #122E56,
+        #1A3A60,
+        #0D1F3C,
+        #06101F
+    );
+    background-size: 400% 400%;
+    animation: sk-gradient-flow 14s ease infinite;
     text-align: center;
 }
 
@@ -467,7 +499,19 @@ html, body {
 /* ── Hasil screen ───────────────────────────────────────────────────────── */
 
 .sk-hasil-screen {
-    background: linear-gradient(160deg, #0D1F3C 0%, #1E3A5F 100%);
+    background: linear-gradient(
+        -45deg,
+        #06101F,
+        #0D1F3C,
+        #1E3A5F,
+        #0A2440,
+        #122E56,
+        #1A3A60,
+        #0D1F3C,
+        #06101F
+    );
+    background-size: 400% 400%;
+    animation: sk-gradient-flow 14s ease infinite;
     text-align: center;
     padding: 32px 20px;
 }

@@ -1,9 +1,15 @@
 import random
+from datetime import datetime, timedelta
 from odoo import http, fields
 from odoo.http import request
 import logging
 
 _logger = logging.getLogger(__name__)
+_WIB = timedelta(hours=7)
+
+
+def _today_wib():
+    return (datetime.utcnow() + _WIB).date()
 
 
 class SertifikasiPublicController(http.Controller):
@@ -12,7 +18,11 @@ class SertifikasiPublicController(http.Controller):
 
     @http.route('/sertifikasi/<string:token>', type='http', auth='public', csrf=False, website=False)
     def kiosk_index(self, token, **kwargs):
-        return request.render('digital_kamtibmas.sertifikasi_kiosk_template', {})
+        company = request.env['res.company'].sudo().search([], limit=1)
+        logo_url = f'/web/image/res.company/{company.id}/logo' if company else ''
+        return request.render('digital_kamtibmas.sertifikasi_kiosk_template', {
+            'company_logo_url': logo_url,
+        })
 
     # ── API: info sertifikasi ─────────────────────────────────────────────────
 
@@ -27,7 +37,7 @@ class SertifikasiPublicController(http.Controller):
         if not s:
             return {'error': 'Link ujian tidak ditemukan'}
 
-        today = fields.Date.today()
+        today = _today_wib()
         if s.state != 'aktif':
             return {'error': 'Ujian ini tidak aktif saat ini'}
         if s.tanggal_expired and today > s.tanggal_expired:
@@ -89,7 +99,7 @@ class SertifikasiPublicController(http.Controller):
         if not s:
             return {'error': 'Sertifikasi tidak valid atau tidak aktif'}
 
-        today = fields.Date.today()
+        today = _today_wib()
         if s.tanggal_expired and today > s.tanggal_expired:
             return {'error': 'Ujian sudah berakhir'}
 

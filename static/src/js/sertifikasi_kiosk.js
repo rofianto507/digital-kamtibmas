@@ -13,6 +13,10 @@
         return parts[parts.length - 1] || '';
     })();
 
+    // Logo company dibaca sebelum OWL mount (div sudah ada di DOM)
+    const LOGO_URL = (document.getElementById('sertifikasi-kiosk-app') || {}).dataset?.logo
+        || '/digital_kamtibmas/static/img/logo_polda.png';
+
     // ── RPC helper ────────────────────────────────────────────────────────────
 
     async function rpc(route, params) {
@@ -59,7 +63,7 @@
 
 <!-- ══════════════════ IDLE ═════════════════════════════════════════════════ -->
 <div t-elif="state.phase === 'idle'" class="sk-screen sk-idle">
-    <img class="sk-logo" src="/digital_kamtibmas/static/img/logo_polda.png" alt="Logo"/>
+    <img class="sk-logo" t-att-src="logoUrl" alt="Logo"/>
     <div class="sk-idle-badge">Sertifikasi Anti Narkoba</div>
     <div class="sk-idle-title" t-esc="state.info.name"/>
     <div class="sk-idle-org">Polrestabes Palembang</div>
@@ -332,6 +336,7 @@
         `;
 
         setup() {
+            this.logoUrl = LOGO_URL;
             this.state = useState({
                 phase: 'loading',
                 errorMsg: '',
