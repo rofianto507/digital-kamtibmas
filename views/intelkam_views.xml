@@ -210,7 +210,7 @@
         <field name="name">intelkam.distribusi.info.form</field>
         <field name="model">intelkam.distribusi.info</field>
         <field name="arch" type="xml">
-            <form string="Distribusi Informasi">
+            <form string="Sabuk Kamtibmas">
                 <header>
                     <button name="action_kirim" string="Kirim ke WhatsApp" type="object"
                             class="btn-primary"
@@ -282,7 +282,7 @@
         <field name="name">intelkam.distribusi.info.list</field>
         <field name="model">intelkam.distribusi.info</field>
         <field name="arch" type="xml">
-            <list string="Distribusi Informasi" decoration-muted="state == 'draft'"
+            <list string="Sabuk Kamtibmas" decoration-muted="state == 'draft'"
                   decoration-success="state == 'terkirim'" decoration-danger="state == 'gagal'">
                 <field name="code"/>
                 <field name="perihal"/>
@@ -299,7 +299,7 @@
         <field name="name">intelkam.distribusi.info.search</field>
         <field name="model">intelkam.distribusi.info</field>
         <field name="arch" type="xml">
-            <search string="Cari Distribusi Informasi">
+            <search string="Cari Sabuk Kamtibmas">
                 <field name="code" string="Nomor"/>
                 <field name="perihal" string="Perihal"/>
                 <field name="pengirim_id" string="Pengirim"/>
@@ -327,7 +327,7 @@
         <field name="name">intelkam.distribusi.info.calendar</field>
         <field name="model">intelkam.distribusi.info</field>
         <field name="arch" type="xml">
-            <calendar string="Kalender Distribusi" date_start="tanggal_kirim"
+            <calendar string="Kalender Sabuk Kamtibmas" date_start="tanggal_kirim"
                       color="state" mode="month" quick_create="False">
                 <field name="perihal"/>
                 <field name="pengirim_id"/>
