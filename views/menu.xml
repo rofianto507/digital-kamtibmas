@@ -5,7 +5,7 @@
         <!-- Root app -->
         <menuitem
             id="menu_dkm_root"
-            name="Digital Kamtibmas"
+            name="Polrestabes Palembang"
             web_icon="digital_kamtibmas,static/description/icon.png"
             sequence="2"/>
 
@@ -172,7 +172,7 @@
 
         <menuitem
             id="menu_dkm_intelkam_distribusi"
-            name="Distribusi Informasi"
+            name="Sabuk Kamtibmas"
             parent="menu_dkm_intelkam"
             action="action_intelkam_distribusi"
             groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
