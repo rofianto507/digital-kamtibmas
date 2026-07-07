@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_rehab_tempat_form" model="ir.ui.view">
+        <field name="name">dkm.rehab.tempat.form</field>
+        <field name="model">digital_kamtibmas.rehab.tempat</field>
+        <field name="arch" type="xml">
+            <form string="Tempat Rehabilitasi">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_buka_partner" type="object"
+                                class="oe_stat_button" icon="fa-address-card"
+                                invisible="not partner_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Kontak</span>
+                            </div>
+                        </button>
+                    </div>
+                    <field name="partner_id" invisible="1"/>
+
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nama tempat rehabilitasi..."/></h1>
+                    </div>
+
+                    <group>
+                        <field name="no_telp"/>
+                        <field name="active" widget="boolean_toggle"/>
+                    </group>
+                    <group string="Alamat">
+                        <field name="alamat" widget="text" rows="3"
+                               nolabel="1" colspan="2"
+                               placeholder="Alamat lengkap..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_rehab_tempat_list" model="ir.ui.view">
+        <field name="name">dkm.rehab.tempat.list</field>
+        <field name="model">digital_kamtibmas.rehab.tempat</field>
+        <field name="arch" type="xml">
+            <list string="Tempat Rehabilitasi">
+                <field name="name"/>
+                <field name="no_telp"/>
+                <field name="alamat"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Action ───────────────────────────────────────────────────────── -->
+    <record id="action_dkm_rehab_tempat" model="ir.actions.act_window">
+        <field name="name">Tempat Rehabilitasi</field>
+        <field name="res_model">digital_kamtibmas.rehab.tempat</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Belum ada tempat rehabilitasi.</p>
+            <p>Klik <strong>Baru</strong> untuk menambahkan tempat rehabilitasi.</p>
+        </field>
+    </record>
+
+</odoo>

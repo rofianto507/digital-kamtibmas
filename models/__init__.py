@@ -8,6 +8,7 @@ from . import loket
 from . import antrian
 from . import display_config
 from . import konseling
+from . import rehab_tempat
 from . import rehab
 from . import barang_bukti
 from . import patroli

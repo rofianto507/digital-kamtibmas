@@ -74,6 +74,7 @@
             groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
             sequence="2"/>
 
+
         <menuitem
             id="menu_dkm_sertifikasi_narkoba"
             name="Sertifikasi Narkoba"
@@ -273,6 +274,14 @@
             action="action_dkm_sertifikasi_soal"
             groups="digital_kamtibmas.group_dkm_admin"
             sequence="30"/>
+
+        <menuitem
+            id="menu_dkm_rehab_tempat"
+            name="Tempat Rehabilitasi"
+            parent="menu_dkm_configuration"
+            action="action_dkm_rehab_tempat"
+            groups="digital_kamtibmas.group_dkm_admin"
+            sequence="31"/>
 
     </data>
 </odoo>
