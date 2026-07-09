@@ -58,7 +58,7 @@
 <div t-if="state.phase === 'idle'" class="ok-idle" t-on-click="startFlow">
     <img class="ok-idle-logo" src="/digital_kamtibmas/static/img/logo_polda.png" alt="Logo"/>
     <div class="ok-idle-title">Buku Tamu Tahti</div>
-    <div class="ok-idle-org">Polrestabes Palembang</div>
+    <div class="ok-idle-org">AMPERA247</div>
     <div class="ok-idle-divider"/>
     <div class="ok-idle-clock" t-esc="state.clock"/>
     <div class="ok-idle-date"  t-esc="state.date"/>
