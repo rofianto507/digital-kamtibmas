@@ -268,6 +268,14 @@
             sequence="20"/>
 
         <menuitem
+            id="menu_dkm_config_tahanan_kategori"
+            name="Kategori Tahanan"
+            parent="menu_dkm_configuration"
+            action="action_dkm_tahanan_kategori"
+            groups="digital_kamtibmas.group_dkm_admin"
+            sequence="21"/>
+
+        <menuitem
             id="menu_dkm_config_sertifikasi_soal"
             name="Soal Sertifikasi"
             parent="menu_dkm_configuration"

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahanan_kategori_form" model="ir.ui.view">
+        <field name="name">dkm.tahanan.kategori.form</field>
+        <field name="model">digital_kamtibmas.tahanan.kategori</field>
+        <field name="arch" type="xml">
+            <form string="Kategori Tahanan">
+                <sheet>
+                    <widget name="web_ribbon" title="Arsip" bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nama Kategori"/></h1>
+                    </div>
+                    <group>
+                        <field name="active"/>
+                    </group>
+                    <group string="Keterangan">
+                        <field name="keterangan" widget="text" rows="3" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_tahanan_kategori_list" model="ir.ui.view">
+        <field name="name">dkm.tahanan.kategori.list</field>
+        <field name="model">digital_kamtibmas.tahanan.kategori</field>
+        <field name="arch" type="xml">
+            <list string="Kategori Tahanan" editable="bottom">
+                <field name="name"/>
+                <field name="keterangan"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_tahanan_kategori" model="ir.actions.act_window">
+        <field name="name">Kategori Tahanan</field>
+        <field name="res_model">digital_kamtibmas.tahanan.kategori</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Belum ada kategori tahanan.</p>
+            <p>Klik <strong>Baru</strong> untuk menambahkan kategori.</p>
+        </field>
+    </record>
+
+</odoo>

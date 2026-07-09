@@ -836,3 +836,175 @@ html, body {
     background: var(--o-border-lt);
     margin: 16px 0;
 }
+
+
+/* ════════════════════════════════════════════
+   CAMERA / FOTO KTP (Step 2)
+   ════════════════════════════════════════════ */
+
+.ok-camera-body {
+    padding: 0;
+    overflow: hidden;
+}
+
+.ok-camera-hint {
+    font-size: 13px;
+    color: var(--o-text-muted);
+    text-align: center;
+    padding: 12px 20px 8px;
+    line-height: 1.5;
+}
+
+.ok-camera-hint-success {
+    color: #28a745;
+    font-weight: 600;
+}
+
+/* ── Live camera viewport ─────────────────── */
+
+.ok-camera-wrap {
+    position: relative;
+    width: 100%;
+    background: #111;
+    overflow: hidden;
+    /* min-height ensures the frame overlay is visible
+       even before the video stream loads (video starts at 0×0) */
+    min-height: 280px;
+    max-height: 440px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ok-camera-video {
+    width: 100%;
+    display: block;
+    max-height: 440px;
+    object-fit: cover;
+    min-height: 280px;
+}
+
+/* Loading placeholder shown while camera stream is absent */
+.ok-camera-loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: rgba(255,255,255,.55);
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.ok-camera-loading-overlay .ok-spinner-cam {
+    width: 32px; height: 32px;
+    border: 3px solid rgba(255,255,255,.2);
+    border-top-color: rgba(255,255,255,.7);
+    border-radius: 50%;
+    animation: ok-spin .8s linear infinite;
+}
+
+/* ── KTP overlay frame ────────────────────── */
+
+.ok-ktp-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* no background here — punch-out is done with box-shadow on the frame */
+}
+
+/* KTP aspect ratio: 85.6 × 53.98 mm ≈ 1.586 : 1
+   We use padding-bottom percentage trick as fallback for older browsers
+   that don't support aspect-ratio in flex children reliably. */
+.ok-ktp-frame {
+    position: relative;
+    width: 72%;
+    /* height via aspect-ratio, explicit fallback via padding */
+    aspect-ratio: 1.586 / 1;
+    border: 2px dashed rgba(255, 255, 255, .75);
+    border-radius: 6px;
+    /* "punch-out" darkened surround — clipped by .ok-camera-wrap overflow:hidden */
+    box-shadow: 0 0 0 2000px rgba(0, 0, 0, .45);
+    /* ensure frame is above the loading overlay but below corner markers */
+    z-index: 2;
+}
+
+/* Fallback for browsers where aspect-ratio on a flex child gives zero height */
+@supports not (aspect-ratio: 1) {
+    .ok-ktp-frame {
+        height: 0;
+        padding-bottom: calc(72% / 1.586);
+    }
+}
+
+/* Corner accent markers */
+.ok-ktp-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-color: #fff;
+    border-style: solid;
+}
+.ok-ktp-tl { top: -2px;  left: -2px;  border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+.ok-ktp-tr { top: -2px;  right: -2px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+.ok-ktp-bl { bottom: -2px; left: -2px;  border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+.ok-ktp-br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+.ok-ktp-label {
+    position: absolute;
+    bottom: -30px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, .80);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* ── Preview after capture ────────────────── */
+
+.ok-ktp-preview-wrap {
+    padding: 16px 20px 12px;
+    background: var(--o-bg);
+    text-align: center;
+}
+
+.ok-ktp-preview-img {
+    max-width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--o-border);
+    box-shadow: var(--o-shadow-sm);
+}
+
+/* ── Camera error state ───────────────────── */
+
+.ok-camera-error {
+    text-align: center;
+    padding: 40px 24px 32px;
+    color: var(--o-text-muted);
+}
+
+.ok-camera-error-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    color: #e69900;
+}
+
+.ok-camera-error-msg {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--o-text);
+    margin-bottom: 8px;
+}
+
+.ok-camera-error-hint {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--o-text-muted);
+}
