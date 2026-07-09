@@ -66,7 +66,7 @@
     <img class="sk-logo" t-att-src="logoUrl" alt="Logo"/>
     <div class="sk-idle-badge">Sertifikasi Anti Narkoba</div>
     <div class="sk-idle-title" t-esc="state.info.name"/>
-    <div class="sk-idle-org">Polrestabes Palembang</div>
+    <div class="sk-idle-org">AMPERA247</div>
 
     <div class="sk-idle-meta">
         <div class="sk-idle-meta-item">
