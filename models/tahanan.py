@@ -21,6 +21,8 @@ class Tahanan(models.Model):
     alamat        = fields.Text('Alamat')
     foto          = fields.Image('Foto', max_width=512, max_height=512)
 
+    kategori_id   = fields.Many2one('digital_kamtibmas.tahanan.kategori', 'Kategori', ondelete='set null', tracking=True)
+
     # ── Perkara ───────────────────────────────────────────────────────────────
     nomor_perkara = fields.Char('No. Perkara', tracking=True)
     jenis_perkara = fields.Selection([

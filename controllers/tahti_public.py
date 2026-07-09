@@ -38,16 +38,15 @@ class TahtiKioskController(http.Controller):
             domain += [('nama', 'ilike', keyword)]
         records = request.env['digital_kamtibmas.tahanan'].sudo().search_read(
             domain,
-            ['id', 'nama', 'jenis_kelamin', 'jenis_perkara', 'sel_id'],
+            ['id', 'nama', 'jenis_kelamin', 'kategori_id', 'sel_id'],
             order='nama asc',
             limit=20,
         )
         for r in records:
-            if r.get('sel_id'):
-                r['sel_nama'] = r['sel_id'][1]
-            else:
-                r['sel_nama'] = '-'
+            r['sel_nama']     = r['sel_id'][1] if r.get('sel_id') else '-'
+            r['kategori_nama'] = r['kategori_id'][1] if r.get('kategori_id') else '—'
             r.pop('sel_id', None)
+            r.pop('kategori_id', None)
         return records
 
     # ── API: cari / cek tamu by NIK ───────────────────────────────────────────
@@ -92,16 +91,28 @@ class TahtiKioskController(http.Controller):
             if not nama:
                 return {'error': 'Nama tamu wajib diisi'}
 
+            # Foto KTP: data URL → base64 string untuk field Image
+            foto_ktp_b64 = None
+            foto_raw = (data.get('foto_ktp') or '').strip()
+            if foto_raw.startswith('data:'):
+                try:
+                    foto_ktp_b64 = foto_raw.split(',', 1)[1]
+                except IndexError:
+                    pass
+
             # Cari atau buat data tamu
             Tamu = request.env['digital_kamtibmas.tahti_tamu'].sudo()
             tamu = Tamu.search([('nik', '=', nik)], limit=1)
             if not tamu:
-                tamu = Tamu.create({
+                create_vals = {
                     'nik':    nik,
                     'nama':   nama,
                     'no_hp':  (data.get('no_hp') or '').strip(),
                     'alamat': (data.get('alamat') or '').strip(),
-                })
+                }
+                if foto_ktp_b64:
+                    create_vals['foto_ktp'] = foto_ktp_b64
+                tamu = Tamu.create(create_vals)
             else:
                 # Update data yang mungkin berubah
                 update_vals = {}
@@ -110,6 +121,8 @@ class TahtiKioskController(http.Controller):
                 no_hp = (data.get('no_hp') or '').strip()
                 if no_hp and no_hp != (tamu.no_hp or ''):
                     update_vals['no_hp'] = no_hp
+                if foto_ktp_b64:
+                    update_vals['foto_ktp'] = foto_ktp_b64
                 if update_vals:
                     tamu.write(update_vals)
 

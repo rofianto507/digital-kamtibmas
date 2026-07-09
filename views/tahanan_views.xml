@@ -32,6 +32,7 @@
 
                     <group>
                         <group string="Identitas">
+                            <field name="kategori_id"/>
                             <field name="nik"/>
                             <field name="jenis_kelamin" widget="radio" options="{'horizontal': true}"/>
                             <field name="tanggal_lahir"/>
@@ -71,6 +72,7 @@
                   decoration-muted="state == 'bebas'">
                 <field name="code" string="No."/>
                 <field name="nama"/>
+                <field name="kategori_id" optional="show"/>
                 <field name="nik" optional="hide"/>
                 <field name="jenis_kelamin"/>
                 <field name="jenis_perkara"/>
@@ -93,6 +95,7 @@
         <field name="arch" type="xml">
             <search string="Cari Tahanan">
                 <field name="nama"/>
+                <field name="kategori_id" string="Kategori"/>
                 <field name="nik" string="NIK"/>
                 <field name="nomor_perkara" string="No. Perkara"/>
                 <field name="sel_id"/>
@@ -104,10 +107,11 @@
                 <filter string="Laki-laki"  name="f_laki"     domain="[('jenis_kelamin','=','laki')]"/>
                 <filter string="Perempuan"  name="f_perempuan" domain="[('jenis_kelamin','=','perempuan')]"/>
                 <group>
-                    <filter string="Status"        name="grp_state"   context="{'group_by': 'state'}"/>
-                    <filter string="Jenis Perkara" name="grp_perkara" context="{'group_by': 'jenis_perkara'}"/>
-                    <filter string="Sel"           name="grp_sel"     context="{'group_by': 'sel_id'}"/>
-                    <filter string="Bulan Masuk"   name="grp_bulan"   context="{'group_by': 'tanggal_masuk:month'}"/>
+                    <filter string="Status"        name="grp_state"    context="{'group_by': 'state'}"/>
+                    <filter string="Kategori"      name="grp_kategori" context="{'group_by': 'kategori_id'}"/>
+                    <filter string="Jenis Perkara" name="grp_perkara"  context="{'group_by': 'jenis_perkara'}"/>
+                    <filter string="Sel"           name="grp_sel"      context="{'group_by': 'sel_id'}"/>
+                    <filter string="Bulan Masuk"   name="grp_bulan"    context="{'group_by': 'tanggal_masuk:month'}"/>
                 </group>
             </search>
         </field>

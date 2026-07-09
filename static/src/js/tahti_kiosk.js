@@ -4,7 +4,7 @@
 (function () {
     'use strict';
 
-    const { Component, useState, mount, xml, onMounted, onWillUnmount } = owl;
+    const { Component, useState, mount, xml, onMounted, onWillUnmount, useRef, onPatched } = owl;
 
     // ── RPC helper ────────────────────────────────────────────────────────────
 
@@ -86,7 +86,7 @@
 <!-- ══════════════════ WIZARD ════════════════════════════════════════════════ -->
 <div t-elif="true" class="ok-screen">
 
-    <!-- Nav bar — Odoo breadcrumb/step style -->
+    <!-- Nav bar -->
     <div class="ok-nav">
         <div class="ok-nav-brand">
             <img class="ok-nav-logo"
@@ -98,24 +98,33 @@
             <!-- Step 1 -->
             <div t-att-class="'ok-step ' + stepClass(1)">
                 <div class="ok-step-num">
-                    <span t-if="state.phase === 'data_tamu' or state.phase === 'konfirmasi'">&#10003;</span>
+                    <span t-if="stepClass(1) === 'is-done'">&#10003;</span>
                     <span t-else="">1</span>
                 </div>
                 <span class="ok-step-label">Pilih Tahanan</span>
             </div>
             <span class="ok-step-arrow">&#8250;</span>
-            <!-- Step 2 -->
+            <!-- Step 2: Foto KTP -->
             <div t-att-class="'ok-step ' + stepClass(2)">
                 <div class="ok-step-num">
-                    <span t-if="state.phase === 'konfirmasi'">&#10003;</span>
+                    <span t-if="stepClass(2) === 'is-done'">&#10003;</span>
                     <span t-else="">2</span>
+                </div>
+                <span class="ok-step-label">Foto KTP</span>
+            </div>
+            <span class="ok-step-arrow">&#8250;</span>
+            <!-- Step 3: Data Pengunjung -->
+            <div t-att-class="'ok-step ' + stepClass(3)">
+                <div class="ok-step-num">
+                    <span t-if="stepClass(3) === 'is-done'">&#10003;</span>
+                    <span t-else="">3</span>
                 </div>
                 <span class="ok-step-label">Data Pengunjung</span>
             </div>
             <span class="ok-step-arrow">&#8250;</span>
-            <!-- Step 3 -->
-            <div t-att-class="'ok-step ' + stepClass(3)">
-                <div class="ok-step-num">3</div>
+            <!-- Step 4: Konfirmasi -->
+            <div t-att-class="'ok-step ' + stepClass(4)">
+                <div class="ok-step-num">4</div>
                 <span class="ok-step-label">Konfirmasi</span>
             </div>
         </div>
@@ -168,7 +177,7 @@
                                 </div>
                                 <div class="ok-list-body">
                                     <div class="ok-list-name" t-esc="t.nama"/>
-                                    <div class="ok-list-meta" t-esc="t.jenis_perkara || '—'"/>
+                                    <div class="ok-list-meta" t-esc="t.kategori_nama || '—'"/>
                                 </div>
                                 <span class="ok-badge" t-esc="t.sel_nama"/>
                                 <span class="ok-list-arrow">&#8250;</span>
@@ -186,7 +195,108 @@
         </div>
     </t>
 
-    <!-- ── Step 2: Data Tamu ─────────────────────────────────────────── -->
+    <!-- ── Step 2: Foto KTP ──────────────────────────────────────────── -->
+    <t t-if="state.phase === 'foto_ktp'">
+        <div class="ok-body">
+            <div class="ok-card">
+                <div class="ok-card-head">
+                    <div class="ok-card-head-icon">&#128247;</div>
+                    <div class="ok-card-head-title">Foto KTP Pengunjung</div>
+                </div>
+                <div class="ok-card-body ok-camera-body">
+                    <t t-if="!state.fotoKtp">
+                        <!-- Error kamera -->
+                        <t t-if="state.cameraError">
+                            <div class="ok-camera-error">
+                                <div class="ok-camera-error-icon">&#9888;</div>
+                                <div class="ok-camera-error-msg" t-esc="state.cameraError"/>
+                                <div class="ok-camera-error-hint">
+                                    Pastikan izin kamera diaktifkan di browser,<br/>
+                                    atau tekan <b>Lewati</b> untuk melanjutkan tanpa foto.
+                                </div>
+                            </div>
+                        </t>
+                        <!-- Live camera -->
+                        <t t-else="">
+                            <div class="ok-camera-hint">
+                                <t t-if="state.cameraLoading">
+                                    Menghubungkan ke kamera...
+                                </t>
+                                <t t-else="">
+                                    &#128247; Posisikan KTP dalam bingkai lalu tekan <b>Ambil Foto</b>
+                                </t>
+                            </div>
+                            <div class="ok-camera-wrap">
+                                <video t-ref="ktpVideo" class="ok-camera-video"
+                                       autoplay="true" playsinline="true" muted="true"/>
+                                <!-- Loading overlay: visible while camera stream not yet ready -->
+                                <t t-if="state.cameraLoading">
+                                    <div class="ok-camera-loading-overlay">
+                                        <div class="ok-spinner-cam"/>
+                                        <span>Memuat kamera...</span>
+                                    </div>
+                                </t>
+                                <div class="ok-ktp-overlay">
+                                    <div class="ok-ktp-frame" t-ref="ktpFrame">
+                                        <div class="ok-ktp-corner ok-ktp-tl"/>
+                                        <div class="ok-ktp-corner ok-ktp-tr"/>
+                                        <div class="ok-ktp-corner ok-ktp-bl"/>
+                                        <div class="ok-ktp-corner ok-ktp-br"/>
+                                        <div class="ok-ktp-label">KTP / Identitas</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                    <!-- Preview setelah capture -->
+                    <t t-else="">
+                        <div class="ok-camera-hint ok-camera-hint-success">
+                            &#10003; Foto berhasil diambil — periksa keterbacaannya
+                        </div>
+                        <div class="ok-ktp-preview-wrap">
+                            <img t-att-src="state.fotoKtp" class="ok-ktp-preview-img"/>
+                        </div>
+                    </t>
+                    <canvas t-ref="ktpCanvas" style="display:none"/>
+                </div>
+            </div>
+        </div>
+        <div class="ok-footer">
+            <div class="ok-footer-left">
+                <button class="ok-btn ok-btn-light" t-on-click="backToStep1Ktp">
+                    &#8592; Kembali
+                </button>
+            </div>
+            <div class="ok-footer-right">
+                <t t-if="!state.fotoKtp">
+                    <button class="ok-btn ok-btn-light" t-on-click="skipFotoKtp">
+                        Lewati
+                    </button>
+                    <button class="ok-btn ok-btn-primary"
+                            t-att-disabled="!!state.cameraError || state.cameraLoading"
+                            t-on-click="captureKtp">
+                        <t t-if="state.cameraLoading">
+                            <div class="ok-spinner-sm"/>
+                            Memuat kamera...
+                        </t>
+                        <t t-else="">
+                            &#128247; Ambil Foto
+                        </t>
+                    </button>
+                </t>
+                <t t-else="">
+                    <button class="ok-btn ok-btn-light" t-on-click="retakeFoto">
+                        &#128247; Foto Ulang
+                    </button>
+                    <button class="ok-btn ok-btn-primary ok-btn-lg" t-on-click="goDataTamu">
+                        Gunakan Foto &#160;&#8250;
+                    </button>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <!-- ── Step 3: Data Tamu ─────────────────────────────────────────── -->
     <t t-if="state.phase === 'data_tamu'">
         <div class="ok-body">
 
@@ -297,7 +407,7 @@
         </div>
         <div class="ok-footer">
             <div class="ok-footer-left">
-                <button class="ok-btn ok-btn-light" t-on-click="backToStep1">
+                <button class="ok-btn ok-btn-light" t-on-click="backToFotoKtp">
                     &#8592; Kembali
                 </button>
             </div>
@@ -309,7 +419,7 @@
         </div>
     </t>
 
-    <!-- ── Step 3: Konfirmasi ─────────────────────────────────────────── -->
+    <!-- ── Step 4: Konfirmasi ─────────────────────────────────────────── -->
     <t t-if="state.phase === 'konfirmasi'">
         <div class="ok-body">
             <div class="ok-card">
@@ -348,6 +458,13 @@
                             <div class="ok-summary-lbl">Keperluan</div>
                             <div class="ok-summary-val" t-esc="state.keperluan"/>
                         </div>
+                        <div class="ok-summary-row">
+                            <div class="ok-summary-lbl">Foto KTP</div>
+                            <div class="ok-summary-val">
+                                <span t-if="state.fotoKtp" style="color:#28a745">&#10003; Tersedia</span>
+                                <span t-else="" style="color:#aaa">Tidak ada</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -362,7 +479,7 @@
             <div class="ok-footer-left">
                 <button class="ok-btn ok-btn-light"
                         t-att-disabled="state.submitting"
-                        t-on-click="backToStep2">
+                        t-on-click="backToDataTamu">
                     &#8592; Ubah Data
                 </button>
             </div>
@@ -389,6 +506,12 @@
 
         setup() {
             this.hubunganOpts = HUBUNGAN;
+
+            this.videoRef  = useRef('ktpVideo');
+            this.canvasRef = useRef('ktpCanvas');
+            this.frameRef  = useRef('ktpFrame');
+            this._stream   = null;
+
             this.state = useState({
                 phase: 'idle',
                 clock: fmtClock(new Date()),
@@ -398,7 +521,11 @@
                 tahananList:     [],
                 loadingTahanan:  false,
                 selectedTahanan: null,
-                // step 2
+                // step 2 camera
+                fotoKtp:       null,
+                cameraError:   '',
+                cameraLoading: false,
+                // step 3
                 nik:       '',
                 nikStatus: null,
                 nikData:   null,
@@ -407,7 +534,7 @@
                 hubungan:  'keluarga',
                 keperluan: '',
                 errors:    {},
-                // step 3
+                // step 4
                 submitting:  false,
                 submitError: '',
                 // success
@@ -430,12 +557,140 @@
                 }, 1000);
             });
 
+            onPatched(() => {
+                if (
+                    this.state.phase === 'foto_ktp' &&
+                    !this._stream &&
+                    !this.state.fotoKtp &&
+                    !this.state.cameraError &&
+                    !this.state.cameraLoading
+                ) {
+                    this._startCamera();
+                }
+            });
+
             onWillUnmount(() => {
                 clearInterval(this._clockTimer);
                 clearInterval(this._countdownTimer);
                 clearTimeout(this._nikTimer);
                 clearTimeout(this._searchTimer);
+                this._stopCamera();
             });
+        }
+
+        // ── Camera ────────────────────────────────────────────────────────────
+
+        async _startCamera() {
+            this.state.cameraLoading = true;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: 'environment' },
+                        width:  { ideal: 1280 },
+                        height: { ideal: 720 },
+                    },
+                });
+                this._stream = stream;
+                this.state.cameraLoading = false;
+                const video = this.videoRef.el;
+                if (video) {
+                    video.srcObject = stream;
+                    video.play().catch(() => {});
+                }
+            } catch (e) {
+                this._stream = null;
+                this.state.cameraLoading = false;
+                let msg = 'Kamera tidak dapat diakses.';
+                if (e.name === 'NotAllowedError')  msg = 'Akses kamera ditolak. Izinkan akses kamera di browser.';
+                if (e.name === 'NotFoundError')    msg = 'Kamera tidak ditemukan pada perangkat ini.';
+                if (e.name === 'NotReadableError') msg = 'Kamera sedang digunakan oleh aplikasi lain.';
+                this.state.cameraError = msg;
+            }
+        }
+
+        _stopCamera() {
+            if (this._stream) {
+                this._stream.getTracks().forEach(t => t.stop());
+                this._stream = null;
+            }
+        }
+
+        captureKtp() {
+            const video  = this.videoRef.el;
+            const canvas = this.canvasRef.el;
+            const frame  = this.frameRef.el;
+            if (!video || !canvas || !frame || !video.videoWidth) return;
+
+            const vw = video.videoWidth;
+            const vh = video.videoHeight;
+            const videoRect = video.getBoundingClientRect();
+            const frameRect = frame.getBoundingClientRect();
+
+            // Hitung rendering object-fit: cover
+            // (salah satu sisi dikrop agar video mengisi elemen)
+            const videoAspect   = vw / vh;
+            const elementAspect = videoRect.width / videoRect.height;
+
+            let scale, offsetX, offsetY;
+            if (videoAspect > elementAspect) {
+                // Video lebih lebar → tinggi pas, kiri-kanan terpotong
+                scale   = videoRect.height / vh;
+                offsetX = (vw * scale - videoRect.width) / 2;
+                offsetY = 0;
+            } else {
+                // Video lebih tinggi → lebar pas, atas-bawah terpotong
+                scale   = videoRect.width / vw;
+                offsetX = 0;
+                offsetY = (vh * scale - videoRect.height) / 2;
+            }
+
+            // Posisi frame relatif terhadap sudut kiri-atas video element (CSS px)
+            const relLeft = frameRect.left - videoRect.left;
+            const relTop  = frameRect.top  - videoRect.top;
+
+            // Konversi ke koordinat pixel source video
+            const sx = (relLeft + offsetX) / scale;
+            const sy = (relTop  + offsetY) / scale;
+            const sw = frameRect.width  / scale;
+            const sh = frameRect.height / scale;
+
+            // Gambar hanya area frame ke canvas (resolusi asli crop area)
+            canvas.width  = Math.round(sw);
+            canvas.height = Math.round(sh);
+            canvas.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+
+            this.state.fotoKtp = canvas.toDataURL('image/jpeg', 0.90);
+            this._stopCamera();
+        }
+
+        retakeFoto() {
+            this.state.fotoKtp     = null;
+            this.state.cameraError = '';
+            // onPatched will restart camera automatically
+        }
+
+        skipFotoKtp() {
+            this._stopCamera();
+            this.state.fotoKtp = null;
+            this.state.phase   = 'data_tamu';
+        }
+
+        goDataTamu() {
+            this._stopCamera();
+            this.state.phase = 'data_tamu';
+        }
+
+        backToStep1Ktp() {
+            this._stopCamera();
+            this.state.fotoKtp     = null;
+            this.state.cameraError = '';
+            this.state.phase       = 'cari_tahanan';
+        }
+
+        backToFotoKtp() {
+            this.state.cameraError = '';
+            this.state.phase       = 'foto_ktp';
+            // onPatched will start camera if fotoKtp is null
         }
 
         // ── Navigation ────────────────────────────────────────────────────────
@@ -450,16 +705,17 @@
             clearInterval(this._countdownTimer);
             clearTimeout(this._nikTimer);
             clearTimeout(this._searchTimer);
+            this._stopCamera();
             this._resetData();
             this.state.phase = 'idle';
         }
 
-        backToStep1() { this.state.phase = 'cari_tahanan'; }
-        backToStep2() { this.state.submitError = ''; this.state.phase = 'data_tamu'; }
+        backToDataTamu() { this.state.submitError = ''; this.state.phase = 'data_tamu'; }
 
         _resetData() {
             Object.assign(this.state, {
                 searchKw: '', tahananList: [], loadingTahanan: false, selectedTahanan: null,
+                fotoKtp: null, cameraError: '', cameraLoading: false,
                 nik: '', nikStatus: null, nikData: null,
                 nama: '', no_hp: '', hubungan: 'keluarga', keperluan: '',
                 errors: {}, submitting: false, submitError: '',
@@ -490,13 +746,14 @@
         selectTahanan(t) {
             this.state.selectedTahanan = { ...t };
             Object.assign(this.state, {
+                fotoKtp: null, cameraError: '', cameraLoading: false,
                 nik: '', nikStatus: null, nikData: null,
                 nama: '', no_hp: '', errors: {},
             });
-            this.state.phase = 'data_tamu';
+            this.state.phase = 'foto_ktp';
         }
 
-        // ── Step 2 ────────────────────────────────────────────────────────────
+        // ── Step 3 ────────────────────────────────────────────────────────────
 
         onNikInput(ev) {
             this.state.nik       = ev.target.value;
@@ -527,16 +784,16 @@
             }
         }
 
-        onNamaInput(ev)  { this.state.nama      = ev.target.value; }
-        onHpInput(ev)    { this.state.no_hp     = ev.target.value; }
-        onKepInput(ev)   { this.state.keperluan  = ev.target.value; }
-        setHubungan(val) { this.state.hubungan   = val; }
+        onNamaInput(ev)  { this.state.nama     = ev.target.value; }
+        onHpInput(ev)    { this.state.no_hp    = ev.target.value; }
+        onKepInput(ev)   { this.state.keperluan = ev.target.value; }
+        setHubungan(val) { this.state.hubungan  = val; }
 
         goKonfirmasi() {
             const errs = {};
             const nik = this.state.nik.trim();
-            if (!nik)               errs.nik  = 'NIK wajib diisi';
-            else if (nik.length !== 16) errs.nik = 'NIK harus 16 digit';
+            if (!nik)                   errs.nik  = 'NIK wajib diisi';
+            else if (nik.length !== 16) errs.nik  = 'NIK harus 16 digit';
             if (!this.state.nama.trim()) errs.nama = 'Nama wajib diisi';
             this.state.errors = errs;
             if (Object.keys(errs).length > 0) return;
@@ -544,7 +801,7 @@
             this.state.phase = 'konfirmasi';
         }
 
-        // ── Step 3 ────────────────────────────────────────────────────────────
+        // ── Step 4 ────────────────────────────────────────────────────────────
 
         async submitKunjungan() {
             if (this.state.submitting) return;
@@ -559,6 +816,7 @@
                         no_hp:      this.state.no_hp.trim(),
                         hubungan:   this.state.hubungan,
                         keperluan:  this.state.keperluan.trim(),
+                        foto_ktp:   this.state.fotoKtp || '',
                     },
                 });
                 if (!res || res.error) {
@@ -597,9 +855,9 @@
         }
 
         stepClass(n) {
-            const map = { cari_tahanan: 1, data_tamu: 2, konfirmasi: 3 };
+            const map = { cari_tahanan: 1, foto_ktp: 2, data_tamu: 3, konfirmasi: 4 };
             const cur = map[this.state.phase] || 1;
-            if (n < cur)  return 'is-done';
+            if (n < cur)   return 'is-done';
             if (n === cur) return 'is-active';
             return '';
         }

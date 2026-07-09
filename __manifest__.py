@@ -29,6 +29,7 @@
         'views/barang_bukti_views.xml',
         'views/patroli_views.xml',
         'views/tahti_sel_views.xml',
+        'views/tahanan_kategori_views.xml',
         'views/tahanan_views.xml',
         'views/tahti_tamu_views.xml',
         'views/tahti_kunjungan_views.xml',
