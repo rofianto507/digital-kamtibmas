@@ -43,7 +43,7 @@ class DkmDashboard extends Component {
                 lakaTotal: 0, lakaBaru: 0, lakaDisproses: 0, lakaSelesai: 0,
             },
             trendData:     [],
-            layanData:     [],
+            lakaByYangTerlibat: [],
             calendarData:  [],
             activeAntrian: [],
             lakaPending:   [],
@@ -327,7 +327,7 @@ class DkmDashboard extends Component {
             this.orm.searchRead(
                 'digital_kamtibmas.eform_laka',
                 [['state', 'in', ['BARU', 'DIPROSES']]],
-                ['code', 'kejadian', 'tanggal_kejadian', 'state'],
+                ['code', 'user_id', 'jumlah_luka_luka', 'jumlah_meninggal', 'tanggal_kejadian', 'state'],
                 { order: 'tanggal_kejadian desc', limit: 10 }
             ),
 
@@ -339,11 +339,11 @@ class DkmDashboard extends Component {
                 { limit: 5000 }
             ),
 
-            // ── Antrian per jenis layanan (bulan ini) ─────────────────
+            // ── Laka per Yang Terlibat (semua waktu) ──────────────────
             this.orm.searchRead(
-                'digital_kamtibmas.antrian',
-                [['tanggal_booking', '>=', monthStartStr], ['state', '!=', 'batal']],
-                ['layanan_id'],
+                'digital_kamtibmas.eform_laka',
+                [],
+                ['yang_terlibat_id'],
                 { limit: 5000 }
             ),
 
@@ -351,7 +351,7 @@ class DkmDashboard extends Component {
             this.orm.searchRead(
                 'digital_kamtibmas.eform_laka',
                 [['lat', '!=', 0], ['lng', '!=', 0]],
-                ['id', 'code', 'kejadian', 'tanggal_kejadian', 'state', 'lat', 'lng'],
+                ['id', 'code', 'jumlah_luka_luka', 'jumlah_meninggal', 'keterangan', 'tanggal_kejadian', 'state', 'lat', 'lng'],
                 { limit: 500 }
             ),
 
@@ -372,7 +372,7 @@ class DkmDashboard extends Component {
         this.state.activeAntrian = activeAntrian;
         this.state.lakaPending   = lakaPending;
         this.state.trendData     = this._buildTrendLaka(trendRaw);
-        this.state.layanData     = this._buildLayanan(layanRaw);
+        this.state.lakaByYangTerlibat = this._buildYangTerlibat(layanRaw);
         this.state.calendarData  = this._buildCalendarData(calendarRaw);
         this.state.calendarYear  = now.getFullYear();
         this.state.lakaPoints    = lakaPoints;
@@ -414,10 +414,10 @@ class DkmDashboard extends Component {
         return Object.entries(map).map(([date, count]) => [date, count]);
     }
 
-    _buildLayanan(records) {
+    _buildYangTerlibat(records) {
         const map = {};
         for (const r of records) {
-            const name = r.layanan_id ? r.layanan_id[1] : 'Lainnya';
+            const name = r.yang_terlibat_id ? r.yang_terlibat_id[1] : 'Tidak Diketahui';
             map[name]  = (map[name] || 0) + 1;
         }
         return Object.entries(map)
@@ -543,20 +543,20 @@ class DkmDashboard extends Component {
         if (this._statusChart) this._statusChart.dispose();
         this._statusChart = echarts.init(el);
 
-        const data = this.state.layanData;
+        const data = this.state.lakaByYangTerlibat;
         if (!data.length) {
             this._statusChart.setOption({
                 graphic: [{
                     type: 'text', left: 'center', top: 'middle',
-                    style: { text: 'Belum ada antrian bulan ini', fill: '#9ca3af', fontSize: 13 },
+                    style: { text: 'Belum ada data laka', fill: '#9ca3af', fontSize: 13 },
                 }],
             });
             return;
         }
 
-        const COLORS = ['#71639e', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+        const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#71639e'];
         this._statusChart.setOption({
-            tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+            tooltip: { trigger: 'item', formatter: '{b}: {c} kejadian ({d}%)' },
             legend: { bottom: 4, textStyle: { fontSize: 11, color: '#6b7280' } },
             series: [{
                 type: 'pie', radius: ['40%', '66%'], center: ['50%', '44%'],
@@ -792,8 +792,12 @@ class DkmDashboard extends Component {
     </div>
     <div class="dkm-laka-popup-body">
         <div class="dkm-laka-popup-row">
-            <span class="dkm-laka-popup-lbl">Kejadian</span>
-            <span class="dkm-laka-popup-val">${p.kejadian || '-'}</span>
+            <span class="dkm-laka-popup-lbl">Korban</span>
+            <span class="dkm-laka-popup-val">${p.jumlah_luka_luka || 0} luka-luka, ${p.jumlah_meninggal || 0} meninggal</span>
+        </div>
+        <div class="dkm-laka-popup-row">
+            <span class="dkm-laka-popup-lbl">Keterangan</span>
+            <span class="dkm-laka-popup-val">${p.keterangan || '-'}</span>
         </div>
         <div class="dkm-laka-popup-row">
             <span class="dkm-laka-popup-lbl">Tanggal</span>

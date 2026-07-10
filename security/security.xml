@@ -28,4 +28,37 @@
         </record>
 
     </data>
+
+    <!-- Record rules — noupdate="0" agar diperbarui saat upgrade modul -->
+    <data>
+
+        <!-- User biasa: hanya lihat/edit record milik sendiri -->
+        <record id="rule_eform_laka_own_user" model="ir.rule">
+            <field name="name">e-Form Laka: user hanya melihat record sendiri</field>
+            <field name="model_id" ref="model_digital_kamtibmas_eform_laka"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Admin: lihat semua record (override rule user) -->
+        <record id="rule_eform_laka_all_admin" model="ir.rule">
+            <field name="name">e-Form Laka: admin melihat semua record</field>
+            <field name="model_id" ref="model_digital_kamtibmas_eform_laka"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_admin'))]"/>
+        </record>
+
+        <!-- Operator: lihat semua record (override rule user) -->
+        <record id="rule_eform_laka_all_operator" model="ir.rule">
+            <field name="name">e-Form Laka: operator melihat semua record</field>
+            <field name="model_id" ref="model_digital_kamtibmas_eform_laka"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_operator'))]"/>
+        </record>
+
+    </data>
 </odoo>

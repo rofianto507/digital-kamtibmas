@@ -1,4 +1,5 @@
 from . import eform_laka
+from . import yang_terlibat
 from . import kabupaten
 from . import kecamatan
 from . import desa
