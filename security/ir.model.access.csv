@@ -1,6 +1,10 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_eform_laka_admin,eform_laka admin,model_digital_kamtibmas_eform_laka,digital_kamtibmas.group_dkm_admin,1,1,1,1
 access_eform_laka_operator,eform_laka operator,model_digital_kamtibmas_eform_laka,digital_kamtibmas.group_dkm_operator,1,1,1,0
+access_eform_laka_user,eform_laka user,model_digital_kamtibmas_eform_laka,base.group_user,1,1,1,0
+access_yang_terlibat_admin,yang_terlibat admin,model_digital_kamtibmas_yang_terlibat,digital_kamtibmas.group_dkm_admin,1,1,1,1
+access_yang_terlibat_operator,yang_terlibat operator,model_digital_kamtibmas_yang_terlibat,digital_kamtibmas.group_dkm_operator,1,1,1,0
+access_yang_terlibat_user,yang_terlibat user,model_digital_kamtibmas_yang_terlibat,base.group_user,1,1,1,0
 access_kabupaten_admin,kabupaten admin,model_digital_kamtibmas_kabupaten,digital_kamtibmas.group_dkm_admin,1,1,1,1
 access_kabupaten_operator,kabupaten operator,model_digital_kamtibmas_kabupaten,digital_kamtibmas.group_dkm_operator,1,0,0,0
 access_kecamatan_admin,kecamatan admin,model_digital_kamtibmas_kecamatan,digital_kamtibmas.group_dkm_admin,1,1,1,1

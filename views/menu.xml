@@ -35,6 +35,14 @@
             sequence="1"/>
 
         <menuitem
+            id="menu_dkm_yang_terlibat"
+            name="Yang Terlibat Laka"
+            parent="menu_dkm_satlantas"
+            action="action_dkm_yang_terlibat"
+            groups="digital_kamtibmas.group_dkm_admin"
+            sequence="2"/>
+
+        <menuitem
             id="menu_dkm_antrian"
             name="Antrian"
             parent="menu_dkm_satlantas"

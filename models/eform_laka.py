@@ -9,12 +9,24 @@ class EformLaka(models.Model):
     _rec_name = 'code'
 
     code = fields.Char('Kode', readonly=True, copy=False, default='New')
-    kejadian = fields.Char('Kejadian', required=True, tracking=True)
-    keterangan = fields.Text('Keterangan')
+    user_id = fields.Many2one(
+        'res.users', string='Pelapor',
+        required=True, default=lambda self: self.env.user,
+        tracking=True,
+    )
     tanggal_kejadian = fields.Datetime(
         'Tanggal Kejadian', required=True,
         default=fields.Datetime.now, tracking=True,
     )
+    yang_terlibat_id = fields.Many2one(
+        'digital_kamtibmas.yang_terlibat',
+        string='Yang Terlibat',
+        tracking=True,
+    )
+    jumlah_luka_luka = fields.Integer('Jumlah Luka-luka', default=0)
+    jumlah_meninggal = fields.Integer('Jumlah Meninggal', default=0)
+    rumah_sakit = fields.Char('Rumah Sakit Tujuan')
+    keterangan = fields.Text('Keterangan')
     lat = fields.Float('Latitude', digits=(10, 6))
     lng = fields.Float('Longitude', digits=(10, 6))
     foto = fields.Binary('Foto', attachment=True)

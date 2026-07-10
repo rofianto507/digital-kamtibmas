@@ -238,8 +238,8 @@
 
                     <div class="dkm-chart-card">
                         <div class="dkm-chart-header">
-                            <span class="dkm-chart-title">Antrian per Jenis Layanan</span>
-                            <span class="dkm-chart-sub">Bulan Ini</span>
+                            <span class="dkm-chart-title">Laka per Yang Terlibat</span>
+                            <span class="dkm-chart-sub">Semua Waktu</span>
                         </div>
                         <div t-ref="statusChart" class="dkm-echarts"/>
                     </div>
@@ -297,14 +297,15 @@
                         <table t-if="state.lakaPending.length > 0" class="dkm-table">
                             <thead>
                                 <tr>
-                                    <th>Kode</th><th>Kejadian</th><th>Tanggal</th><th>Status</th>
+                                    <th>Kode</th><th>Pelapor</th><th>Luka / Meninggal</th><th>Tanggal</th><th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <t t-foreach="state.lakaPending" t-as="r" t-key="r.id">
                                     <tr class="dkm-tr" t-on-click="() => this.openLakaRecord(r.id)">
                                         <td class="dkm-code" t-esc="r.code"/>
-                                        <td t-esc="r.kejadian"/>
+                                        <td t-esc="r.user_id &amp;&amp; r.user_id[1] || '-'"/>
+                                        <td t-esc="(r.jumlah_luka_luka || 0) + ' / ' + (r.jumlah_meninggal || 0)"/>
                                         <td t-esc="fmtTgl(r.tanggal_kejadian)"/>
                                         <td>
                                             <span t-attf-class="dkm-badge dkm-badge--laka-#{r.state.toLowerCase()}"
