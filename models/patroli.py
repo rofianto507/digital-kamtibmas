@@ -18,6 +18,9 @@ class Patroli(models.Model):
         ('selesai',  'Selesai'),
     ], string='Status', default='menunggu', required=True, tracking=True)
 
+    grup_id      = fields.Many2one('digital_kamtibmas.patroli_grup', 'Grup Patroli',
+                                   ondelete='set null', tracking=True)
+
     kecamatan_id = fields.Many2one('digital_kamtibmas.kecamatan', 'Kecamatan',
                                    ondelete='set null', tracking=True)
     desa_id      = fields.Many2one('digital_kamtibmas.desa', 'Desa/Kelurahan',

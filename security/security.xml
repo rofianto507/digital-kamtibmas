@@ -35,15 +35,21 @@
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
 
+        <!-- Patroli: akses khusus fitur patroli lapangan (app mobile patroli) -->
+        <record id="group_dkm_patroli" model="res.groups">
+            <field name="name">Patroli</field>
+            <field name="privilege_id" ref="privilege_dkm_access"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
     </data>
 
     <!-- Menu overrides + Record rules — noupdate="0" agar diperbarui saat upgrade -->
     <data>
 
         <!--
-            Sembunyikan Calendar dan Contacts dari group_masyarakat.
-            (6, 0, [...]) mengganti seluruh group_ids, menghapus base.group_user lama.
-            Admin/Operator/System tetap bisa akses.
+            Sembunyikan Calendar, Contacts, HR, Spreadsheet dari masyarakat & patroli.
+            (6, 0, [...]) mengganti seluruh group_ids — Admin/Operator/System tetap bisa akses.
         -->
         <record id="calendar.mail_menu_calendar" model="ir.ui.menu">
             <field name="group_ids" eval="[
@@ -85,7 +91,7 @@
             ]"/>
         </record>
 
-        <!-- Discuss: sembunyikan sub-menu Channels dan Configuration dari masyarakat -->
+        <!-- Discuss: sembunyikan sub-menu Channels dan Configuration dari masyarakat & patroli -->
         <record id="mail.menu_channel" model="ir.ui.menu">
             <field name="group_ids" eval="[
                 (6, 0, [
@@ -104,6 +110,18 @@
                     ref('digital_kamtibmas.group_dkm_operator'),
                 ])
             ]"/>
+        </record>
+
+        <!-- Record rule: group_dkm_patroli hanya lihat patroli milik grupnya sendiri -->
+        <record id="rule_patroli_own_grup" model="ir.rule">
+            <field name="name">Patroli: user patroli hanya lihat record grupnya</field>
+            <field name="model_id" ref="model_digital_kamtibmas_patroli"/>
+            <field name="domain_force">[('grup_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_patroli'))]"/>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
         </record>
 
         <!-- User biasa: hanya lihat/edit record milik sendiri -->

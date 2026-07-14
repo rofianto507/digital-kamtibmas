@@ -1,5 +1,6 @@
 from markupsafe import Markup
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 
 
 class Konseling(models.Model):
@@ -47,6 +48,8 @@ class Konseling(models.Model):
         self.state = 'konfirmasi'
 
     def action_proses(self):
+        if not self.konselor_id:
+            raise UserError('Konselor harus diisi sebelum memulai proses konseling.')
         self.state = 'proses'
         if self.user_id and self.konselor_id and not self.channel_id:
             partner_ids = [self.user_id.partner_id.id, self.konselor_id.partner_id.id]
@@ -89,6 +92,10 @@ class Konseling(models.Model):
 
     def write(self, vals):
         new_state = vals.get('state')
+        if new_state == 'proses':
+            for rec in self:
+                if not rec.konselor_id and not vals.get('konselor_id'):
+                    raise UserError(f'Konselor harus diisi sebelum memulai proses konseling ({rec.code}).')
         res = super().write(vals)
         if new_state:
             _msgs = {
@@ -110,6 +117,30 @@ class Konseling(models.Model):
                             'isi': isi_fn(rec),
                             'tipe': 'konseling',
                         })
+            if new_state == 'proses':
+                for rec in self:
+                    if rec.user_id and rec.konselor_id and not rec.channel_id:
+                        partner_ids = [rec.user_id.partner_id.id, rec.konselor_id.partner_id.id]
+                        channel = self.env['discuss.channel'].sudo().create({
+                            'name': f'Konseling {rec.code} – {rec.nama}',
+                            'channel_type': 'group',
+                            'description': f'Sesi konseling untuk {rec.nama}. Konselor: {rec.konselor_id.name}.',
+                            'channel_member_ids': [(0, 0, {'partner_id': pid}) for pid in partner_ids],
+                        })
+                        channel.sudo().message_post(
+                            body=Markup(
+                                'Sesi konseling <b>{code}</b> untuk <b>{nama}</b> telah dimulai.<br/>'
+                                'Konselor yang ditugaskan: <b>{konselor}</b>.<br/>'
+                                'Silakan mulai sesi konsultasi di sini.'
+                            ).format(
+                                code=rec.code,
+                                nama=rec.nama,
+                                konselor=rec.konselor_id.name,
+                            ),
+                            message_type='comment',
+                            subtype_xmlid='mail.mt_comment',
+                        )
+                        rec.channel_id = channel.id
         return res
 
     # ── Auto-code ─────────────────────────────────────────────────────────────

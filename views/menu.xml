@@ -120,16 +120,24 @@
             id="menu_dkm_sabhara"
             name="Sabhara"
             parent="menu_dkm_root"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_dkm_patroli"
             sequence="40"/>
+
+        <menuitem
+            id="menu_dkm_patroli_grup"
+            name="Grup Patroli"
+            parent="menu_dkm_sabhara"
+            action="action_dkm_patroli_grup"
+            groups="digital_kamtibmas.group_dkm_admin"
+            sequence="1"/>
 
         <menuitem
             id="menu_dkm_patroli"
             name="Patroli"
             parent="menu_dkm_sabhara"
             action="action_dkm_patroli"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="1"/>
+            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_dkm_patroli"
+            sequence="2"/>
 
         <!-- Tahti -->
         <menuitem
