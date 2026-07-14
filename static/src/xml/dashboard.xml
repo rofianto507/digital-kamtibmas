@@ -536,7 +536,7 @@
                     <div class="dkm-chart-card">
                         <div class="dkm-chart-header">
                             <i class="fa fa-pie-chart" style="color:#71639e;"/>
-                            Jenis Masalah Konseling
+                            Distribusi per Konselor
                         </div>
                         <div t-ref="skJenisChart" class="dkm-echarts"/>
                     </div>
@@ -556,7 +556,7 @@
                                 <tr>
                                     <th>No.</th>
                                     <th>Pemohon</th>
-                                    <th>Jenis Masalah</th>
+                                    <th>Konselor</th>
                                     <th>Jadwal</th>
                                     <th>Status</th>
                                 </tr>
@@ -570,7 +570,7 @@
                                     t-on-click="() => this.openKonselingRecord(r.id)">
                                     <td class="dkm-code" t-esc="r.code"/>
                                     <td t-esc="r.nama"/>
-                                    <td t-esc="skJenisMasalah(r.jenis_masalah)"/>
+                                    <td t-esc="r.konselor_id ? r.konselor_id[1] : '-'"/>
                                     <td t-esc="skFormatJadwal(r.tanggal_jadwal)"/>
                                     <td>
                                         <span t-attf-class="dkm-badge dkm-badge--#{r.state}"
@@ -713,7 +713,7 @@
                     <div class="dkm-chart-card">
                         <div class="dkm-chart-header">
                             <i class="fa fa-pie-chart" style="color:#71639e;"/>
-                            Distribusi Jenis Perkara
+                            Distribusi Jenis Kendaraan
                         </div>
                         <div t-ref="srJenisChart" class="dkm-echarts"/>
                     </div>
@@ -733,8 +733,8 @@
                         <thead>
                             <tr>
                                 <th>No. BB</th>
-                                <th>Pelapor / Pemilik</th>
-                                <th>Jenis Perkara</th>
+                                <th>Kendaraan</th>
+                                <th>NOPOL</th>
                                 <th>Tgl. Penerimaan</th>
                                 <th>Status</th>
                             </tr>
@@ -747,8 +747,8 @@
                                 class="dkm-tr"
                                 t-on-click="() => this.openBBRecord(r.id)">
                                 <td class="dkm-code" t-esc="r.code"/>
-                                <td t-esc="r.nama_pelapor"/>
-                                <td t-esc="srJenisPerkara(r.jenis_perkara)"/>
+                                <td t-esc="(r.merek || '') + (r.tipe ? ' ' + r.tipe : '') || '-'"/>
+                                <td t-esc="r.nomor_polisi || '-'"/>
                                 <td t-esc="r.tanggal_penerimaan || '-'"/>
                                 <td>
                                     <span t-attf-class="dkm-badge dkm-badge--sr-#{r.state}"

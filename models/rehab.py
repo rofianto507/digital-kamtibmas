@@ -66,6 +66,31 @@ class Rehab(models.Model):
     def action_reset(self):
         self.state = 'menunggu'
 
+    def write(self, vals):
+        new_state = vals.get('state')
+        res = super().write(vals)
+        if new_state:
+            _msgs = {
+                'konfirmasi': ('Rehab Dikonfirmasi',
+                               lambda r: f'Permohonan rehabilitasi {r.code} atas nama {r.nama} telah dikonfirmasi.'),
+                'proses':     ('Rehab Sedang Diproses',
+                               lambda r: f'Permohonan rehabilitasi {r.code} sedang dalam proses penanganan.'),
+                'selesai':    ('Rehab Selesai',
+                               lambda r: f'Permohonan rehabilitasi {r.code} telah selesai. Terima kasih.'),
+            }
+            if new_state in _msgs:
+                judul, isi_fn = _msgs[new_state]
+                Notif = self.env['digital_kamtibmas.notifikasi'].sudo()
+                for rec in self:
+                    if rec.user_id:
+                        Notif.create({
+                            'user_id': rec.user_id.id,
+                            'judul': judul,
+                            'isi': isi_fn(rec),
+                            'tipe': 'rehab',
+                        })
+        return res
+
     # ── Auto-code ─────────────────────────────────────────────────────────────
 
     @api.model_create_multi

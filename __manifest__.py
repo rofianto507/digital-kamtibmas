@@ -6,7 +6,7 @@
     'category': 'Tools',
     'author': 'Cv Sel Studio',
     'website': 'https://selstudio.id',
-    'depends': ['base', 'web', 'mail'],
+    'depends': ['base', 'web', 'mail', 'calendar', 'contacts', 'hr', 'spreadsheet_dashboard'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -23,6 +23,7 @@
         'views/display_config_views.xml',
         'views/antrian_display_template.xml',
         'views/konseling_views.xml',
+        'views/mobile_chat_template.xml',
         'views/rehab_tempat_views.xml',
         'views/rehab_report.xml',
         'views/rehab_views.xml',

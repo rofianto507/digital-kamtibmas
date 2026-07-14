@@ -3,48 +3,56 @@ from odoo import models, fields, api
 
 class BarangBukti(models.Model):
     _name        = 'digital_kamtibmas.barang_bukti'
-    _description = 'Barang Bukti Online Satreskrim'
+    _description = 'Barang Bukti Online Curanmor'
     _inherit     = ['mail.thread', 'mail.activity.mixin']
     _order       = 'id desc'
     _rec_name    = 'code'
 
-    code                = fields.Char('No. Barang Bukti', readonly=True, default='New', copy=False, tracking=True)
+    code               = fields.Char('No. Barang Bukti', readonly=True, default='New', copy=False, tracking=True)
 
     # ── Informasi Perkara ─────────────────────────────────────────────────────
-    nomor_perkara       = fields.Char('No. Perkara / SP3', tracking=True)
-    jenis_perkara       = fields.Selection([
-        ('pencurian',     'Pencurian'),
-        ('penipuan',      'Penipuan / Penggelapan'),
-        ('penganiayaan',  'Penganiayaan / Kekerasan'),
-        ('narkoba',       'Narkoba'),
-        ('korupsi',       'Korupsi'),
-        ('cybercrime',    'Cyber Crime'),
-        ('pemerkosaan',   'Kesusilaan'),
-        ('pembunuhan',    'Pembunuhan'),
-        ('lainnya',       'Lainnya'),
-    ], string='Jenis Perkara', tracking=True)
-    lokasi_kejadian     = fields.Char('Lokasi Kejadian')
-    tanggal_penyitaan   = fields.Date('Tanggal Penyitaan')
-    tanggal_penerimaan  = fields.Date('Tanggal Diterima', default=fields.Date.today)
-    petugas_id          = fields.Many2one('res.users', 'Penyidik / Petugas', tracking=True)
+    nomor_perkara      = fields.Char('No. LP / Perkara', tracking=True)
+    lokasi_kejadian    = fields.Char('TKP / Lokasi Kejadian')
+    tanggal_penyitaan  = fields.Date('Tanggal Penyitaan')
+    tanggal_penerimaan = fields.Date('Tanggal Diterima', default=fields.Date.today)
+    petugas_id         = fields.Many2one('res.users', 'Penyidik / Petugas', tracking=True)
 
-    # ── Identitas Pelapor / Pemilik ───────────────────────────────────────────
-    nama_pelapor        = fields.Char('Nama Pelapor / Pemilik', required=True)
-    nik_pelapor         = fields.Char('NIK', size=16)
-    no_hp_pelapor       = fields.Char('No. HP / WA')
-    alamat_pelapor      = fields.Text('Alamat Pelapor')
+    # ── Identitas Kendaraan ───────────────────────────────────────────────────
+    jenis_kendaraan    = fields.Selection([
+        ('roda_dua',   'Sepeda Motor (Roda Dua)'),
+        ('roda_empat', 'Kendaraan Roda Empat'),
+        ('roda_tiga',  'Kendaraan Roda Tiga'),
+        ('lainnya',    'Lainnya'),
+    ], string='Jenis Kendaraan', required=True, tracking=True)
+    merek              = fields.Char('Merek', help='Contoh: Honda, Yamaha, Toyota, Suzuki')
+    tipe               = fields.Char('Tipe / Model', help='Contoh: Beat, Vario, Avanza, Xenia')
+    warna              = fields.Char('Warna Kendaraan')
+    tahun_kendaraan    = fields.Integer('Tahun Kendaraan')
+    nomor_polisi       = fields.Char('Nomor Polisi (NOPOL)', tracking=True)
+    nomor_rangka       = fields.Char('Nomor Rangka', tracking=True)
+    nomor_mesin        = fields.Char('Nomor Mesin', tracking=True)
 
-    # ── Daftar Item Barang Bukti ──────────────────────────────────────────────
-    item_ids            = fields.One2many(
+    # ── Data Kepemilikan (STNK / BPKB) ───────────────────────────────────────
+    nama_pemilik_stnk  = fields.Char('Nama Pemilik (STNK/BPKB)')
+    alamat_stnk        = fields.Text('Alamat Pemilik (STNK/BPKB)')
+
+    # ── Identitas Pelapor ─────────────────────────────────────────────────────
+    nama_pelapor       = fields.Char('Nama Pelapor', required=True)
+    nik_pelapor        = fields.Char('NIK Pelapor', size=16)
+    no_hp_pelapor      = fields.Char('No. HP / WA Pelapor')
+    alamat_pelapor     = fields.Text('Alamat Pelapor')
+
+    # ── Barang Bukti Pendukung ────────────────────────────────────────────────
+    item_ids           = fields.One2many(
         'digital_kamtibmas.barang_bukti_item', 'barang_bukti_id',
-        string='Daftar Barang Bukti')
+        string='Barang Bukti Pendukung')
 
-    # ── Lokasi Penyimpanan & Catatan ──────────────────────────────────────────
-    lokasi_penyimpanan  = fields.Char('Lokasi Penyimpanan', help='Nomor rak / ruangan')
-    keterangan          = fields.Text('Keterangan / Catatan')
+    # ── Penyimpanan & Catatan ─────────────────────────────────────────────────
+    lokasi_penyimpanan = fields.Char('Lokasi Penyimpanan', help='Nomor rak / ruangan / halaman')
+    keterangan         = fields.Text('Keterangan / Catatan')
 
     # ── Status ────────────────────────────────────────────────────────────────
-    state               = fields.Selection([
+    state              = fields.Selection([
         ('diterima',     'Diterima'),
         ('disimpan',     'Disimpan'),
         ('diproses',     'Diproses'),
@@ -66,6 +74,9 @@ class BarangBukti(models.Model):
     def action_musnahkan(self):
         self.state = 'dimusnahkan'
 
+    def action_proses_ulang(self):
+        self.state = 'diproses'
+
     def action_reset(self):
         self.state = 'diterima'
 
@@ -82,7 +93,7 @@ class BarangBukti(models.Model):
 
 class BarangBuktiItem(models.Model):
     _name        = 'digital_kamtibmas.barang_bukti_item'
-    _description = 'Item Barang Bukti'
+    _description = 'Barang Bukti Pendukung'
     _order       = 'sequence, id'
 
     sequence        = fields.Integer(default=10)
@@ -90,19 +101,17 @@ class BarangBuktiItem(models.Model):
         'digital_kamtibmas.barang_bukti', 'Barang Bukti',
         required=True, ondelete='cascade')
 
-    nama_barang     = fields.Char('Nama / Deskripsi Barang', required=True)
+    nama_barang     = fields.Char('Nama / Deskripsi', required=True)
     jenis_barang    = fields.Selection([
-        ('senjata',     'Senjata / Sajam'),
-        ('narkoba',     'Narkotika / Psikotropika'),
-        ('dokumen',     'Dokumen / Surat'),
-        ('elektronik',  'Elektronik / Gadget'),
-        ('kendaraan',   'Kendaraan'),
-        ('uang',        'Uang'),
-        ('pakaian',     'Pakaian / Tekstil'),
-        ('lainnya',     'Lainnya'),
-    ], string='Jenis Barang')
+        ('dokumen',    'Dokumen (STNK / BPKB / SIM)'),
+        ('kunci',      'Kunci Kontak / Duplikat'),
+        ('aksesoris',  'Aksesoris Kendaraan'),
+        ('elektronik', 'Elektronik / Gadget'),
+        ('uang',       'Uang'),
+        ('lainnya',    'Lainnya'),
+    ], string='Jenis')
     jumlah          = fields.Float('Jumlah', default=1.0)
-    satuan          = fields.Char('Satuan', help='Contoh: pcs, gram, kg, liter, unit')
+    satuan          = fields.Char('Satuan', help='Contoh: pcs, lembar, unit')
     kondisi         = fields.Selection([
         ('baik',           'Baik'),
         ('sebagian_rusak', 'Sebagian Rusak'),

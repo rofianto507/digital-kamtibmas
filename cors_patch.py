@@ -9,7 +9,7 @@ _ALLOWED_ORIGINS = {
 _CORS_RESPONSE_HEADERS = [
     ('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'),
     ('Access-Control-Allow-Headers',
-     'Content-Type, Authorization, X-Requested-With, Origin'),
+     'Content-Type, Authorization, X-Requested-With, Origin, X-Odoo-Database'),
     ('Access-Control-Max-Age', '86400'),
 ]
 

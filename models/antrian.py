@@ -74,6 +74,33 @@ class Antrian(models.Model):
     def action_reset(self):
         self.state = 'menunggu'
 
+    def write(self, vals):
+        new_state = vals.get('state')
+        res = super().write(vals)
+        if new_state:
+            _msgs = {
+                'konfirmasi': ('Antrian Dikonfirmasi',
+                               lambda r: f'Antrian {r.nomor_antrian} untuk layanan {r.loket_id.name} pada {r.tanggal_booking} telah dikonfirmasi.'),
+                'dipanggil':  ('Anda Dipanggil!',
+                               lambda r: f'Antrian {r.nomor_antrian} sedang dipanggil. Segera menuju loket {r.loket_id.name}.'),
+                'selesai':    ('Antrian Selesai',
+                               lambda r: f'Antrian {r.nomor_antrian} telah selesai diproses. Terima kasih.'),
+                'batal':      ('Antrian Dibatalkan',
+                               lambda r: f'Antrian {r.nomor_antrian} telah dibatalkan.'),
+            }
+            if new_state in _msgs:
+                judul, isi_fn = _msgs[new_state]
+                Notif = self.env['digital_kamtibmas.notifikasi'].sudo()
+                for rec in self:
+                    if rec.user_id:
+                        Notif.create({
+                            'user_id': rec.user_id.id,
+                            'judul': judul,
+                            'isi': isi_fn(rec),
+                            'tipe': 'antrian',
+                        })
+        return res
+
     @api.constrains('loket_id')
     def _check_loket_aktif(self):
         for rec in self:

@@ -26,3 +26,5 @@ from . import sertifikasi_soal
 from . import sertifikasi_profil
 from . import sertifikasi
 from . import sertifikasi_peserta
+from . import discuss_channel_patch
+from . import notifikasi
