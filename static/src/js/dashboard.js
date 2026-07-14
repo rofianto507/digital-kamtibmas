@@ -55,9 +55,9 @@ class DkmDashboard extends Component {
                     konTotal: 0, konMenunggu: 0, konProses: 0, konSelesai: 0,
                     rehTotal: 0, rehMenunggu: 0, rehProses: 0, rehSelesai: 0,
                 },
-                trendData:  [],
-                konJenis:   [],
-                jadwalKon:  [],
+                trendData:   [],
+                konKonselor: [],
+                jadwalKon:   [],
                 jadwalReh:  [],
             },
             // ── Satreskrim ─────────────────────────────────────────────
@@ -65,7 +65,7 @@ class DkmDashboard extends Component {
                 loading: false,
                 kpi: { total: 0, diterima: 0, aktif: 0, selesai: 0 },
                 trendData:    [],
-                jenisPerkara: [],
+                jenisKendaraan: [],
                 terbaru:      [],
             },
             // ── Sabhara ────────────────────────────────────────────────
@@ -862,7 +862,7 @@ class DkmDashboard extends Component {
         const [
             konTotal, konMenunggu, konProses, konSelesai,
             rehTotal, rehMenunggu, rehProses, rehSelesai,
-            konTrendRaw, rehTrendRaw, konJenisRaw,
+            konTrendRaw, rehTrendRaw, konKonselorRaw,
             jadwalKon, jadwalReh,
         ] = await Promise.all([
             this.orm.searchCount('digital_kamtibmas.konseling', []),
@@ -884,11 +884,11 @@ class DkmDashboard extends Component {
                 ['tanggal_pengajuan'], { limit: 5000 }),
 
             this.orm.searchRead('digital_kamtibmas.konseling',
-                [], ['jenis_masalah'], { limit: 5000 }),
+                [], ['konselor_id'], { limit: 5000 }),
 
             this.orm.searchRead('digital_kamtibmas.konseling',
                 [['tanggal_jadwal','!=',false], ['state','!=','selesai']],
-                ['code','nama','tanggal_jadwal','jenis_masalah','state'],
+                ['code','nama','tanggal_jadwal','konselor_id','state'],
                 { order: 'tanggal_jadwal asc', limit: 10 }),
 
             this.orm.searchRead('digital_kamtibmas.rehab',
@@ -901,15 +901,8 @@ class DkmDashboard extends Component {
             konTotal, konMenunggu, konProses, konSelesai,
             rehTotal, rehMenunggu, rehProses, rehSelesai,
         };
-        this.state.satkoba.trendData = this._buildSatkobaTrend(konTrendRaw, rehTrendRaw);
-        this.state.satkoba.konJenis  = this._buildSelectionCount(konJenisRaw, 'jenis_masalah', {
-            penyalahgunaan: 'Penyalahgunaan',
-            ketergantungan: 'Ketergantungan',
-            pencegahan:     'Pencegahan',
-            pasca_rehab:    'Pasca Rehab',
-            konsultasi:     'Konsultasi',
-            lainnya:        'Lainnya',
-        });
+        this.state.satkoba.trendData   = this._buildSatkobaTrend(konTrendRaw, rehTrendRaw);
+        this.state.satkoba.konKonselor = this._buildMany2oneCount(konKonselorRaw, 'konselor_id');
         this.state.satkoba.jadwalKon = jadwalKon;
         this.state.satkoba.jadwalReh = jadwalReh;
         this.state.satkoba.loading   = false;
@@ -953,6 +946,18 @@ class DkmDashboard extends Component {
         return Object.entries(map).map(([k, count]) => ({
             name: labelMap[k] || k, count,
         })).sort((a, b) => b.count - a.count);
+    }
+
+    _buildMany2oneCount(raw, field) {
+        const map = {};
+        for (const r of raw) {
+            const v    = r[field];
+            const name = Array.isArray(v) ? v[1] : 'Belum Ditugaskan';
+            map[name]  = (map[name] || 0) + 1;
+        }
+        return Object.entries(map)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count);
     }
 
     _renderSatnarkobaCharts() {
@@ -1002,7 +1007,7 @@ class DkmDashboard extends Component {
         if (!el) return;
         this._skJenisChart?.dispose();
         this._skJenisChart = echarts.init(el);
-        const data = this.state.satkoba.konJenis;
+        const data = this.state.satkoba.konKonselor;
         if (!data.length) {
             this._skJenisChart.setOption({ graphic: [{ type:'text', left:'center', top:'middle',
                 style:{ text:'Belum ada data konseling', fill:'#9ca3af', fontSize:13 } }] });
@@ -1010,7 +1015,7 @@ class DkmDashboard extends Component {
         }
         const COLORS = ['#71639e','#10b981','#f59e0b','#3b82f6','#ef4444','#8b5cf6'];
         this._skJenisChart.setOption({
-            tooltip: { trigger:'item', formatter:'{b}: {c} ({d}%)' },
+            tooltip: { trigger:'item', formatter:'{b}: {c} konseling ({d}%)' },
             legend: { bottom: 4, textStyle: { fontSize: 11, color: '#6b7280' } },
             series: [{ type:'pie', radius:['40%','66%'], center:['50%','44%'],
                 label:{ show:false }, labelLine:{ show:false },
@@ -1050,12 +1055,6 @@ class DkmDashboard extends Component {
                  proses:'Diproses', selesai:'Selesai' }[s] || s;
     }
 
-    skJenisMasalah(key) {
-        return { penyalahgunaan:'Penyalahgunaan', ketergantungan:'Ketergantungan',
-                 pencegahan:'Pencegahan', pasca_rehab:'Pasca Rehab',
-                 konsultasi:'Konsultasi', lainnya:'Lainnya' }[key] || '-';
-    }
-
     skFormatJadwal(dt) { return this._fmtWib(dt); }
 
     // ── Satreskrim Dashboard ──────────────────────────────────────────────────
@@ -1069,7 +1068,7 @@ class DkmDashboard extends Component {
 
         const [
             total, diterima, aktif, selesai,
-            trendRaw, jenisRaw, terbaru,
+            trendRaw, jenisKendaraanRaw, terbaru,
         ] = await Promise.all([
             this.orm.searchCount('digital_kamtibmas.barang_bukti', []),
             this.orm.searchCount('digital_kamtibmas.barang_bukti', [['state','=','diterima']]),
@@ -1083,26 +1082,21 @@ class DkmDashboard extends Component {
                 ['tanggal_penerimaan'], { limit: 5000 }),
 
             this.orm.searchRead('digital_kamtibmas.barang_bukti',
-                [], ['jenis_perkara'], { limit: 5000 }),
+                [], ['jenis_kendaraan'], { limit: 5000 }),
 
             this.orm.searchRead('digital_kamtibmas.barang_bukti',
                 [],
-                ['code','nama_pelapor','jenis_perkara','tanggal_penerimaan','state'],
+                ['code','nomor_polisi','merek','tipe','jenis_kendaraan','tanggal_penerimaan','state'],
                 { order: 'id desc', limit: 10 }),
         ]);
 
-        this.state.satreskrim.kpi          = { total, diterima, aktif, selesai };
-        this.state.satreskrim.trendData    = this._buildTrend6BulanDate(trendRaw, 'tanggal_penerimaan');
-        this.state.satreskrim.jenisPerkara = this._buildSelectionCount(jenisRaw, 'jenis_perkara', {
-            pencurian:    'Pencurian',
-            penipuan:     'Penipuan',
-            penganiayaan: 'Penganiayaan',
-            narkoba:      'Narkoba',
-            korupsi:      'Korupsi',
-            cybercrime:   'Cyber Crime',
-            pemerkosaan:  'Kesusilaan',
-            pembunuhan:   'Pembunuhan',
-            lainnya:      'Lainnya',
+        this.state.satreskrim.kpi             = { total, diterima, aktif, selesai };
+        this.state.satreskrim.trendData       = this._buildTrend6BulanDate(trendRaw, 'tanggal_penerimaan');
+        this.state.satreskrim.jenisKendaraan  = this._buildSelectionCount(jenisKendaraanRaw, 'jenis_kendaraan', {
+            roda_dua:    'Sepeda Motor',
+            roda_empat:  'Roda 4',
+            roda_tiga:   'Roda 3',
+            lainnya:     'Lainnya',
         });
         this.state.satreskrim.terbaru      = terbaru;
         this.state.satreskrim.loading      = false;
@@ -1178,7 +1172,7 @@ class DkmDashboard extends Component {
         if (!el) return;
         this._srJenisChart?.dispose();
         this._srJenisChart = echarts.init(el);
-        const data = this.state.satreskrim.jenisPerkara;
+        const data = this.state.satreskrim.jenisKendaraan;
         if (!data.length) {
             this._srJenisChart.setOption({ graphic: [{ type:'text', left:'center', top:'middle',
                 style:{ text:'Belum ada data', fill:'#9ca3af', fontSize:13 } }] });
@@ -1214,10 +1208,9 @@ class DkmDashboard extends Component {
                  dikembalikan:'Dikembalikan', dimusnahkan:'Dimusnahkan' }[s] || s;
     }
 
-    srJenisPerkara(key) {
-        return { pencurian:'Pencurian', penipuan:'Penipuan', penganiayaan:'Penganiayaan',
-                 narkoba:'Narkoba', korupsi:'Korupsi', cybercrime:'Cyber Crime',
-                 pemerkosaan:'Kesusilaan', pembunuhan:'Pembunuhan', lainnya:'Lainnya' }[key] || '-';
+    srJenisKendaraan(key) {
+        return { roda_dua:'Sepeda Motor', roda_empat:'Roda 4', roda_tiga:'Roda 3',
+                 lainnya:'Lainnya' }[key] || '-';
     }
 
     // ── Sabhara Dashboard ──────────────────────────────────────────────────────

@@ -27,10 +27,84 @@
             <field name="privilege_id" ref="privilege_dkm_access"/>
         </record>
 
+        <!-- Masyarakat: hanya akses Discuss (konsultasi online) -->
+        <record id="group_masyarakat" model="res.groups">
+            <field name="name">Masyarakat</field>
+            <field name="privilege_id" ref="privilege_dkm_access"/>
+            <!-- Harus internal user agar bisa buka /odoo/discuss -->
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
     </data>
 
-    <!-- Record rules — noupdate="0" agar diperbarui saat upgrade modul -->
+    <!-- Menu overrides + Record rules — noupdate="0" agar diperbarui saat upgrade -->
     <data>
+
+        <!--
+            Sembunyikan Calendar dan Contacts dari group_masyarakat.
+            (6, 0, [...]) mengganti seluruh group_ids, menghapus base.group_user lama.
+            Admin/Operator/System tetap bisa akses.
+        -->
+        <record id="calendar.mail_menu_calendar" model="ir.ui.menu">
+            <field name="group_ids" eval="[
+                (6, 0, [
+                    ref('base.group_system'),
+                    ref('digital_kamtibmas.group_dkm_admin'),
+                    ref('digital_kamtibmas.group_dkm_operator'),
+                ])
+            ]"/>
+        </record>
+
+        <record id="contacts.menu_contacts" model="ir.ui.menu">
+            <field name="group_ids" eval="[
+                (6, 0, [
+                    ref('base.group_system'),
+                    ref('digital_kamtibmas.group_dkm_admin'),
+                    ref('digital_kamtibmas.group_dkm_operator'),
+                ])
+            ]"/>
+        </record>
+
+        <record id="hr.menu_hr_root" model="ir.ui.menu">
+            <field name="group_ids" eval="[
+                (6, 0, [
+                    ref('base.group_system'),
+                    ref('digital_kamtibmas.group_dkm_admin'),
+                    ref('digital_kamtibmas.group_dkm_operator'),
+                ])
+            ]"/>
+        </record>
+
+        <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
+            <field name="group_ids" eval="[
+                (6, 0, [
+                    ref('base.group_system'),
+                    ref('digital_kamtibmas.group_dkm_admin'),
+                    ref('digital_kamtibmas.group_dkm_operator'),
+                ])
+            ]"/>
+        </record>
+
+        <!-- Discuss: sembunyikan sub-menu Channels dan Configuration dari masyarakat -->
+        <record id="mail.menu_channel" model="ir.ui.menu">
+            <field name="group_ids" eval="[
+                (6, 0, [
+                    ref('base.group_system'),
+                    ref('digital_kamtibmas.group_dkm_admin'),
+                    ref('digital_kamtibmas.group_dkm_operator'),
+                ])
+            ]"/>
+        </record>
+
+        <record id="mail.menu_configuration" model="ir.ui.menu">
+            <field name="group_ids" eval="[
+                (6, 0, [
+                    ref('base.group_system'),
+                    ref('digital_kamtibmas.group_dkm_admin'),
+                    ref('digital_kamtibmas.group_dkm_operator'),
+                ])
+            ]"/>
+        </record>
 
         <!-- User biasa: hanya lihat/edit record milik sendiri -->
         <record id="rule_eform_laka_own_user" model="ir.rule">
@@ -41,6 +115,26 @@
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!--
+            Discuss Channel: masyarakat hanya lihat channel yang dia ikuti.
+            Tanpa rule ini, semua internal user bisa lihat semua channel.
+        -->
+        <record id="rule_discuss_channel_masyarakat" model="ir.rule">
+            <field name="name">Discuss Channel: masyarakat hanya lihat channel sendiri</field>
+            <field name="model_id" ref="mail.model_discuss_channel"/>
+            <field name="domain_force">
+                [
+                    ('channel_member_ids.partner_id', '=', user.partner_id.id),
+                    ('channel_type', '!=', 'chat')
+                ]
+            </field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_masyarakat'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
 
