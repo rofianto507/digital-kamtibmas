@@ -29,6 +29,7 @@
 
                     <group>
                         <group>
+                            <field name="grup_id"/>
                             <field name="tanggal_patroli"/>
                             <field name="tanggal_selesai"/>
                         </group>
@@ -77,6 +78,7 @@
         <field name="arch" type="xml">
             <list string="Patroli" default_order="id desc">
                 <field name="code"/>
+                <field name="grup_id"/>
                 <field name="tanggal_patroli"/>
                 <field name="tanggal_selesai"/>
                 <field name="kecamatan_id"/>

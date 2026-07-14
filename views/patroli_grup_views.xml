@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_patroli_grup_form" model="ir.ui.view">
+        <field name="name">dkm.patroli.grup.form</field>
+        <field name="model">digital_kamtibmas.patroli_grup</field>
+        <field name="arch" type="xml">
+            <form string="Grup Patroli">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_patroli" type="object"
+                                class="oe_stat_button" icon="fa-car">
+                            <field name="patroli_count" widget="statinfo" string="Patroli"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nama Grup..."/></h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="no_pol" string="Nopol"/>
+                            <field name="jenis_kendaraan"/>
+                        </group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+
+                    <group string="Keterangan">
+                        <field name="keterangan" widget="text" rows="3" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── List View ──────────────────────────────────────────────────────── -->
+    <record id="view_dkm_patroli_grup_list" model="ir.ui.view">
+        <field name="name">dkm.patroli.grup.list</field>
+        <field name="model">digital_kamtibmas.patroli_grup</field>
+        <field name="arch" type="xml">
+            <list string="Grup Patroli">
+                <field name="name"/>
+                <field name="no_pol" string="Nopol"/>
+                <field name="jenis_kendaraan"/>
+                <field name="user_id"/>
+                <field name="patroli_count" string="Jml Patroli"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Search View ────────────────────────────────────────────────────── -->
+    <record id="view_dkm_patroli_grup_search" model="ir.ui.view">
+        <field name="name">dkm.patroli.grup.search</field>
+        <field name="model">digital_kamtibmas.patroli_grup</field>
+        <field name="arch" type="xml">
+            <search string="Cari Grup Patroli">
+                <field name="name" string="Nama Grup"/>
+                <field name="no_pol" string="Nopol"/>
+                <field name="user_id"/>
+                <separator/>
+                <filter string="Tidak Aktif" name="f_inactive" domain="[('active','=',False)]"/>
+                <group>
+                    <filter string="Jenis Kendaraan" name="grp_jenis"
+                            context="{'group_by': 'jenis_kendaraan'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_dkm_patroli_grup" model="ir.actions.act_window">
+        <field name="name">Grup Patroli</field>
+        <field name="res_model">digital_kamtibmas.patroli_grup</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dkm_patroli_grup_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada grup patroli.
+            </p>
+            <p>Klik <strong>Baru</strong> untuk mendaftarkan grup patroli baru.</p>
+        </field>
+    </record>
+
+</odoo>
