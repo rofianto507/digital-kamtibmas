@@ -17,42 +17,48 @@
         <div class="dkm-sidebar-section">
             <div class="dkm-sidebar-section-title">Dashboard</div>
 
-            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satlantas' ? 'active' : '' }"
+            <div t-if="state.allowedSections.includes('satlantas')"
+                 t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satlantas' ? 'active' : '' }"
                  t-on-click="() => this.setSection('satlantas')"
                  title="Satlantas">
                 <i class="fa fa-car"/>
                 <span>Satlantas</span>
             </div>
 
-            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satnarkoba' ? 'active' : '' }"
+            <div t-if="state.allowedSections.includes('satnarkoba')"
+                 t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satnarkoba' ? 'active' : '' }"
                  t-on-click="() => this.setSection('satnarkoba')"
                  title="Satnarkoba">
                 <i class="fa fa-medkit"/>
                 <span>Satnarkoba</span>
             </div>
 
-            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satreskrim' ? 'active' : '' }"
+            <div t-if="state.allowedSections.includes('satreskrim')"
+                 t-attf-class="dkm-sidebar-item #{ state.activeSection === 'satreskrim' ? 'active' : '' }"
                  t-on-click="() => this.setSection('satreskrim')"
                  title="Satreskrim">
                 <i class="fa fa-search"/>
                 <span>Satreskrim</span>
             </div>
 
-            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'sabhara' ? 'active' : '' }"
+            <div t-if="state.allowedSections.includes('sabhara')"
+                 t-attf-class="dkm-sidebar-item #{ state.activeSection === 'sabhara' ? 'active' : '' }"
                  t-on-click="() => this.setSection('sabhara')"
                  title="Sabhara">
                 <i class="fa fa-binoculars"/>
                 <span>Sabhara</span>
             </div>
 
-            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'tahti' ? 'active' : '' }"
+            <div t-if="state.allowedSections.includes('tahti')"
+                 t-attf-class="dkm-sidebar-item #{ state.activeSection === 'tahti' ? 'active' : '' }"
                  t-on-click="() => this.setSection('tahti')"
                  title="Tahti">
                 <i class="fa fa-institution"/>
                 <span>Tahti</span>
             </div>
 
-            <div t-attf-class="dkm-sidebar-item #{ state.activeSection === 'intelkam' ? 'active' : '' }"
+            <div t-if="state.allowedSections.includes('intelkam')"
+                 t-attf-class="dkm-sidebar-item #{ state.activeSection === 'intelkam' ? 'active' : '' }"
                  t-on-click="() => this.setSection('intelkam')"
                  title="Intelkam">
                 <i class="fa fa-eye"/>

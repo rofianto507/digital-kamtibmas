@@ -42,6 +42,38 @@
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
 
+        <!-- ── Per-satker groups: tiap satker hanya lihat menu satkernya ── -->
+        <record id="group_satlantas" model="res.groups">
+            <field name="name">Satlantas</field>
+            <field name="privilege_id" ref="privilege_dkm_access"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="group_satnarkoba" model="res.groups">
+            <field name="name">Satnarkoba</field>
+            <field name="privilege_id" ref="privilege_dkm_access"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="group_satreskrim" model="res.groups">
+            <field name="name">Satreskrim</field>
+            <field name="privilege_id" ref="privilege_dkm_access"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="group_sabhara" model="res.groups">
+            <field name="name">Sabhara</field>
+            <field name="privilege_id" ref="privilege_dkm_access"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="group_tahti" model="res.groups">
+            <field name="name">Tahti</field>
+            <field name="privilege_id" ref="privilege_dkm_access"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="group_intelkam" model="res.groups">
+            <field name="name">Intelkam</field>
+            <field name="privilege_id" ref="privilege_dkm_access"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
     </data>
 
     <!-- Menu overrides + Record rules — noupdate="0" agar diperbarui saat upgrade -->
@@ -170,6 +202,84 @@
             <field name="model_id" ref="model_digital_kamtibmas_eform_laka"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_operator'))]"/>
+        </record>
+
+        <!-- ── Konseling: masyarakat hanya lihat milik sendiri ─────────────── -->
+        <record id="rule_konseling_own_user" model="ir.rule">
+            <field name="name">Konseling: user hanya lihat record sendiri</field>
+            <field name="model_id" ref="model_digital_kamtibmas_konseling"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_konseling_all_satnarkoba" model="ir.rule">
+            <field name="name">Konseling: satnarkoba lihat semua record</field>
+            <field name="model_id" ref="model_digital_kamtibmas_konseling"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_satnarkoba'))]"/>
+        </record>
+        <record id="rule_konseling_all_admin" model="ir.rule">
+            <field name="name">Konseling: admin lihat semua record</field>
+            <field name="model_id" ref="model_digital_kamtibmas_konseling"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_admin'))]"/>
+        </record>
+        <record id="rule_konseling_all_operator" model="ir.rule">
+            <field name="name">Konseling: operator lihat semua record</field>
+            <field name="model_id" ref="model_digital_kamtibmas_konseling"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_operator'))]"/>
+        </record>
+
+        <!-- ── Rehab: masyarakat hanya lihat milik sendiri ─────────────────── -->
+        <record id="rule_rehab_own_user" model="ir.rule">
+            <field name="name">Rehab: user hanya lihat record sendiri</field>
+            <field name="model_id" ref="model_digital_kamtibmas_rehab"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_rehab_all_satnarkoba" model="ir.rule">
+            <field name="name">Rehab: satnarkoba lihat semua record</field>
+            <field name="model_id" ref="model_digital_kamtibmas_rehab"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_satnarkoba'))]"/>
+        </record>
+        <record id="rule_rehab_all_admin" model="ir.rule">
+            <field name="name">Rehab: admin lihat semua record</field>
+            <field name="model_id" ref="model_digital_kamtibmas_rehab"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_admin'))]"/>
+        </record>
+        <record id="rule_rehab_all_operator" model="ir.rule">
+            <field name="name">Rehab: operator lihat semua record</field>
+            <field name="model_id" ref="model_digital_kamtibmas_rehab"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_operator'))]"/>
+        </record>
+
+        <!-- ── Notifikasi: hanya lihat notifikasi milik sendiri ─────────────── -->
+        <record id="rule_notifikasi_own_user" model="ir.rule">
+            <field name="name">Notifikasi: user hanya lihat notifikasi sendiri</field>
+            <field name="model_id" ref="model_digital_kamtibmas_notifikasi"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_notifikasi_all_admin" model="ir.rule">
+            <field name="name">Notifikasi: admin lihat semua notifikasi</field>
+            <field name="model_id" ref="model_digital_kamtibmas_notifikasi"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('digital_kamtibmas.group_dkm_admin'))]"/>
         </record>
 
     </data>

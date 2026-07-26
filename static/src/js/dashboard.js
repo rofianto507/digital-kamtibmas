@@ -33,6 +33,7 @@ class DkmDashboard extends Component {
 
         this.state = useState({
             activeSection:    'satlantas',
+            allowedSections:  ['satlantas','satnarkoba','satreskrim','sabhara','tahti','intelkam'],
             sidebarCollapsed: false,
             period:           'this_month',
             loading:      true,
@@ -163,7 +164,16 @@ class DkmDashboard extends Component {
         this._ikResponChart = null;
         this._ikCalWaChart  = null;
 
-        onMounted(async () => await this.loadData());
+        onMounted(async () => {
+            await this._loadAllowedSections();
+            const s = this.state.activeSection;
+            if      (s === 'satlantas')  await this.loadData();
+            else if (s === 'satnarkoba') await this.loadSatnarkoba();
+            else if (s === 'satreskrim') await this.loadSatreskrim();
+            else if (s === 'sabhara')    await this.loadSabhara();
+            else if (s === 'tahti')      await this.loadTahti();
+            else if (s === 'intelkam')   await this.loadIntelkam();
+        });
 
         useEffect(
             () => {
@@ -202,6 +212,27 @@ class DkmDashboard extends Component {
             this._ikResponChart?.dispose();
             this._ikCalWaChart?.dispose();
         });
+    }
+
+    // ── Allowed sections per user group ───────────────────────────────────────
+
+    async _loadAllowedSections() {
+        const ALL = ['satlantas','satnarkoba','satreskrim','sabhara','tahti','intelkam'];
+        try {
+            // Server-side method: uses user.has_group() which has no RPC restrictions
+            const allowed = await this.orm.call(
+                'digital_kamtibmas.notifikasi',
+                'get_allowed_dashboard_sections',
+                []
+            );
+            this.state.allowedSections = Array.isArray(allowed) && allowed.length ? allowed : ALL;
+            if (!this.state.allowedSections.includes(this.state.activeSection)) {
+                this.state.activeSection = this.state.allowedSections[0];
+            }
+        } catch (e) {
+            console.error('[DKM] _loadAllowedSections error:', e);
+            this.state.allowedSections = ALL;
+        }
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────
