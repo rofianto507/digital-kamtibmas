@@ -9,303 +9,58 @@
             web_icon="digital_kamtibmas,static/description/icon.png"
             sequence="2"/>
 
-        <!-- Dashboard -->
-        <menuitem
-            id="menu_dkm_dashboard"
-            name="Dashboard"
-            parent="menu_dkm_root"
-            action="action_dkm_dashboard"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="1"/>
+        <!-- Dashboard: semua group bisa akses dashboard satkernya -->
+        <menuitem id="menu_dkm_dashboard" name="Dashboard" parent="menu_dkm_root" action="action_dkm_dashboard" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satlantas,digital_kamtibmas.group_satnarkoba,digital_kamtibmas.group_satreskrim,digital_kamtibmas.group_sabhara,digital_kamtibmas.group_tahti,digital_kamtibmas.group_intelkam" sequence="1"/>
 
         <!-- Satlantas -->
-        <menuitem
-            id="menu_dkm_satlantas"
-            name="Satlantas"
-            parent="menu_dkm_root"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="10"/>
-
-        <menuitem
-            id="menu_dkm_eform_laka"
-            name="e-Form Laka"
-            parent="menu_dkm_satlantas"
-            action="action_dkm_eform_laka"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="1"/>
-
-        <menuitem
-            id="menu_dkm_yang_terlibat"
-            name="Yang Terlibat Laka"
-            parent="menu_dkm_satlantas"
-            action="action_dkm_yang_terlibat"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="2"/>
-
-        <menuitem
-            id="menu_dkm_antrian"
-            name="Antrian"
-            parent="menu_dkm_satlantas"
-            action="action_dkm_antrian"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="2"/>
-
-        <menuitem
-            id="menu_dkm_display_antrian"
-            name="Display Antrian"
-            parent="menu_dkm_satlantas"
-            action="action_dkm_display_config"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="3"/>
+        <menuitem id="menu_dkm_satlantas" name="Satlantas" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satlantas" sequence="10"/>
+        <menuitem id="menu_dkm_eform_laka" name="e-Form Laka" parent="menu_dkm_satlantas" action="action_dkm_eform_laka" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satlantas" sequence="1"/>
+        <menuitem id="menu_dkm_yang_terlibat" name="Yang Terlibat Laka" parent="menu_dkm_satlantas" action="action_dkm_yang_terlibat" groups="digital_kamtibmas.group_dkm_admin" sequence="2"/>
+        <menuitem id="menu_dkm_antrian" name="Antrian" parent="menu_dkm_satlantas" action="action_dkm_antrian" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satlantas" sequence="3"/>
+        <menuitem id="menu_dkm_display_antrian" name="Display Antrian" parent="menu_dkm_satlantas" action="action_dkm_display_config" groups="digital_kamtibmas.group_dkm_admin" sequence="4"/>
 
         <!-- Satnarkoba -->
-        <menuitem
-            id="menu_dkm_satnarkoba"
-            name="Satnarkoba"
-            parent="menu_dkm_root"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="20"/>
-
-        <menuitem
-            id="menu_dkm_konseling"
-            name="Konseling Online"
-            parent="menu_dkm_satnarkoba"
-            action="action_dkm_konseling"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="1"/>
-
-        <menuitem
-            id="menu_dkm_rehab"
-            name="Permohonan Rehabilitasi"
-            parent="menu_dkm_satnarkoba"
-            action="action_dkm_rehab"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="2"/>
-
-
-        <menuitem
-            id="menu_dkm_sertifikasi_narkoba"
-            name="Sertifikasi Narkoba"
-            parent="menu_dkm_satnarkoba"
-            action="action_dkm_sertifikasi"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="10"/>
-
-        <menuitem
-            id="menu_dkm_sertifikasi_profil"
-            name="Peserta Sertifikasi"
-            parent="menu_dkm_satnarkoba"
-            action="action_dkm_sertifikasi_profil"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="11"/>
+        <menuitem id="menu_dkm_satnarkoba" name="Satnarkoba" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satnarkoba" sequence="20"/>
+        <menuitem id="menu_dkm_konseling" name="Konseling Online" parent="menu_dkm_satnarkoba" action="action_dkm_konseling" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satnarkoba" sequence="1"/>
+        <menuitem id="menu_dkm_rehab" name="Permohonan Rehabilitasi" parent="menu_dkm_satnarkoba" action="action_dkm_rehab" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satnarkoba" sequence="2"/>
+        <menuitem id="menu_dkm_sertifikasi_narkoba" name="Sertifikasi Narkoba" parent="menu_dkm_satnarkoba" action="action_dkm_sertifikasi" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satnarkoba" sequence="10"/>
+        <menuitem id="menu_dkm_sertifikasi_profil" name="Peserta Sertifikasi" parent="menu_dkm_satnarkoba" action="action_dkm_sertifikasi_profil" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satnarkoba" sequence="11"/>
 
         <!-- Satreskrim -->
-        <menuitem
-            id="menu_dkm_satreskrim"
-            name="Satreskrim"
-            parent="menu_dkm_root"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="30"/>
-
-        <menuitem
-            id="menu_dkm_barang_bukti"
-            name="Barang Bukti Online"
-            parent="menu_dkm_satreskrim"
-            action="action_dkm_barang_bukti"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="1"/>
+        <menuitem id="menu_dkm_satreskrim" name="Satreskrim" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satreskrim" sequence="30"/>
+        <menuitem id="menu_dkm_barang_bukti" name="Barang Bukti Online" parent="menu_dkm_satreskrim" action="action_dkm_barang_bukti" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satreskrim" sequence="1"/>
 
         <!-- Sabhara -->
-        <menuitem
-            id="menu_dkm_sabhara"
-            name="Sabhara"
-            parent="menu_dkm_root"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_dkm_patroli"
-            sequence="40"/>
-
-        <menuitem
-            id="menu_dkm_patroli_grup"
-            name="Grup Patroli"
-            parent="menu_dkm_sabhara"
-            action="action_dkm_patroli_grup"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="1"/>
-
-        <menuitem
-            id="menu_dkm_patroli"
-            name="Patroli"
-            parent="menu_dkm_sabhara"
-            action="action_dkm_patroli"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_dkm_patroli"
-            sequence="2"/>
+        <menuitem id="menu_dkm_sabhara" name="Sabhara" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_dkm_patroli,digital_kamtibmas.group_sabhara" sequence="40"/>
+        <menuitem id="menu_dkm_patroli_grup" name="Grup Patroli" parent="menu_dkm_sabhara" action="action_dkm_patroli_grup" groups="digital_kamtibmas.group_dkm_admin" sequence="1"/>
+        <menuitem id="menu_dkm_patroli" name="Patroli" parent="menu_dkm_sabhara" action="action_dkm_patroli" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_dkm_patroli,digital_kamtibmas.group_sabhara" sequence="2"/>
 
         <!-- Tahti -->
-        <menuitem
-            id="menu_dkm_tahti"
-            name="Tahti"
-            parent="menu_dkm_root"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="50"/>
-
-        <menuitem
-            id="menu_dkm_tahanan"
-            name="Data Tahanan"
-            parent="menu_dkm_tahti"
-            action="action_dkm_tahanan"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="1"/>
-
-        <menuitem
-            id="menu_dkm_tahanan_all"
-            name="Semua Tahanan"
-            parent="menu_dkm_tahti"
-            action="action_dkm_tahanan_all"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="2"/>
-
-        <menuitem
-            id="menu_dkm_tahti_kunjungan"
-            name="Buku Tamu"
-            parent="menu_dkm_tahti"
-            action="action_dkm_tahti_kunjungan"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="3"/>
-
-        <menuitem
-            id="menu_dkm_tahti_tamu"
-            name="Data Tamu"
-            parent="menu_dkm_tahti"
-            action="action_dkm_tahti_tamu"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="4"/>
+        <menuitem id="menu_dkm_tahti" name="Tahti" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_tahti" sequence="50"/>
+        <menuitem id="menu_dkm_tahanan" name="Data Tahanan" parent="menu_dkm_tahti" action="action_dkm_tahanan" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_tahti" sequence="1"/>
+        <menuitem id="menu_dkm_tahanan_all" name="Semua Tahanan" parent="menu_dkm_tahti" action="action_dkm_tahanan_all" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_tahti" sequence="2"/>
+        <menuitem id="menu_dkm_tahti_kunjungan" name="Buku Tamu" parent="menu_dkm_tahti" action="action_dkm_tahti_kunjungan" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_tahti" sequence="3"/>
+        <menuitem id="menu_dkm_tahti_tamu" name="Data Tamu" parent="menu_dkm_tahti" action="action_dkm_tahti_tamu" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_tahti" sequence="4"/>
 
         <!-- Intelkam -->
-        <menuitem
-            id="menu_dkm_intelkam"
-            name="Intelkam"
-            parent="menu_dkm_root"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="60"/>
-
-        <menuitem
-            id="menu_dkm_intelkam_distribusi"
-            name="Sabuk Kamtibmas"
-            parent="menu_dkm_intelkam"
-            action="action_intelkam_distribusi"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="1"/>
-
-        <menuitem
-            id="menu_dkm_intelkam_respon"
-            name="Respon WhatsApp"
-            parent="menu_dkm_intelkam"
-            action="action_intelkam_respon"
-            groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator"
-            sequence="2"/>
-
-        <menuitem
-            id="menu_dkm_intelkam_wa_group"
-            name="Master Group WhatsApp"
-            parent="menu_dkm_intelkam"
-            action="action_intelkam_wa_group"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="10"/>
-
-        <menuitem
-            id="menu_dkm_intelkam_wa_config"
-            name="Konfigurasi Wablas"
-            parent="menu_dkm_intelkam"
-            action="action_intelkam_wa_config"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="20"/>
+        <menuitem id="menu_dkm_intelkam" name="Intelkam" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_intelkam" sequence="60"/>
+        <menuitem id="menu_dkm_intelkam_distribusi" name="Sabuk Kamtibmas" parent="menu_dkm_intelkam" action="action_intelkam_distribusi" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_intelkam" sequence="1"/>
+        <menuitem id="menu_dkm_intelkam_respon" name="Respon WhatsApp" parent="menu_dkm_intelkam" action="action_intelkam_respon" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_intelkam" sequence="2"/>
+        <menuitem id="menu_dkm_intelkam_wa_group" name="Master Group WhatsApp" parent="menu_dkm_intelkam" action="action_intelkam_wa_group" groups="digital_kamtibmas.group_dkm_admin" sequence="10"/>
+        <menuitem id="menu_dkm_intelkam_wa_config" name="Konfigurasi Wablas" parent="menu_dkm_intelkam" action="action_intelkam_wa_config" groups="digital_kamtibmas.group_dkm_admin" sequence="20"/>
 
         <!-- Configuration: admin only -->
-        <menuitem
-            id="menu_dkm_configuration"
-            name="Configuration"
-            parent="menu_dkm_root"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="99"/>
-
-        <menuitem
-            id="menu_dkm_config_polsek"
-            name="Polsek"
-            parent="menu_dkm_configuration"
-            action="action_dkm_config_polsek"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="1"/>
-
-        <menuitem
-            id="menu_dkm_config_kabupaten"
-            name="Kabupaten"
-            parent="menu_dkm_configuration"
-            action="action_dkm_config_kabupaten"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="2"/>
-
-        <menuitem
-            id="menu_dkm_config_kecamatan"
-            name="Kecamatan"
-            parent="menu_dkm_configuration"
-            action="action_dkm_config_kecamatan"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="3"/>
-
-        <menuitem
-            id="menu_dkm_config_desa"
-            name="Desa/Kelurahan"
-            parent="menu_dkm_configuration"
-            action="action_dkm_config_desa"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="4"/>
-
-        <menuitem
-            id="menu_dkm_config_jenis_layanan"
-            name="Jenis Layanan"
-            parent="menu_dkm_configuration"
-            action="action_dkm_config_jenis_layanan"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="10"/>
-
-        <menuitem
-            id="menu_dkm_config_loket"
-            name="Loket"
-            parent="menu_dkm_configuration"
-            action="action_dkm_config_loket"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="11"/>
-
-        <menuitem
-            id="menu_dkm_config_tahti_sel"
-            name="Sel / Kamar Tahanan"
-            parent="menu_dkm_configuration"
-            action="action_dkm_tahti_sel"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="20"/>
-
-        <menuitem
-            id="menu_dkm_config_tahanan_kategori"
-            name="Kategori Tahanan"
-            parent="menu_dkm_configuration"
-            action="action_dkm_tahanan_kategori"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="21"/>
-
-        <menuitem
-            id="menu_dkm_config_sertifikasi_soal"
-            name="Soal Sertifikasi"
-            parent="menu_dkm_configuration"
-            action="action_dkm_sertifikasi_soal"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="30"/>
-
-        <menuitem
-            id="menu_dkm_rehab_tempat"
-            name="Tempat Rehabilitasi"
-            parent="menu_dkm_configuration"
-            action="action_dkm_rehab_tempat"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="31"/>
+        <menuitem id="menu_dkm_configuration" name="Configuration" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin" sequence="99"/>
+        <menuitem id="menu_dkm_config_polsek" name="Polsek" parent="menu_dkm_configuration" action="action_dkm_config_polsek" groups="digital_kamtibmas.group_dkm_admin" sequence="1"/>
+        <menuitem id="menu_dkm_config_kabupaten" name="Kabupaten" parent="menu_dkm_configuration" action="action_dkm_config_kabupaten" groups="digital_kamtibmas.group_dkm_admin" sequence="2"/>
+        <menuitem id="menu_dkm_config_kecamatan" name="Kecamatan" parent="menu_dkm_configuration" action="action_dkm_config_kecamatan" groups="digital_kamtibmas.group_dkm_admin" sequence="3"/>
+        <menuitem id="menu_dkm_config_desa" name="Desa/Kelurahan" parent="menu_dkm_configuration" action="action_dkm_config_desa" groups="digital_kamtibmas.group_dkm_admin" sequence="4"/>
+        <menuitem id="menu_dkm_config_jenis_layanan" name="Jenis Layanan" parent="menu_dkm_configuration" action="action_dkm_config_jenis_layanan" groups="digital_kamtibmas.group_dkm_admin" sequence="10"/>
+        <menuitem id="menu_dkm_config_loket" name="Loket" parent="menu_dkm_configuration" action="action_dkm_config_loket" groups="digital_kamtibmas.group_dkm_admin" sequence="11"/>
+        <menuitem id="menu_dkm_config_tahti_sel" name="Sel / Kamar Tahanan" parent="menu_dkm_configuration" action="action_dkm_tahti_sel" groups="digital_kamtibmas.group_dkm_admin" sequence="20"/>
+        <menuitem id="menu_dkm_config_tahanan_kategori" name="Kategori Tahanan" parent="menu_dkm_configuration" action="action_dkm_tahanan_kategori" groups="digital_kamtibmas.group_dkm_admin" sequence="21"/>
+        <menuitem id="menu_dkm_config_sertifikasi_soal" name="Soal Sertifikasi" parent="menu_dkm_configuration" action="action_dkm_sertifikasi_soal" groups="digital_kamtibmas.group_dkm_admin" sequence="30"/>
+        <menuitem id="menu_dkm_rehab_tempat" name="Tempat Rehabilitasi" parent="menu_dkm_configuration" action="action_dkm_rehab_tempat" groups="digital_kamtibmas.group_dkm_admin" sequence="31"/>
 
     </data>
 </odoo>
