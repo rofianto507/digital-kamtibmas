@@ -15,7 +15,7 @@
 
     // Logo company dibaca sebelum OWL mount (div sudah ada di DOM)
     const LOGO_URL = (document.getElementById('sertifikasi-kiosk-app') || {}).dataset?.logo
-        || '/digital_kamtibmas/static/img/logo_polda.png';
+        || '/digital_kamtibmas/static/img/logo_app.png';
 
     // ── RPC helper ────────────────────────────────────────────────────────────
 

@@ -8,6 +8,11 @@
         <field name="arch" type="xml">
             <form string="Detail Peserta">
                 <header>
+                    <button name="action_cetak_sertifikat"
+                            type="object"
+                            string="Cetak Sertifikat"
+                            class="btn-success"
+                            invisible="not lulus or state != 'selesai'"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="mengerjakan,selesai"/>
                 </header>

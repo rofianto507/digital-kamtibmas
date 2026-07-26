@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Paper format: A4 Landscape ════════════════════════════════════════ -->
+    <record id="paperformat_a4_landscape_cert" model="report.paperformat">
+        <field name="name">A4 Landscape Sertifikat</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <!-- ══ Report action ══════════════════════════════════════════════════════ -->
+    <record id="action_report_sertifikat" model="ir.actions.report">
+        <field name="name">Cetak Sertifikat</field>
+        <field name="model">digital_kamtibmas.sertifikasi.peserta</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">digital_kamtibmas.sertifikasi_cetak_template</field>
+        <field name="report_file">digital_kamtibmas.sertifikasi_cetak_template</field>
+        <field name="print_report_name">'Sertifikat - ' + object.nama</field>
+        <field name="binding_model_id" ref="model_digital_kamtibmas_sertifikasi_peserta"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_a4_landscape_cert"/>
+    </record>
+
+    <!-- ══ Certificate QWeb template ══════════════════════════════════════════
+         Pattern: same as rehab_report.xml — class="page", no flexbox,
+         HTML tables for layout, position:absolute only for decorative overlays.
+    ════════════════════════════════════════════════════════════════════════════ -->
+    <template id="sertifikasi_cetak_template">
+        <t t-call="web.html_container">
+            <t t-set="data_report_landscape" t-value="True"/>
+
+            <t t-foreach="docs" t-as="p">
+                <!-- Fallback path: children of <main> → raw fragment ke wkhtmltopdf.
+                     <style> dibungkus div height:0 + overflow:hidden agar wkhtmltopdf's
+                     old WebKit tidak menghitung tinggi elemen <style> sebagai content body
+                     (mirip solusi kanan: Bootstrap max-width dihilangkan via fallback path). -->
+                <div style="height:0;overflow:hidden;margin:0;padding:0;"><style>
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
+                        html, body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 260mm; overflow: hidden; font-size: 0; }
+
+                        /* ── Outer shell ──────────────────────────────────── */
+                        .cp {
+                            width: 100%;
+                            height: 260mm;
+                            position: relative;
+                            overflow: hidden;
+                            background: #FAFAF6;
+                            font-family: Arial, Helvetica, sans-serif;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+
+                        /* ── Decorative overlays (position:absolute only) ── */
+                        .cp-pat {
+                            position: absolute;
+                            top: 0; left: 0; right: 0; bottom: 0;
+                            background-image: repeating-linear-gradient(
+                                -45deg,
+                                transparent, transparent 28px,
+                                rgba(201,162,39,0.05) 28px, rgba(201,162,39,0.05) 29px
+                            );
+                            pointer-events: none;
+                        }
+                        .cp-bo {
+                            position: absolute;
+                            top: 7mm; left: 7mm; right: 7mm; bottom: 7mm;
+                            border: 3px solid #C9A227;
+                            pointer-events: none;
+                        }
+                        .cp-bi {
+                            position: absolute;
+                            top: 11mm; left: 11mm; right: 11mm; bottom: 11mm;
+                            border: 1px solid rgba(201,162,39,0.55);
+                            pointer-events: none;
+                        }
+                        .cp-co {
+                            position: absolute;
+                            width: 14px; height: 14px;
+                            background: #1D2A44;
+                            pointer-events: none;
+                        }
+                        .cc-tl { top: 5mm;    left: 5mm;  }
+                        .cc-tr { top: 5mm;    right: 5mm; }
+                        .cc-bl { bottom: 5mm; left: 5mm;  }
+                        .cc-br { bottom: 5mm; right: 5mm; }
+
+                        /* ── Layout sections (position:absolute, no flex) ── */
+
+                        /* HEADER band: navy, top of cert */
+                        .cp-hdr {
+                            position: absolute;
+                            top: 12mm; left: 12mm; right: 12mm;
+                            height: 27mm;
+                            background: #1D2A44;
+                        }
+                        .cp-hdr-tbl {
+                            width: 100%; height: 27mm;
+                            border-collapse: collapse;
+                        }
+                        /* Header: single centred cell, no logo */
+                        .cp-title-cell {
+                            text-align: center;
+                            vertical-align: middle;
+                            padding: 0 20px;
+                        }
+                        .cp-app-lbl {
+                            color: #C9A227; font-size: 8pt; letter-spacing: 5px;
+                            font-weight: 700; text-transform: uppercase; margin-bottom: 2px;
+                        }
+                        .cp-main-ttl {
+                            color: #fff; font-family: Georgia, serif;
+                            font-size: 22pt; font-weight: 700; letter-spacing: 3px;
+                            line-height: 1.1;
+                        }
+                        .cp-subtitle {
+                            color: #C9A227; font-size: 7.5pt;
+                            letter-spacing: 2px; text-transform: uppercase; margin-top: 2px;
+                        }
+
+                        /* Logo: centred in body, above "Diberikan kepada" */
+                        .cp-body-logo {
+                            text-align: center;
+                            margin-bottom: 80px;
+                        }
+                        .cp-body-logo img { max-width: 100px; max-height: 100px; }
+
+                        /* DIVIDER: gold gradient bar */
+                        .cp-div {
+                            position: absolute;
+                            top: 39mm; left: 12mm; right: 12mm;
+                            height: 4px;
+                            background: #C9A227;
+                            background: -webkit-linear-gradient(left, #1D2A44, #C9A227, #E8C547, #C9A227, #1D2A44);
+                            background: linear-gradient(to right, #1D2A44, #C9A227, #E8C547, #C9A227, #1D2A44);
+                        }
+
+                        /* BODY */
+                        .cp-body {
+                            position: absolute;
+                            top: 40mm; left: 12mm; right: 12mm;
+                            height: 110mm;
+                        }
+                        .cp-body-tbl {
+                            width: 100%; height: 110mm;
+                            border-collapse: collapse;
+                        }
+                        .cp-body-td {
+                            text-align: center;
+                            vertical-align: middle;
+                            padding: 0 28px;
+                        }
+
+                        /* FOOTER: diperlebar ke 48mm, mulai lebih awal (150mm dari atas) */
+                        .cp-ftr {
+                            position: absolute;
+                            bottom: 12mm; left: 12mm; right: 12mm;
+                            height: 48mm;
+                            border-top: 1px solid rgba(201,162,39,0.4);
+                        }
+                        .cp-ftr-tbl {
+                            width: 100%; height: 48mm;
+                            border-collapse: collapse;
+                        }
+                        .cp-ftr-certno { vertical-align: bottom; padding-bottom: 6px; }
+                        .cp-ftr-sig {
+                            width: 160px;
+                            text-align: center;
+                            vertical-align: top;
+                            padding-top: 4px;
+                        }
+                        /* Ruang kosong untuk tanda tangan dan stempel */
+                        .cp-sig-sp { height: 60px; }
+                        .cp-sig-ln { width: 130px; height: 1px; background: #1D2A44; margin: 0 auto 3px; }
+
+                        /* ── Body content typography ──────────────────────── */
+                        .cp-given {
+                            font-size: 8pt; color: #888;
+                            letter-spacing: 4px; text-transform: uppercase;
+                            margin-bottom: 14px;
+                        }
+                        .cp-namewrap { margin-bottom: 14px; }
+                        .cp-nrule-t {
+                            height: 1px;
+                            background: -webkit-linear-gradient(left, transparent, #C9A227, transparent);
+                            background: linear-gradient(to right, transparent, #C9A227, transparent);
+                            margin-bottom: 6px;
+                        }
+                        .cp-name {
+                            font-family: Georgia, serif;
+                            font-size: 36pt; color: #1D2A44;
+                            font-style: italic; font-weight: 700;
+                            line-height: 1.15;
+                        }
+                        .cp-nrule-b {
+                            height: 2px;
+                            background: -webkit-linear-gradient(left, transparent, #C9A227 20%, #C9A227 80%, transparent);
+                            background: linear-gradient(to right, transparent, #C9A227 20%, #C9A227 80%, transparent);
+                            margin-top: 6px;
+                        }
+                        /* Thin separator between name and details */
+                        .cp-mid-sep {
+                            width: 50%; height: 1px;
+                            background: rgba(201,162,39,0.25);
+                            margin: 14px auto;
+                        }
+                        .cp-detail { font-size: 10pt; color: #444; }
+                        .cp-sep {
+                            display: inline-block;
+                            width: 4px; height: 4px; background: #C9A227;
+                            border-radius: 50%; vertical-align: middle; margin: 0 9px 2px;
+                        }
+                        .cp-pill {
+                            display: inline-block;
+                            background: #C9A227; color: #fff; font-weight: 700;
+                            padding: 1px 10px; border-radius: 10px; font-size: 9pt;
+                        }
+                        .cp-desc { font-size: 10.5pt; color: #333; margin-top: 10px; }
+                        .cp-lulus {
+                            color: #1D2A44; font-weight: 700;
+                            background: rgba(201,162,39,0.18); padding: 0 5px;
+                        }
+                        .cp-sertname { font-size: 13pt; font-weight: 700; color: #1D2A44; margin-top: 8px; }
+
+                        /* Footer items */
+                        .cp-certno { font-size: 7.5pt; color: #aaa; font-family: 'Courier New', monospace; }
+                        .cp-date   { font-size: 8.5pt; color: #555; }
+                        .cp-sig-org { font-size: 8pt; font-weight: 700; color: #1D2A44; letter-spacing: 1px; }
+                        .cp-sig-sub { font-size: 7pt; color: #777; }
+                    </style></div>
+
+                    <div class="cp">
+                        <!-- 1. Background pattern -->
+                        <div class="cp-pat"/>
+
+                        <!-- 2. HEADER BAND (judul saja, logo dipindah ke body) -->
+                        <div class="cp-hdr">
+                            <table class="cp-hdr-tbl">
+                                <tr>
+                                    <td class="cp-title-cell">
+                                        <div class="cp-app-lbl">AMPERA247</div>
+                                        <div class="cp-main-ttl">SERTIFIKAT KELULUSAN</div>
+                                        <div class="cp-subtitle">Layanan Digital Kamtibmas Kota Palembang</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 3. GOLD DIVIDER -->
+                        <div class="cp-div"/>
+
+                        <!-- 4. BODY — vertically centred via inner table -->
+                        <div class="cp-body">
+                            <table class="cp-body-tbl">
+                                <tr>
+                                    <td class="cp-body-td">
+                                        <!-- Logo di tengah, di atas teks "Diberikan kepada" -->
+                                        <div class="cp-body-logo">
+                                            <img t-att-src="'data:image/png;base64,' + logo_b64" alt="AMPERA247"/>
+                                        </div>
+                                        <div class="cp-given">Diberikan kepada :</div>
+                                        <div class="cp-namewrap">
+                                            <div class="cp-nrule-t"/>
+                                            <div class="cp-name"><t t-esc="p.nama"/></div>
+                                            <div class="cp-nrule-b"/>
+                                        </div>
+                                        <div class="cp-mid-sep"/>
+                                        <div class="cp-detail">
+                                            NIK: <t t-esc="p.nik"/>
+                                             
+                                            <span class="cp-sep"/>
+                                            Nilai: <span class="cp-pill"><t t-esc="'%.1f' % p.nilai"/></span>
+                                        </div>
+                                        <div class="cp-desc">
+                                            Telah menyelesaikan dan dinyatakan
+                                            <span class="cp-lulus">LULUS</span>
+                                            ujian sertifikasi:
+                                        </div>
+                                        <div class="cp-sertname"><t t-esc="p.sertifikasi_id.name"/></div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 5. FOOTER -->
+                        <div class="cp-ftr">
+                            <table class="cp-ftr-tbl">
+                                <tr>
+                                    <!-- Kiri: nomor sertifikat (bawah) -->
+                                    <td class="cp-ftr-certno">
+                                        <div class="cp-certno">
+                                            No.: CERT-<t t-esc="p.waktu_selesai.year if p.waktu_selesai else '2026'"/>-<t t-esc="'%05d' % p.id"/>
+                                        </div>
+                                    </td>
+                                    <!-- Kanan: tanggal → ruang ttd+stempel → garis → nama org -->
+                                    <td class="cp-ftr-sig">
+                                        <div class="cp-date">
+                                            Palembang, <t t-esc="format_date_id(p.waktu_selesai)"/>
+                                        </div>
+                                        <div class="cp-sig-sp"/>
+                                        <div class="cp-sig-ln"/>
+                                        <div class="cp-sig-org">AMPERA247</div>
+                                        <div class="cp-sig-sub">Layanan Digital Kamtibmas</div>
+                                        <div class="cp-sig-sub">Kota Palembang</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 6. Gold border frame (painted over content) -->
+                        <div class="cp-bo"/>
+                        <div class="cp-bi"/>
+
+                        <!-- 7. Navy corner squares (topmost layer) -->
+                        <div class="cp-co cc-tl"/>
+                        <div class="cp-co cc-tr"/>
+                        <div class="cp-co cc-bl"/>
+                        <div class="cp-co cc-br"/>
+                    </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -32,6 +32,10 @@ class SertifikasiPeserta(models.Model):
     jawaban_ids   = fields.One2many(
         'digital_kamtibmas.sertifikasi.jawaban', 'peserta_id', 'Detail Jawaban')
 
+    def action_cetak_sertifikat(self):
+        self.ensure_one()
+        return self.env.ref('digital_kamtibmas.action_report_sertifikat').with_context(landscape=True).report_action(self)
+
 
 class SertifikasiJawaban(models.Model):
     _name = 'digital_kamtibmas.sertifikasi.jawaban'

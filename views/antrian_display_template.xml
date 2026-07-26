@@ -280,7 +280,7 @@
     <!-- Header -->
     <div class="dsp-header">
         <div class="dsp-brand">
-            <img src="/digital_kamtibmas/static/img/logo_polda.png"
+            <img src="/digital_kamtibmas/static/img/logo_app.png"
                  class="dsp-brand-logo" alt="Logo Polda Sumsel"
                  onerror="this.style.display='none'"/>
             <div class="dsp-brand-text">

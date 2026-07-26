@@ -56,7 +56,7 @@
 
 <!-- ══════════════════ IDLE ══════════════════════════════════════════════════ -->
 <div t-if="state.phase === 'idle'" class="ok-idle" t-on-click="startFlow">
-    <img class="ok-idle-logo" src="/digital_kamtibmas/static/img/logo_polda.png" alt="Logo"/>
+    <img class="ok-idle-logo" src="/digital_kamtibmas/static/img/logo_app.png" alt="Logo"/>
     <div class="ok-idle-title">Buku Tamu Tahti</div>
     <div class="ok-idle-org">AMPERA247</div>
     <div class="ok-idle-divider"/>
@@ -90,7 +90,7 @@
     <div class="ok-nav">
         <div class="ok-nav-brand">
             <img class="ok-nav-logo"
-                 src="/digital_kamtibmas/static/img/logo_polda.png" alt=""/>
+                 src="/digital_kamtibmas/static/img/logo_app.png" alt=""/>
             <span class="ok-nav-name">Buku Tamu Tahti</span>
         </div>
 
