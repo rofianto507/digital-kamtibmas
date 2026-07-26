@@ -93,3 +93,5 @@ access_sertifikasi_jawaban_admin,sertifikasi_jawaban admin,model_digital_kamtibm
 
 access_notifikasi_user,notifikasi user,model_digital_kamtibmas_notifikasi,base.group_user,1,1,1,0
 access_notifikasi_admin,notifikasi admin,model_digital_kamtibmas_notifikasi,digital_kamtibmas.group_dkm_admin,1,1,1,1
+access_deletion_req_admin,deletion_request admin,model_digital_kamtibmas_account_deletion_request,digital_kamtibmas.group_dkm_admin,1,1,1,1
+access_deletion_req_user,deletion_request user,model_digital_kamtibmas_account_deletion_request,base.group_user,0,0,1,0

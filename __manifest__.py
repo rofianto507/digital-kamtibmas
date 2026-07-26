@@ -41,6 +41,8 @@
         'views/sertifikasi_profil_views.xml',
         'views/sertifikasi_views.xml',
         'views/sertifikasi_kiosk_template.xml',
+        'views/sertifikasi_cetak_template.xml',
+        'views/account_deletion_views.xml',
         'views/menu.xml',
     ],
     'assets': {

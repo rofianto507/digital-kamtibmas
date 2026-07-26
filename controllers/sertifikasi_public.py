@@ -18,10 +18,8 @@ class SertifikasiPublicController(http.Controller):
 
     @http.route('/sertifikasi/<string:token>', type='http', auth='public', csrf=False, website=False)
     def kiosk_index(self, token, **kwargs):
-        company = request.env['res.company'].sudo().search([], limit=1)
-        logo_url = f'/web/image/res.company/{company.id}/logo' if company else ''
         return request.render('digital_kamtibmas.sertifikasi_kiosk_template', {
-            'company_logo_url': logo_url,
+            'company_logo_url': '/digital_kamtibmas/static/img/logo_app.png',
         })
 
     # ── API: info sertifikasi ─────────────────────────────────────────────────
