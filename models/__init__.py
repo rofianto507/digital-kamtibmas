@@ -31,3 +31,5 @@ from . import sertifikasi_cetak
 from . import discuss_channel_patch
 from . import notifikasi
 from . import account_deletion_request
+from . import welcome_screen
+from . import slider

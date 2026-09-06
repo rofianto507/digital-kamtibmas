@@ -8,3 +8,5 @@ from . import mobile_register
 from . import mobile_sertifikasi
 from . import privacy_policy
 from . import account_deletion
+from . import mobile_welcome
+from . import mobile_slider

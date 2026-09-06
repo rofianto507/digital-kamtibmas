@@ -28,7 +28,7 @@ def _generate_password(length=8):
 
 class MobileRegisterController(http.Controller):
 
-    @http.route('/mobile/dkm/register', type='jsonrpc', auth='public', csrf=False)
+    @http.route('/mobile/dkm/register', type='jsonrpc', auth='public', csrf=False, cors='*')
     def register(self, data=None, **kwargs):
         data = data or {}
 
