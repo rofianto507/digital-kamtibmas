@@ -7,7 +7,7 @@ _logger = logging.getLogger(__name__)
 
 class MobileSertifikasiController(http.Controller):
 
-    @http.route('/mobile/dkm/sertifikasi/list', type='jsonrpc', auth='public', csrf=False)
+    @http.route('/mobile/dkm/sertifikasi/list', type='jsonrpc', auth='public', csrf=False, cors='*')
     def list_sertifikasi(self, **kwargs):
         today = str(fields.Date.today())
         domain = [

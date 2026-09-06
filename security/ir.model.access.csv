@@ -91,8 +91,17 @@ access_notifikasi_user,notifikasi user,model_digital_kamtibmas_notifikasi,base.g
 access_notifikasi_admin,notifikasi admin,model_digital_kamtibmas_notifikasi,digital_kamtibmas.group_dkm_admin,1,1,1,1
 access_deletion_req_admin,deletion_request admin,model_digital_kamtibmas_account_deletion_request,digital_kamtibmas.group_dkm_admin,1,1,1,1
 access_deletion_req_user,deletion_request user,model_digital_kamtibmas_account_deletion_request,base.group_user,0,0,1,0
+access_welcome_screen_admin,welcome_screen admin,model_digital_kamtibmas_welcome_screen,digital_kamtibmas.group_dkm_admin,1,1,1,1
+access_welcome_screen_user,welcome_screen user,model_digital_kamtibmas_welcome_screen,base.group_user,1,0,0,0
+access_slider_admin,slider admin,model_digital_kamtibmas_slider,digital_kamtibmas.group_dkm_admin,1,1,1,1
+access_slider_user,slider user,model_digital_kamtibmas_slider,base.group_user,1,0,0,0
 access_eform_laka_satlantas,eform_laka satlantas,model_digital_kamtibmas_eform_laka,digital_kamtibmas.group_satlantas,1,1,1,0
 access_yang_terlibat_satlantas,yang_terlibat satlantas,model_digital_kamtibmas_yang_terlibat,digital_kamtibmas.group_satlantas,1,0,0,0
+access_yang_terlibat_user,yang_terlibat user,model_digital_kamtibmas_yang_terlibat,base.group_user,1,0,0,0
+access_kabupaten_user,kabupaten user,model_digital_kamtibmas_kabupaten,base.group_user,1,0,0,0
+access_kecamatan_user,kecamatan user,model_digital_kamtibmas_kecamatan,base.group_user,1,0,0,0
+access_desa_user,desa user,model_digital_kamtibmas_desa,base.group_user,1,0,0,0
+access_polsek_user,polsek user,model_digital_kamtibmas_polsek,base.group_user,1,0,0,0
 access_antrian_satlantas,antrian satlantas,model_digital_kamtibmas_antrian,digital_kamtibmas.group_satlantas,1,1,1,0
 access_jenis_layanan_satlantas,jenis_layanan satlantas,model_digital_kamtibmas_jenis_layanan,digital_kamtibmas.group_satlantas,1,0,0,0
 access_loket_satlantas,loket satlantas,model_digital_kamtibmas_loket,digital_kamtibmas.group_satlantas,1,0,0,0

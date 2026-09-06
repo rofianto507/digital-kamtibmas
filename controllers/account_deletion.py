@@ -66,7 +66,7 @@ textarea{{resize:vertical;min-height:80px}}
     </p>
   </div>
 </div>
-<div class="footer">&copy; 2026 AMPERA247 &mdash; CV Sel Studio</div>
+<div class="footer">&copy; 2026 AMPERA247 &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA247)</div>
 <script>
 document.getElementById('frm').addEventListener('submit', async function(e) {{
   e.preventDefault();

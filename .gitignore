@@ -27,3 +27,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Dokumentasi internal (tidak untuk repo publik)
+context.md
