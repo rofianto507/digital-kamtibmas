@@ -31,8 +31,11 @@
     <field name="arch" type="xml">
       <form string="Permintaan Hapus Akun">
         <header>
+          <button name="action_hapus_akun" type="object" string="Hapus Akun Pengguna"
+                  class="btn-danger"
+                  confirm="Hapus akun ini? Data pribadi dihapus permanen dan akun dinonaktifkan. Tidak bisa dibatalkan."
+                  invisible="state == 'processed' or not user_id"/>
           <button name="action_proses" type="object" string="Tandai Sudah Diproses"
-                  class="btn-primary"
                   invisible="state == 'processed'"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="pending,processed"/>
@@ -82,12 +85,6 @@
     </field>
   </record>
 
-  <!-- Menu -->
-  <menuitem id="menu_account_deletion"
-            name="Permintaan Hapus Akun"
-            parent="digital_kamtibmas.menu_dkm_configuration"
-            action="action_account_deletion_request"
-            groups="digital_kamtibmas.group_dkm_admin"
-            sequence="90"/>
+  <!-- Menu ada di menu.xml (dimuat terakhir) -->
 
 </odoo>

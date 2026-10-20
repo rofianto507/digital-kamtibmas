@@ -43,6 +43,7 @@
         'views/sertifikasi_kiosk_template.xml',
         'views/sertifikasi_cetak_template.xml',
         'views/account_deletion_views.xml',
+        'views/warga_views.xml',
         'views/welcome_screen_views.xml',
         'views/slider_views.xml',
         'views/menu.xml',

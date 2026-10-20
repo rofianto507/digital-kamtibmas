@@ -529,6 +529,7 @@ Semua view Intelkam dalam satu file. Views yang ada:
 ```
 Digital Kamtibmas (root, sequence 2)
 ├── Dashboard                           [admin, operator]
+├── Warga (sequence 5)                  [admin only]
 ├── Satlantas
 │   ├── e-Form Laka                     [admin, operator]
 │   └── Antrian Layanan                 [admin, operator]
@@ -554,7 +555,8 @@ Digital Kamtibmas (root, sequence 2)
     ├── Kecamatan
     ├── Desa/Kelurahan
     ├── Sel/Kamar Tahanan (sequence 20)
-    └── Konfigurasi Wablas              [admin only]
+    ├── Konfigurasi Wablas              [admin only]
+    └── Permintaan Hapus Akun (sequence 90) [admin only]
 ```
 
 ---
@@ -642,6 +644,55 @@ Dialog sambutan yang muncul sekali per sesi saat dashboard mobile dibuka. **Hany
 **Endpoint**: `GET /api/mobile/welcome-screen` (`controllers/mobile_welcome.py`, auth public) — domain filter `active=True` + rentang tanggal terhadap `date.today()`, return `null` jika tidak ada yang cocok.
 
 **Flutter**: `lib/features/dashboard/presentation/providers/welcome_screen_provider.dart` (`WelcomeScreenData`) + `_WelcomeDialog` di `dashboard_screen.dart`. Tombol aksi hanya muncul jika `button_url` tidak kosong.
+
+---
+
+## Warga & Registrasi Mobile
+
+### Registrasi mobile — dua versi (jangan hapus v1)
+
+| Endpoint | Dipakai app | Login |
+|---|---|---|
+| `POST /mobile/dkm/register` (v1) | ≤ 1.3.0+6 (sudah rilis) | Nomor WhatsApp (`628xxx`); password acak dikirim lewat WA |
+| `POST /mobile/dkm/v2/check-username` | ≥ 1.4.0+7 | Cek username tersedia / belum |
+| `POST /mobile/dkm/v2/register` | ≥ 1.4.0+7 | Username + nama + password (+ foto opsional); tanpa WA dan tanpa nomor telepon |
+
+Semuanya di `controllers/mobile_register.py`, `type='jsonrpc'`, `auth='public'`. **Endpoint v1 dibiarkan apa adanya** supaya app lama yang sudah rilis tetap bisa daftar. Perubahan perilaku pendaftaran selalu lewat endpoint berversi baru, bukan mengubah yang lama.
+
+**Aturan v2** (divalidasi di server, dan sama persis di Flutter `registration_screen.dart` — ubah keduanya bersamaan):
+- Username dinormalisasi ke huruf kecil, regex `^[a-z][a-z0-9._]{3,29}$` (4–30 karakter). Wajib diawali huruf, jadi tidak bisa berupa angka murni — mencegah bentrok dengan login nomor WA milik akun v1.
+- Nama dicadangkan (`admin`, `polri`, `polrestabes`, `ampera247`, dst.) ditolak dengan pesan "Username tidak tersedia".
+- Cek ketersediaan case-insensitive dan ikut menghitung akun terarsip (`=ilike` dengan escape `_` dan `%`, `active_test=False`).
+- Password 8–64 karakter, wajib kombinasi huruf dan angka.
+- Flutter: cek username otomatis (debounce 500 ms, counter `_checkSeq` untuk membuang respons usang), form tidak bisa dikirim bila username terpakai / masih diperiksa. Foto opsional dan disembunyikan di web.
+
+**Belum ada**: rate limit pada endpoint register / check-username, dan "lupa password". Akun v2 tidak punya nomor telepon, jadi pemulihan lewat admin (menu Warga → Reset Password).
+
+### digital_kamtibmas.warga (menu Warga)
+
+Daftar akun grup **Masyarakat** untuk admin. Model view SQL read-only (`_auto = False`) di atas `res.users` + `res.partner` (`models/warga.py`, `views/warga_views.xml`), menu **Warga** di root (sequence 5, hanya `group_dkm_admin`). Dengan view SQL, admin DKM tidak perlu hak Settings dan tidak bisa mengubah grup / hak akses user lain.
+
+| Field | Keterangan |
+|---|---|
+| `user_id` | Akun `res.users` (id baris = id user) |
+| `name`, `login`, `phone`, `street` | Dari user / partner |
+| `active`, `create_date` | Status dan tanggal daftar |
+| `image_128` | `Binary` related ke `user_id.image_128` |
+| `antrian_count`, `eform_count`, `konseling_count`, `rehab_count` | Compute (sudo + `_read_group`) → smart button ke riwayat layanan |
+| `deletion_pending` | Compute: ada `account_deletion_request` berstatus pending |
+
+**Aksi** (hanya `group_dkm_admin`, hanya target bergrup Masyarakat, tidak boleh akun sendiri):
+- `action_toggle_active` — nonaktifkan / aktifkan.
+- `action_reset_password` — password acak (`secrets`), ditampilkan sekali lewat notifikasi sticky. Satu akun per panggilan.
+- `action_hapus_akun` — **anonimisasi**, bukan `unlink`: nama partner jadi "Akun Dihapus", alamat / telepon / email / foto dikosongkan, login jadi `dihapus.<id>` (username lama bisa dipakai lagi), password diacak, akun dinonaktifkan, dan `account_deletion_request` pending milik user itu ditandai `processed` dengan catatan. Baris layanan (antrian, laka, konseling, rehab) tetap utuh agar relasi tidak rusak.
+- `account_deletion_request.action_hapus_akun` (tombol "Hapus Akun Pengguna" di form Permintaan Hapus Akun) memanggil aksi di atas, jadi hanya ada satu jalur hapus akun. Baris permintaan sendiri masih menyimpan `nama` dan `login` asli sebagai jejak audit.
+
+**Catatan teknis view SQL**:
+- `_log_access = True` dan view wajib menyediakan kolom `create_uid`, `create_date`, `write_uid`, `write_date`. Web client selalu meminta `write_date` saat membuka form; tanpa kolom itu muncul `ValueError: Invalid field 'write_date'`.
+- Gunakan `fields.Binary` (bukan `fields.Image`) untuk related foto — `Image` mensyaratkan `_log_access` dan memunculkan warning.
+- `<group string>` tidak valid di `<search>` Odoo 19; taruh `<filter>` group-by langsung.
+- Filter grup di SQL lewat `ir_model_data` (`module='digital_kamtibmas'`, `name='group_masyarakat'`) di `EXISTS`, jadi view bisa dibuat sebelum data grup dimuat.
+- Menuitem yang parent-nya didefinisikan di `menu.xml` **harus** ditaruh di `menu.xml` (dimuat paling akhir di manifest). Menu Warga dan Permintaan Hapus Akun sudah dipindah ke sana.
 
 ---
 
@@ -936,3 +987,5 @@ OWL XML parser **tidak** mengenal HTML named entities. Gunakan numeric:
 | 1.5.5 | **Flutter mobile 1.2.0+5**: (1) Ripple effect audit menyeluruh — semua `GestureDetector`/`Container` bertappable diganti `Material + InkWell` di: profile_screen, dashboard_screen, antrian_screen, konseling_screen, barang_bukti_screen, patroli_home_screen. Pattern: `DecoratedBox` (shadow) + `Material` (ink surface, clipBehavior) + `InkWell`. (2) Bugfix crash `barang_bukti_screen.dart` dan `konseling_screen.dart`: `Material` tidak boleh menerima `borderRadius` DAN `shape` secara bersamaan — hapus `borderRadius`, gunakan hanya `shape: RoundedRectangleBorder(...)`. (3) AndroidManifest.xml: tambah `<queries>` intent untuk `mailto:` dan `https:` agar `canLaunchUrl()` tidak selalu return false di Android 11+. (4) **Play Store**: update ditolak karena "Kebijakan Klaim Menyesatkan — Tidak Ada Link Sumber Informasi Pemerintah". Fix: deskripsi diupdate dengan disclaimer di bagian paling atas, link sumber resmi (`palembang.go.id`, `polrestapalembang.polri.go.id`), repositioning sebagai "community app", developer diubah dari CV Sel Studio → CV. "Mitra Hoki Maju Mapan". AAB 1.2.0+5 disubmit. (5) **App Store**: banding Guideline 5.1.1(ix) disiapkan ulang — strategi: SIUP CV. "Mitra Hoki Maju Mapan" (No. 517/0160/35.73.407/2015) + Surat Pernyataan bilingual (Indonesia + English) yang menyatakan AMPERA247 adalah produk CV. "Mitra Hoki Maju Mapan", tanpa menyebut instansi pemerintah. |
 | 1.5.6 | **App Store lanjutan**: reject 3x dengan Guideline 5.1.1(ix) — Apple eksplisit minta seller name mencerminkan "Pemerintah Kota Palembang". Strategi baru: **Bank Sumsel Babel** (PT Bank Pembangunan Daerah Sumatera Selatan dan Bangka Belitung) sebagai institusi pendukung netral (bukan penegak hukum, relevan geografis Palembang). Dibuat Surat Permohonan Dukungan dari CV Mitra Hoki ke Bank Sumsel Babel (`.docx`, alamat Jl. Gubernur H. Ahmad Bastari No. 7, Jakabaring Palembang) untuk memperoleh surat dukungan resmi balasan sebagai evidence of relationship ke Apple. **Model baru Odoo**: `digital.kamtibmas.welcome.screen` (`models/welcome_screen.py`, `controllers/mobile_welcome.py`, `views/welcome_screen_views.xml`) dan `digital.kamtibmas.slider` untuk banner dashboard mobile — endpoint `/api/mobile/welcome-screen` dan `/api/mobile/slider`, auth public. Welcome screen ditambah field `button_label` (default "Lihat detail") dan `button_url` agar bisa menampilkan tombol aksi yang buka browser eksternal (dipakai untuk link Bank Sumsel Babel sebagai sponsor). Dibuat gambar welcome screen 1080×1350 kombinasi logo AMPERA247 + Bank Sumsel Babel dengan tagline "Membangun Daerah, Melayani Sepenuh Hati". |
 | 1.5.7 | **Flutter mobile 1.3.0+6 — bugfix session & migrasi domain**: (1) **Root cause auto-logout tidak jalan**: `AuthInterceptor` mencocokkan nama exception `odoo.exceptions.SessionExpiredException`, tapi Odoo 19 mengirim `odoo.http.SessionExpiredException` (kelas pindah modul) — dibuktikan via curl dengan session_id palsu ke `/web/dataset/call_kw`. Fix: cocokkan akhiran `endsWith('SessionExpiredException')` agar tahan beda versi. (2) **Bug kedua setelah fix #1**: begitu deteksi jalan, terjadi loop 231× panggilan `/web/session/destroy` (self-feeding logout) — root cause: `sessionExpiredProvider` di-`reset()` terlalu dini (seusai satu logout) sementara banyak request lain yang sedang terbang juga balas expired dan masing-masing memicu logout baru. Fix: flag `hasExpired` dikunci sampai ada login berikutnya yang **berhasil** (`reset()` dipindah ke `AuthNotifier.login()`, hanya jika `state.valueOrNull != null`). Juga `apiClientProvider`: `sessionExpired: ref.watch(...)` → `ref.read(...)` — dengan `watch`, tiap `notifyListeners()` membangun ulang `Dio` + seluruh provider turunannya sehingga badai request makin besar. (3) **Crash banner slider**: `_BannerSliderState._startTimer` memanggil `_ctrl.animateToPage()` walau `PageController` belum/tidak lagi attached ke `PageView` (`'positions.isNotEmpty'` assertion) — terjadi saat provider slider balik ke state loading sehingga `PageView` sempat lepas dari tree walau `State` masih `mounted`. Fix: tambah guard `_ctrl.hasClients`. (4) **Migrasi domain**: base URL production `https://palembang.polisibaik.id` → `https://ampera2407.id` (domain netral untuk App Store, lihat 1.5.4) di `app_config.dart`, `login_screen.dart`, `profile_screen.dart` (URL kebijakan privasi), `.vscode/launch.json`. Diverifikasi via curl bahwa `ampera2407.id` melayani DB `palembang` yang sama (reverse proxy nginx dengan `Host: palembang.polisibaik.id`) sebelum migrasi — endpoint API, auth, dan halaman statis (`/kebijakan-privasi`, `/dukungan`) identik. Bundle ID (`id.polisibaik.ampera247`) **tidak diubah** — itu identitas app di store, beda dari base URL. Semua fix diverifikasi live di device `058990610406` via `flutter run` + hot reload/restart lewat Dart Tooling Daemon (`mcp__dart__dtd` connect ke DTD URI dari `flutter devices`/log run), cross-check jumlah baris log dan endpoint yang di-hit sebelum/sesudah fix. AAB 1.3.0+6 dibuild dan disubmit ke Play Store. |
+| 1.5.8 | **Perubahan strategi App Store / Play Store**: Polrestabes Palembang bersedia memberi surat pernyataan bahwa AMPERA247 berada di bawah tanggung jawab Polri satwil Polrestabes Palembang dan CV. Mitra Hoki Maju Mapan ditunjuk sebagai pengembang / pengelola teknis. Rute Bank Sumsel Babel dan posisi "community app" ditinggalkan. Draft surat bilingual (Indonesia + Inggris, `.docx`, field kosong di-highlight kuning) dibuat di `Documents/Surat_Pernyataan_Polrestabes_AMPERA247.docx` — menunggu scan PDF bertanda tangan + cap; surat yang sama dipakai untuk Play Console dan App Store Connect (nama app, Bundle ID `id.polisibaik.ampera247`, dan nama CV harus persis sama dengan akun developer). `controllers/privacy_policy.py` diubah: disclaimer "tidak berafiliasi dengan instansi pemerintah" diganti pernyataan **Aplikasi Resmi Polrestabes Palembang** (title, badge, hero, bagian about, intro kebijakan privasi, link `polrestapalembang.polri.go.id`). **Jangan deploy halaman ini dan jangan ubah listing sebelum surat ada** — klaim resmi tanpa bukti berisiko dianggap menyesatkan. Listing Play Store (disclaimer "community app" di atas deskripsi) diubah manual di Play Console setelah surat; welcome screen sponsor Bank Sumsel Babel perlu ditinjau ulang. |
+| 1.5.9 | **Registrasi v2 + manajemen Warga**: (1) Pendaftaran app diganti username + nama + password + ulangi password + foto opsional (tanpa WhatsApp / telepon) lewat endpoint baru `/mobile/dkm/v2/check-username` dan `/mobile/dkm/v2/register`; endpoint v1 `/mobile/dkm/register` **tidak diubah** agar app lama tetap jalan. Aturan username dan password: lihat bagian "Warga & Registrasi Mobile". Server live sudah diverifikasi merespons endpoint baru dan lama. (2) Menu **Warga** (`digital_kamtibmas.warga`, view SQL read-only) untuk admin: list + pencarian + smart button riwayat layanan + Reset Password / Nonaktifkan / Hapus Akun (anonimisasi); tombol "Hapus Akun Pengguna" ditambahkan di Permintaan Hapus Akun. Bug saat dibuka di live: `Invalid field 'write_date'` — view SQL harus menyediakan kolom log akses (`_log_access = True`). (3) Instalasi bersih modul sebelumnya tidak mungkin dan sudah diperbaiki: ID duplikat di `ir.model.access.csv` (`access_rehab_*` dan `access_rehab_tempat_*`, baris terakhir yang berlaku sehingga izin tidak berubah) dan menu Permintaan Hapus Akun yang memakai parent dari `menu.xml` sebelum dimuat (dipindah ke `menu.xml`, xmlid sama). Diuji lewat instalasi di database sementara (19 skenario fungsional lulus: akses, aksi, reset password, anonimisasi). (4) **Flutter 1.4.0+7**: `registration_screen.dart` dan `registration_provider.dart` memakai endpoint v2. `env.prod.json` masih berisi `palembang.polisibaik.id` (usang) — build rilis memakai `--dart-define=BASE_URL=https://ampera2407.id --dart-define=DB_NAME=palembang --dart-define=IS_PRODUCTION=true` secara eksplisit. Upgrade modul di server live (`-u digital_kamtibmas`) diperlukan untuk model / menu Warga. |
