@@ -24,6 +24,10 @@
                     <group>
                         <field name="keterangan" placeholder="Keterangan tambahan (opsional)"/>
                     </group>
+                    <group string="Tombol Aksi (opsional)">
+                        <field name="button_label" placeholder="Lihat detail"/>
+                        <field name="button_url" placeholder="https://contoh.com/halaman"/>
+                    </group>
                 </sheet>
             </form>
         </field>

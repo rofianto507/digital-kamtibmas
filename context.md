@@ -608,6 +608,43 @@ ir.module.category (module_category_dkm)
 
 ---
 
+## Mobile Home Content — Slider & Welcome Screen
+
+Konten dinamis yang dikelola dari backend Odoo untuk ditampilkan di dashboard mobile (Flutter).
+
+### digital.kamtibmas.slider
+
+Banner carousel di dashboard mobile. Ditampilkan berurutan sesuai `sequence`.
+
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `name` | Char | Judul (required) |
+| `image` | Binary | Gambar banner (required, attachment) |
+| `sequence` | Integer | Urutan tampil (default 10) |
+| `active` | Boolean | Aktif/nonaktif |
+
+**Endpoint**: `GET /api/mobile/slider` (`controllers/mobile_slider.py`, auth public) — return list `{id, name, image_url}`, hanya record `active=True`, urut `sequence`.
+
+### digital.kamtibmas.welcome.screen
+
+Dialog sambutan yang muncul sekali per sesi saat dashboard mobile dibuka. **Hanya boleh 1 record aktif** (`@api.constrains`).
+
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `name` | Char | Judul (required) |
+| `image` | Binary | Gambar welcome (required, attachment) |
+| `active` | Boolean | Aktif/nonaktif — validasi single-active |
+| `tanggal_mulai` / `tanggal_selesai` | Date | Rentang tampil (opsional, kosong = tanpa batas) |
+| `keterangan` | Text | Catatan tambahan (opsional) |
+| `button_label` | Char | Label tombol aksi (default "Lihat detail") |
+| `button_url` | Char | URL tujuan tombol — dibuka via `url_launcher` di browser eksternal mobile |
+
+**Endpoint**: `GET /api/mobile/welcome-screen` (`controllers/mobile_welcome.py`, auth public) — domain filter `active=True` + rentang tanggal terhadap `date.today()`, return `null` jika tidak ada yang cocok.
+
+**Flutter**: `lib/features/dashboard/presentation/providers/welcome_screen_provider.dart` (`WelcomeScreenData`) + `_WelcomeDialog` di `dashboard_screen.dart`. Tombol aksi hanya muncul jika `button_url` tidak kosong.
+
+---
+
 ## Frontend Assets
 
 ### Map Widget (OWL: `DkmMapPicker`)
@@ -897,3 +934,5 @@ OWL XML parser **tidak** mengenal HTML named entities. Gunakan numeric:
 | 1.5.3 | Fix CORS error web app `ampera247.polisibaik.id`: root cause adalah `env.prod.json` menggunakan BASE_URL `kamtibmas.polrestabes-palembang.id` (salah) dan DB_NAME `odoo_prod` (tidak ada) — difix ke `palembang.polisibaik.id` dan `palembang`. CORS di nginx `palembang.conf` sudah dikonfigurasi via `map $cors_origin` untuk `ampera247.polisibaik.id`, tidak perlu `cors='*'` di controller (menyebabkan duplicate header). Flutter web rebuild dan deploy ke `/home/rofi/ampera247/` di server. Foto picker registrasi dikondisikan `if (!kIsWeb)` — web pakai avatar Odoo otomatis, mobile tetap bisa upload foto. iOS App Store: build 1.1.0 (4) disubmit ulang, reply dikirim ke Apple untuk Guideline 2.1 (hubungan CV Sel Studio / CV Mitra Hoki dengan Polrestabes Palembang) dan 5.1.1v (Alamat opsional, WhatsApp wajib untuk kirim password). |
 | 1.5.4 | iOS App Store lanjutan: Apple menolak 2x lagi dengan Guideline 5.1.1(ix) — seller name harus mencerminkan nama instansi pemerintah. Reply klarifikasi dikirim 2x (posisi sebagai community app, bukan app pemerintah). Reply pertama yang menyebut "Polrestabes Palembang" justru memicu 5.1.1(ix). Ditemukan bahwa `dharukun@yahoo.com` punya akses ke akun Apple Developer **Divisi Teknologi Informasi dan Komunikasi Kepolisian Negara Republik Indonesia** (Divtik Polri) — opsional untuk transfer/resubmit. Sementara menunggu respons Apple, setup **TestFlight External Testing**: grup "Ampera External" dibuat, build 1.1.0 (4) status "Waiting for Review" untuk Beta App Review, public link `https://testflight.apple.com/join/QPGb7CsZ`. Domain baru `ampera2407.id` dibeli sebagai URL netral (tanpa kata "polisi") untuk App Store listing. Nginx dikonfigurasi di server: `/etc/nginx/sites-available/ampera2407.id/ampera2407.conf` — reverse proxy ke Odoo dengan `Host: palembang.polisibaik.id` (database palembang). SSL via Let's Encrypt untuk `ampera2407.id`. Ditambahkan `proxy_mode = True` ke `/etc/odoo/odoo.conf`. Server mengalami OOM kill nginx 2x karena tidak ada swap (Swap = 0) — pending penambahan swap 4GB oleh server admin. URL App Store perlu diupdate ke: Support `https://ampera2407.id/dukungan`, Privacy Policy `https://ampera2407.id/kebijakan-privasi`, Marketing `https://ampera2407.id/ampera247` — semua halaman sudah diverifikasi bersih dari kata polisi/police. |
 | 1.5.5 | **Flutter mobile 1.2.0+5**: (1) Ripple effect audit menyeluruh — semua `GestureDetector`/`Container` bertappable diganti `Material + InkWell` di: profile_screen, dashboard_screen, antrian_screen, konseling_screen, barang_bukti_screen, patroli_home_screen. Pattern: `DecoratedBox` (shadow) + `Material` (ink surface, clipBehavior) + `InkWell`. (2) Bugfix crash `barang_bukti_screen.dart` dan `konseling_screen.dart`: `Material` tidak boleh menerima `borderRadius` DAN `shape` secara bersamaan — hapus `borderRadius`, gunakan hanya `shape: RoundedRectangleBorder(...)`. (3) AndroidManifest.xml: tambah `<queries>` intent untuk `mailto:` dan `https:` agar `canLaunchUrl()` tidak selalu return false di Android 11+. (4) **Play Store**: update ditolak karena "Kebijakan Klaim Menyesatkan — Tidak Ada Link Sumber Informasi Pemerintah". Fix: deskripsi diupdate dengan disclaimer di bagian paling atas, link sumber resmi (`palembang.go.id`, `polrestapalembang.polri.go.id`), repositioning sebagai "community app", developer diubah dari CV Sel Studio → CV. "Mitra Hoki Maju Mapan". AAB 1.2.0+5 disubmit. (5) **App Store**: banding Guideline 5.1.1(ix) disiapkan ulang — strategi: SIUP CV. "Mitra Hoki Maju Mapan" (No. 517/0160/35.73.407/2015) + Surat Pernyataan bilingual (Indonesia + English) yang menyatakan AMPERA247 adalah produk CV. "Mitra Hoki Maju Mapan", tanpa menyebut instansi pemerintah. |
+| 1.5.6 | **App Store lanjutan**: reject 3x dengan Guideline 5.1.1(ix) — Apple eksplisit minta seller name mencerminkan "Pemerintah Kota Palembang". Strategi baru: **Bank Sumsel Babel** (PT Bank Pembangunan Daerah Sumatera Selatan dan Bangka Belitung) sebagai institusi pendukung netral (bukan penegak hukum, relevan geografis Palembang). Dibuat Surat Permohonan Dukungan dari CV Mitra Hoki ke Bank Sumsel Babel (`.docx`, alamat Jl. Gubernur H. Ahmad Bastari No. 7, Jakabaring Palembang) untuk memperoleh surat dukungan resmi balasan sebagai evidence of relationship ke Apple. **Model baru Odoo**: `digital.kamtibmas.welcome.screen` (`models/welcome_screen.py`, `controllers/mobile_welcome.py`, `views/welcome_screen_views.xml`) dan `digital.kamtibmas.slider` untuk banner dashboard mobile — endpoint `/api/mobile/welcome-screen` dan `/api/mobile/slider`, auth public. Welcome screen ditambah field `button_label` (default "Lihat detail") dan `button_url` agar bisa menampilkan tombol aksi yang buka browser eksternal (dipakai untuk link Bank Sumsel Babel sebagai sponsor). Dibuat gambar welcome screen 1080×1350 kombinasi logo AMPERA247 + Bank Sumsel Babel dengan tagline "Membangun Daerah, Melayani Sepenuh Hati". |
+| 1.5.7 | **Flutter mobile 1.3.0+6 — bugfix session & migrasi domain**: (1) **Root cause auto-logout tidak jalan**: `AuthInterceptor` mencocokkan nama exception `odoo.exceptions.SessionExpiredException`, tapi Odoo 19 mengirim `odoo.http.SessionExpiredException` (kelas pindah modul) — dibuktikan via curl dengan session_id palsu ke `/web/dataset/call_kw`. Fix: cocokkan akhiran `endsWith('SessionExpiredException')` agar tahan beda versi. (2) **Bug kedua setelah fix #1**: begitu deteksi jalan, terjadi loop 231× panggilan `/web/session/destroy` (self-feeding logout) — root cause: `sessionExpiredProvider` di-`reset()` terlalu dini (seusai satu logout) sementara banyak request lain yang sedang terbang juga balas expired dan masing-masing memicu logout baru. Fix: flag `hasExpired` dikunci sampai ada login berikutnya yang **berhasil** (`reset()` dipindah ke `AuthNotifier.login()`, hanya jika `state.valueOrNull != null`). Juga `apiClientProvider`: `sessionExpired: ref.watch(...)` → `ref.read(...)` — dengan `watch`, tiap `notifyListeners()` membangun ulang `Dio` + seluruh provider turunannya sehingga badai request makin besar. (3) **Crash banner slider**: `_BannerSliderState._startTimer` memanggil `_ctrl.animateToPage()` walau `PageController` belum/tidak lagi attached ke `PageView` (`'positions.isNotEmpty'` assertion) — terjadi saat provider slider balik ke state loading sehingga `PageView` sempat lepas dari tree walau `State` masih `mounted`. Fix: tambah guard `_ctrl.hasClients`. (4) **Migrasi domain**: base URL production `https://palembang.polisibaik.id` → `https://ampera2407.id` (domain netral untuk App Store, lihat 1.5.4) di `app_config.dart`, `login_screen.dart`, `profile_screen.dart` (URL kebijakan privasi), `.vscode/launch.json`. Diverifikasi via curl bahwa `ampera2407.id` melayani DB `palembang` yang sama (reverse proxy nginx dengan `Host: palembang.polisibaik.id`) sebelum migrasi — endpoint API, auth, dan halaman statis (`/kebijakan-privasi`, `/dukungan`) identik. Bundle ID (`id.polisibaik.ampera247`) **tidak diubah** — itu identitas app di store, beda dari base URL. Semua fix diverifikasi live di device `058990610406` via `flutter run` + hot reload/restart lewat Dart Tooling Daemon (`mcp__dart__dtd` connect ke DTD URI dari `flutter devices`/log run), cross-check jumlah baris log dan endpoint yang di-hit sebelum/sesudah fix. AAB 1.3.0+6 dibuild dan disubmit ke Play Store. |
