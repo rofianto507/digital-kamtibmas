@@ -30,6 +30,8 @@ class MobileWelcomeController(http.Controller):
                     'name': rec.name,
                     'image_url': f'/web/image/digital.kamtibmas.welcome.screen/{rec.id}/image',
                     'keterangan': rec.keterangan or '',
+                    'button_label': rec.button_label or 'Lihat detail',
+                    'button_url': rec.button_url or '',
                 }
             }),
             content_type='application/json',

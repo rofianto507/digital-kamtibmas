@@ -14,6 +14,8 @@ class WelcomeScreen(models.Model):
     tanggal_mulai = fields.Date('Tampil Mulai')
     tanggal_selesai = fields.Date('Tampil Sampai')
     keterangan = fields.Text('Keterangan')
+    button_label = fields.Char('Label Tombol', default='Lihat detail')
+    button_url = fields.Char('URL Tombol')
 
     @api.constrains('active')
     def _check_single_active(self):
