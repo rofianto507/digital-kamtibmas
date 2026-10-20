@@ -13,6 +13,7 @@
         <menuitem id="menu_dkm_dashboard" name="Dashboard" parent="menu_dkm_root" action="action_dkm_dashboard" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satlantas,digital_kamtibmas.group_satnarkoba,digital_kamtibmas.group_satreskrim,digital_kamtibmas.group_sabhara,digital_kamtibmas.group_tahti,digital_kamtibmas.group_intelkam" sequence="1"/>
 
         <!-- Satlantas -->
+        <menuitem id="menu_dkm_warga" name="Warga" parent="menu_dkm_root" action="action_warga" groups="digital_kamtibmas.group_dkm_admin" sequence="5"/>
         <menuitem id="menu_dkm_satlantas" name="Satlantas" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satlantas" sequence="10"/>
         <menuitem id="menu_dkm_eform_laka" name="e-Form Laka" parent="menu_dkm_satlantas" action="action_dkm_eform_laka" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_satlantas" sequence="1"/>
         <menuitem id="menu_dkm_yang_terlibat" name="Yang Terlibat Laka" parent="menu_dkm_satlantas" action="action_dkm_yang_terlibat" groups="digital_kamtibmas.group_dkm_admin" sequence="2"/>
@@ -61,6 +62,7 @@
         <menuitem id="menu_dkm_config_tahanan_kategori" name="Kategori Tahanan" parent="menu_dkm_configuration" action="action_dkm_tahanan_kategori" groups="digital_kamtibmas.group_dkm_admin" sequence="21"/>
         <menuitem id="menu_dkm_config_sertifikasi_soal" name="Soal Sertifikasi" parent="menu_dkm_configuration" action="action_dkm_sertifikasi_soal" groups="digital_kamtibmas.group_dkm_admin" sequence="30"/>
         <menuitem id="menu_dkm_rehab_tempat" name="Tempat Rehabilitasi" parent="menu_dkm_configuration" action="action_dkm_rehab_tempat" groups="digital_kamtibmas.group_dkm_admin" sequence="31"/>
+        <menuitem id="menu_account_deletion" name="Permintaan Hapus Akun" parent="menu_dkm_configuration" action="action_account_deletion_request" groups="digital_kamtibmas.group_dkm_admin" sequence="90"/>
         <menuitem id="menu_dkm_welcome_screen" name="Welcome Screen Mobile" parent="menu_dkm_configuration" action="action_welcome_screen" groups="digital_kamtibmas.group_dkm_admin" sequence="40"/>
         <menuitem id="menu_dkm_slider" name="Slider Mobile" parent="menu_dkm_configuration" action="action_slider" groups="digital_kamtibmas.group_dkm_admin" sequence="41"/>
 

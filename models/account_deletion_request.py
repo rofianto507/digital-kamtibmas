@@ -1,4 +1,5 @@
 from odoo import models, fields
+from odoo.exceptions import UserError
 
 
 class AccountDeletionRequest(models.Model):
@@ -18,6 +19,19 @@ class AccountDeletionRequest(models.Model):
     ], string='Status', default='pending', required=True)
     catatan_admin = fields.Text(string='Catatan Admin')
     tanggal_proses = fields.Datetime(string='Tanggal Diproses')
+
+    def action_hapus_akun(self):
+        """Anonimkan + nonaktifkan akun pemohon (lihat menu Warga)."""
+        warga_model = self.env['digital_kamtibmas.warga']
+        for rec in self:
+            if not rec.user_id:
+                raise UserError('Permintaan ini tidak terhubung ke akun pengguna.')
+            warga = warga_model.browse(rec.user_id.id).exists()
+            if not warga:
+                raise UserError(
+                    'Akun %s bukan akun Masyarakat atau sudah dihapus.' % rec.login)
+            warga.action_hapus_akun()
+        return True
 
     def action_proses(self):
         self.write({

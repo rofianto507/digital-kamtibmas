@@ -1,9 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_rehab_admin,rehab admin,model_digital_kamtibmas_rehab,digital_kamtibmas.group_dkm_admin,1,1,1,1
-access_rehab_operator,rehab operator,model_digital_kamtibmas_rehab,digital_kamtibmas.group_dkm_operator,1,1,1,1
 access_rehab_user,rehab user,model_digital_kamtibmas_rehab,base.group_user,1,1,1,1
-access_rehab_tempat_admin,rehab_tempat admin,model_digital_kamtibmas_rehab_tempat,digital_kamtibmas.group_dkm_admin,1,1,1,1
-access_rehab_tempat_operator,rehab_tempat operator,model_digital_kamtibmas_rehab_tempat,digital_kamtibmas.group_dkm_operator,1,0,0,0
 access_rehab_tempat_user,rehab_tempat user,model_digital_kamtibmas_rehab_tempat,base.group_user,1,0,0,0
 access_eform_laka_admin,eform_laka admin,model_digital_kamtibmas_eform_laka,digital_kamtibmas.group_dkm_admin,1,1,1,1
 access_eform_laka_operator,eform_laka operator,model_digital_kamtibmas_eform_laka,digital_kamtibmas.group_dkm_operator,1,1,1,1
@@ -136,3 +132,4 @@ access_intelkam_distribusi_log_intelkam,intelkam_distribusi_log intelkam,model_i
 access_intelkam_respon_wa_intelkam,intelkam_respon_wa intelkam,model_intelkam_respon_wa,digital_kamtibmas.group_intelkam,1,0,0,0
 access_intelkam_wa_group_intelkam,intelkam_wa_group intelkam,model_intelkam_wa_group,digital_kamtibmas.group_intelkam,1,0,0,0
 access_intelkam_wa_config_intelkam,intelkam_wa_config intelkam,model_intelkam_wa_config,digital_kamtibmas.group_intelkam,1,0,0,0
+access_warga_admin,warga admin,model_digital_kamtibmas_warga,digital_kamtibmas.group_dkm_admin,1,0,0,0

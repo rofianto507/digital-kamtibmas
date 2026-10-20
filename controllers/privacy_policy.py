@@ -55,7 +55,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="intro">
     <p><strong>Terakhir diperbarui: 31 Juli 2026</strong><br>
     Kebijakan Privasi ini menjelaskan bagaimana aplikasi <strong>AMPERA247</strong>
-    yang dikembangkan dan dikelola oleh <strong>CV Mitra Hoki Maju Mapan (Tim AMPERA247)</strong> mengumpulkan,
+    yang berada di bawah tanggung jawab <strong>Polrestabes Palembang</strong> dan dikembangkan serta dikelola secara teknis oleh <strong>CV Mitra Hoki Maju Mapan (Tim AMPERA247)</strong> mengumpulkan,
     menggunakan, dan melindungi data pribadi pengguna. Dengan menggunakan aplikasi
     ini, Anda menyetujui ketentuan dalam kebijakan ini.</p>
   </div>
@@ -500,7 +500,7 @@ _MARKETING_HTML = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="AMPERA247 - Platform layanan publik digital untuk warga Kota Palembang. Antrian online, e-Form Kecelakaan, sertifikasi, rehabilitasi, dan konseling dalam satu aplikasi.">
-<title>AMPERA247 – Layanan Publik Digital Kota Palembang</title>
+<title>AMPERA247 – Aplikasi Resmi Polrestabes Palembang</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F4F9FF;color:#0D1526;line-height:1.7;font-size:15px}
@@ -573,7 +573,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <body>
 
 <div class="hero">
-  <div class="hero-badge"><span>Platform Layanan Publik Digital</span></div>
+  <div class="hero-badge"><span>Aplikasi Resmi Polrestabes Palembang</span></div>
   <div class="hero-logo">
     <svg viewBox="0 0 40 40" fill="none">
       <rect width="40" height="40" rx="10" fill="#1D2A44"/>
@@ -582,7 +582,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </svg>
   </div>
   <h1>AMPERA<span>247</span></h1>
-  <p class="hero-sub">Akses layanan publik Kota Palembang kapan saja dan di mana saja, langsung dari smartphone Anda.</p>
+  <p class="hero-sub">Akses layanan Polrestabes Palembang kapan saja dan di mana saja, langsung dari smartphone Anda.</p>
   <div class="btn-row">
     <a class="btn-store btn-android" href="https://play.google.com/store/apps/details?id=id.polisibaik.ampera247" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.16.65.18.97.06L14.76 12 3.15.18C2.83.06 2.48.08 2.18.24 1.6.56 1.25 1.19 1.25 1.88v20.24c0 .69.35 1.32.93 1.64zM17.22 8.79l-2.44-2.44 2.44-2.44 2.89 1.67c.83.48.83 1.71 0 2.19l-2.89 1.02zM16.07 10l-1.31 1.31L4.43 2l11.64 8zM16.07 14l-1.31-1.31L4.43 22l11.64-8z"/></svg>
@@ -692,12 +692,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 
   <div class="disclaimer">
-    <p><strong>Pernyataan Penyangkalan:</strong> AMPERA247 adalah aplikasi yang dikembangkan oleh CV Mitra Hoki Maju Mapan (Tim AMPERA247), perusahaan swasta independen. Aplikasi ini tidak berafiliasi dengan, tidak mewakili, dan tidak beroperasi atas nama instansi pemerintah manapun. AMPERA247 merupakan platform teknologi yang memfasilitasi akses informasi dan layanan publik secara digital.</p>
+    <p><strong>Aplikasi Resmi:</strong> AMPERA247 adalah aplikasi resmi yang berada di bawah tanggung jawab <strong>Kepolisian Negara Republik Indonesia, Kepolisian Resor Kota Besar (Polrestabes) Palembang</strong>. Pengembangan teknis dan pengelolaan operasional aplikasi dilakukan oleh CV Mitra Hoki Maju Mapan (Tim AMPERA247) berdasarkan penunjukan dari Polrestabes Palembang. Informasi resmi instansi dapat dilihat di <a href="https://polrestapalembang.polri.go.id" target="_blank" rel="noopener">polrestapalembang.polri.go.id</a>.</p>
   </div>
 
   <div class="about">
-    <h3>Dikembangkan oleh CV Mitra Hoki Maju Mapan (Tim AMPERA247)</h3>
-    <p>CV Mitra Hoki Maju Mapan (Tim AMPERA247) adalah perusahaan teknologi yang berkomitmen menghadirkan solusi digitalisasi layanan publik yang modern, terpercaya, dan mudah diakses oleh seluruh lapisan masyarakat.</p>
+    <h3>Milik Polrestabes Palembang, dikembangkan oleh CV Mitra Hoki Maju Mapan</h3>
+    <p>AMPERA247 berada di bawah tanggung jawab Polrestabes Palembang. CV Mitra Hoki Maju Mapan (Tim AMPERA247) bertindak sebagai pengembang dan pengelola teknis aplikasi atas penunjukan instansi.</p>
     <a href="mailto:dharukun@yahoo.com">dharukun@yahoo.com</a>
   </div>
 </div>
