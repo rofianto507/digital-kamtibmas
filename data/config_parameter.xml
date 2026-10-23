@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- noupdate: nilai bisa diubah admin di Settings > Technical > System Parameters -->
+    <data noupdate="1">
+        <record id="param_public_base_url" model="ir.config_parameter">
+            <field name="key">digital_kamtibmas.public_base_url</field>
+            <field name="value">https://ampera2407.id</field>
+        </record>
+    </data>
+</odoo>

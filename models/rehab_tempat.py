@@ -12,9 +12,10 @@ class RehabTempat(models.Model):
     active     = fields.Boolean(default=True)
     partner_id = fields.Many2one('res.partner', 'Kontak', ondelete='set null', readonly=True)
 
-    _sql_constraints = [
-        ('name_uniq', 'UNIQUE(name)', 'Nama tempat rehabilitasi sudah terdaftar.'),
-    ]
+    _name_uniq = models.Constraint(
+        'UNIQUE(name)',
+        'Nama tempat rehabilitasi sudah terdaftar.',
+    )
 
     @api.model_create_multi
     def create(self, vals_list):

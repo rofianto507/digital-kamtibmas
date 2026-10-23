@@ -8,11 +8,14 @@
 
     // ── RPC helper ────────────────────────────────────────────────────────────
 
+    // Token kiosk dari URL /tahti/buku-tamu/<token>; wajib di setiap API call.
+    const TOKEN = (document.getElementById('tahti-kiosk-app') || {}).dataset?.token || '';
+
     async function rpc(route, params) {
         const res = await fetch(route, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: params || {} }),
+            body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { token: TOKEN, ...(params || {}) } }),
         });
         const json = await res.json();
         if (json.error) {

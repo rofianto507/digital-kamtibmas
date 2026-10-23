@@ -153,5 +153,8 @@ class Konseling(models.Model):
                     'digital_kamtibmas.konseling') or 'New'
         return super().create(vals_list)
 
-    def name_get(self):
-        return [(rec.id, f"[{rec.code}] {rec.nama}") for rec in self]
+    # Odoo 19: name_get sudah dihapus, ganti _compute_display_name
+    @api.depends('code', 'nama')
+    def _compute_display_name(self):
+        for rec in self:
+            rec.display_name = f"[{rec.code}] {rec.nama}"

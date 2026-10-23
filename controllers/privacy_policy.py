@@ -510,8 +510,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 110%,rgba(162,207,254,.12) 0%,transparent 70%);pointer-events:none}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(162,207,254,.15);border:1px solid rgba(162,207,254,.3);border-radius:20px;padding:5px 16px;margin-bottom:24px}
 .hero-badge span{color:#A2CFFE;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
-.hero-logo{width:72px;height:72px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
-.hero-logo svg{width:40px;height:40px}
+.hero-logo{width:120px;height:120px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.35))}
+.hero-logo img{width:100%;height:100%;object-fit:contain}
 .hero h1{color:#fff;font-size:clamp(28px,7vw,42px);font-weight:900;letter-spacing:-.5px;margin-bottom:12px;line-height:1.15}
 .hero h1 span{color:#A2CFFE}
 .hero-sub{color:rgba(255,255,255,.65);font-size:clamp(14px,3vw,16px);max-width:480px;margin:0 auto 32px}
@@ -575,11 +575,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="hero">
   <div class="hero-badge"><span>Aplikasi Resmi Polrestabes Palembang</span></div>
   <div class="hero-logo">
-    <svg viewBox="0 0 40 40" fill="none">
-      <rect width="40" height="40" rx="10" fill="#1D2A44"/>
-      <path d="M20 8 L32 14 L32 26 L20 32 L8 26 L8 14 Z" stroke="#A2CFFE" stroke-width="2" fill="none"/>
-      <circle cx="20" cy="20" r="4" fill="#A2CFFE"/>
-    </svg>
+    <img src="/digital_kamtibmas/static/img/logo_app.png" alt="Logo AMPERA247"/>
   </div>
   <h1>AMPERA<span>247</span></h1>
   <p class="hero-sub">Akses layanan Polrestabes Palembang kapan saja dan di mana saja, langsung dari smartphone Anda.</p>

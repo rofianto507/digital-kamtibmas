@@ -90,9 +90,10 @@ class LoketJadwal(models.Model):
                               help='Format desimal: 8.0 = 08:00, 8.5 = 08:30')
     jam_tutup = fields.Float('Jam Tutup', digits=(2, 2))
 
-    _sql_constraints = [
-        ('loket_hari_uniq', 'unique(loket_id, hari)', 'Setiap hari hanya boleh satu jadwal per loket.'),
-    ]
+    _loket_hari_uniq = models.Constraint(
+        'unique(loket_id, hari)',
+        'Setiap hari hanya boleh satu jadwal per loket.',
+    )
 
     @api.onchange('libur')
     def _onchange_libur(self):

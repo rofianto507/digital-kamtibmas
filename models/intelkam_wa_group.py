@@ -36,9 +36,10 @@ class IntelkamWaGroup(models.Model):
     )
     distribusi_count = fields.Integer('Total Distribusi', compute='_compute_distribusi_count', store=True)
 
-    _sql_constraints = [
-        ('unique_group_id', 'UNIQUE(group_id)', 'Group ID WhatsApp harus unik.'),
-    ]
+    _unique_group_id = models.Constraint(
+        'UNIQUE(group_id)',
+        'Group ID WhatsApp harus unik.',
+    )
 
     @api.depends('respon_ids')
     def _compute_respon_count(self):
@@ -49,9 +50,6 @@ class IntelkamWaGroup(models.Model):
     def _compute_distribusi_count(self):
         for rec in self:
             rec.distribusi_count = len(rec.distribusi_ids)
-
-    def name_get(self):
-        return [(r.id, r.name) for r in self]
 
     def action_view_respon(self):
         self.ensure_one()
