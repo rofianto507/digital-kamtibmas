@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_tahti_kiosk_config_form" model="ir.ui.view">
+        <field name="name">tahti.kiosk.config.form</field>
+        <field name="model">digital_kamtibmas.tahti_kiosk_config</field>
+        <field name="arch" type="xml">
+            <form string="Kiosk Buku Tamu">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Kiosk Buku Tamu Tahti</h2>
+                        <p class="text-muted">
+                            Buka URL di bawah pada tablet kiosk di depan ruang Tahti.
+                            Tanpa token yang benar, halaman dan data tahanan tidak bisa diakses.
+                        </p>
+                    </div>
+
+                    <separator/>
+
+                    <div class="d-flex gap-3 mb-4">
+                        <button name="action_generate_token" type="object" class="btn btn-warning"
+                                confirm="Generate token baru? URL kiosk lama langsung tidak berlaku dan harus diganti di tablet.">
+                            <i class="fa fa-refresh me-1"/> Generate Token Baru
+                        </button>
+                        <button name="action_open_kiosk" type="object" class="btn btn-primary"
+                                invisible="not token">
+                            <i class="fa fa-tablet me-1"/> Buka Kiosk
+                        </button>
+                    </div>
+
+                    <group>
+                        <group string="Informasi URL">
+                            <field name="token" widget="CopyClipboardChar" readonly="1"
+                                   placeholder="(Belum digenerate — klik Generate Token Baru)"/>
+                            <field name="kiosk_url" widget="CopyClipboardChar" readonly="1"
+                                   placeholder="(Belum digenerate)"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-info mt-3" role="status" invisible="not token">
+                        <i class="fa fa-info-circle me-1"/>
+                        Jika token di-generate ulang, URL lama tidak bisa dipakai lagi dan harus
+                        diganti di tablet kiosk. Generate ulang bila URL bocor ke pihak luar.
+                    </div>
+                    <div class="alert alert-warning" role="status" invisible="token">
+                        <i class="fa fa-exclamation-triangle me-1"/>
+                        Token belum digenerate. Kiosk tidak bisa dipakai sampai token dibuat.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tahti_kiosk_config" model="ir.actions.act_window">
+        <field name="name">Kiosk Buku Tamu</field>
+        <field name="res_model">digital_kamtibmas.tahti_kiosk_config</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_tahti_kiosk_config_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu ada di menu.xml (dimuat terakhir) -->
+
+</odoo>

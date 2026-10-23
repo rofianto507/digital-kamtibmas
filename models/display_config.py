@@ -2,6 +2,8 @@ import uuid
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
+from .utils import public_base_url
+
 PARAM_TOKEN = 'digital_kamtibmas.display_token'
 
 
@@ -16,13 +18,12 @@ class AntrianDisplayConfig(models.TransientModel):
     def default_get(self, fields_list):
         res  = super().default_get(fields_list)
         tok  = self.env['ir.config_parameter'].sudo().get_param(PARAM_TOKEN, '')
-        base = self.env['ir.config_parameter'].sudo().get_param('web.base.url', 'http://localhost:8069')
         res['token']       = tok
-        res['display_url'] = f'{base}/antrian/{tok}' if tok else ''
+        res['display_url'] = f'{self._base_url()}/antrian/{tok}' if tok else ''
         return res
 
     def _base_url(self):
-        return self.env['ir.config_parameter'].sudo().get_param('web.base.url', 'http://localhost:8069')
+        return public_base_url(self.env)
 
     def action_generate_token(self):
         tok = uuid.uuid4().hex

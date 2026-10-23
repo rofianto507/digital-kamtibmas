@@ -2,6 +2,8 @@ import uuid
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
+from .utils import public_base_url
+
 
 class Sertifikasi(models.Model):
     _name = 'digital_kamtibmas.sertifikasi'
@@ -21,7 +23,8 @@ class Sertifikasi(models.Model):
         ('nonaktif', 'Nonaktif'),
     ], string='Status', default='draft', required=True, tracking=True)
     access_token = fields.Char('Token Akses', copy=False, readonly=True, index=True)
-    url_public = fields.Char('Link Publik', compute='_compute_url', store=True)
+    # Tidak disimpan: selalu mengikuti domain publik terkini (lihat utils.public_base_url)
+    url_public = fields.Char('Link Publik', compute='_compute_url')
     notes = fields.Text('Catatan')
 
     peserta_ids = fields.One2many(
@@ -38,7 +41,7 @@ class Sertifikasi(models.Model):
 
     @api.depends('access_token')
     def _compute_url(self):
-        base = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
+        base = public_base_url(self.env)
         for rec in self:
             rec.url_public = f'{base}/sertifikasi/{rec.access_token}' if rec.access_token else ''
 

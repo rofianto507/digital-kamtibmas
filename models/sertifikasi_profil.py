@@ -28,9 +28,10 @@ class SertifikasiProfil(models.Model):
     total_lulus = fields.Integer(
         'Total Lulus', compute='_compute_stats', store=True)
 
-    _sql_constraints = [
-        ('nik_unique', 'UNIQUE(nik)', 'NIK sudah terdaftar di sistem.'),
-    ]
+    _nik_unique = models.Constraint(
+        'UNIQUE(nik)',
+        'NIK sudah terdaftar di sistem.',
+    )
 
     @api.depends('peserta_ids', 'peserta_ids.state', 'peserta_ids.lulus')
     def _compute_stats(self):

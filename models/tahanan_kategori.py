@@ -10,6 +10,7 @@ class TahananKategori(models.Model):
     keterangan  = fields.Text('Keterangan')
     active      = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('name_uniq', 'UNIQUE(name)', 'Nama kategori sudah terdaftar.'),
-    ]
+    _name_uniq = models.Constraint(
+        'UNIQUE(name)',
+        'Nama kategori sudah terdaftar.',
+    )

@@ -19,6 +19,7 @@ from . import tahanan_kategori
 from . import tahanan
 from . import tahti_tamu
 from . import tahti_kunjungan
+from . import tahti_kiosk_config
 from . import intelkam_wa_config
 from . import intelkam_wa_group
 from . import intelkam_distribusi

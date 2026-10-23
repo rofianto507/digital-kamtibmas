@@ -42,6 +42,7 @@
         <menuitem id="menu_dkm_tahanan_all" name="Semua Tahanan" parent="menu_dkm_tahti" action="action_dkm_tahanan_all" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_tahti" sequence="2"/>
         <menuitem id="menu_dkm_tahti_kunjungan" name="Buku Tamu" parent="menu_dkm_tahti" action="action_dkm_tahti_kunjungan" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_tahti" sequence="3"/>
         <menuitem id="menu_dkm_tahti_tamu" name="Data Tamu" parent="menu_dkm_tahti" action="action_dkm_tahti_tamu" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_tahti" sequence="4"/>
+        <menuitem id="menu_dkm_tahti_kiosk_config" name="Kiosk Buku Tamu" parent="menu_dkm_tahti" action="action_tahti_kiosk_config" groups="digital_kamtibmas.group_dkm_admin" sequence="10"/>
 
         <!-- Intelkam -->
         <menuitem id="menu_dkm_intelkam" name="Intelkam" parent="menu_dkm_root" groups="digital_kamtibmas.group_dkm_admin,digital_kamtibmas.group_dkm_operator,digital_kamtibmas.group_intelkam" sequence="60"/>

@@ -20,6 +20,7 @@ class JenisLayanan(models.Model):
         for rec in self:
             rec.loket_count = len(rec.loket_ids)
 
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Kode jenis layanan harus unik.'),
-    ]
+    _code_uniq = models.Constraint(
+        'unique(code)',
+        'Kode jenis layanan harus unik.',
+    )
