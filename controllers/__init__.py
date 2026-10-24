@@ -5,6 +5,7 @@ from . import intelkam_webhook
 from . import sertifikasi_public
 from . import mobile_chat
 from . import mobile_register
+from . import mobile_profile
 from . import mobile_sertifikasi
 from . import privacy_policy
 from . import account_deletion
