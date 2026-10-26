@@ -173,13 +173,13 @@ class MobileRegisterController(http.Controller):
             try:
                 wa_config = request.env['intelkam.wa.config'].sudo().get_config()
                 wa_msg = (
-                    f"*Registrasi AMPERA247 Berhasil* ✅\n\n"
+                    f"*Registrasi AMPERA PBM Berhasil* ✅\n\n"
                     f"Halo *{nama}*,\n"
                     f"Akun Anda telah berhasil dibuat.\n\n"
                     f"🔑 *Informasi Login:*\n"
                     f"Username: {login}\n"
                     f"Password: {password}\n\n"
-                    f"Silakan login di aplikasi AMPERA247.\n"
+                    f"Silakan login di aplikasi AMPERA PBM.\n"
                     f"_Jangan bagikan informasi ini ke siapapun._"
                 )
                 result = wa_config.send_message(phone_normalized, wa_msg)

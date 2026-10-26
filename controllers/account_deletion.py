@@ -9,7 +9,7 @@ _FORM_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Permintaan Hapus Akun – AMPERA247</title>
+<title>Permintaan Hapus Akun – AMPERA PBM</title>
 <style>
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
 body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F4F9FF;color:#0D1526;line-height:1.6;font-size:15px;min-height:100vh;display:flex;flex-direction:column}}
@@ -36,13 +36,13 @@ textarea{{resize:vertical;min-height:80px}}
 <body>
 <div class="header">
   <h1>Permintaan Hapus Akun</h1>
-  <p>AMPERA247 &mdash; Layanan Digital Kamtibmas Kota Palembang</p>
+  <p>AMPERA PBM &mdash; Layanan Digital Kamtibmas Kota Palembang</p>
 </div>
 <div class="container">
   <div class="card">
     <h2>Formulir Permintaan</h2>
     <p class="desc">
-      Isi formulir di bawah untuk mengajukan permintaan penghapusan akun AMPERA247 Anda.
+      Isi formulir di bawah untuk mengajukan permintaan penghapusan akun AMPERA PBM Anda.
       Permintaan akan diproses oleh administrator dalam <strong>maksimal 30 hari kerja</strong>.
     </p>
     <div id="msg-success" class="alert alert-success" style="display:none">
@@ -66,7 +66,7 @@ textarea{{resize:vertical;min-height:80px}}
     </p>
   </div>
 </div>
-<div class="footer">&copy; 2026 AMPERA247 &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA247)</div>
+<div class="footer">&copy; 2026 AMPERA PBM &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA PBM)</div>
 <script>
 document.getElementById('frm').addEventListener('submit', async function(e) {{
   e.preventDefault();

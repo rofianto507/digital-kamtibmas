@@ -5,7 +5,7 @@
         <!-- Root app -->
         <menuitem
             id="menu_dkm_root"
-            name="AMPERA247"
+            name="AMPERA PBM"
             web_icon="digital_kamtibmas,static/description/icon.png"
             sequence="2"/>
 
