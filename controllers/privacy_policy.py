@@ -7,7 +7,7 @@ _PRIVACY_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kebijakan Privasi – AMPERA247</title>
+<title>Kebijakan Privasi – AMPERA PBM</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F4F9FF;color:#0D1526;line-height:1.7;font-size:15px}
@@ -48,14 +48,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="header">
   <div class="header-badge"><span>Dokumen Resmi</span></div>
   <h1>Kebijakan Privasi</h1>
-  <p class="header-sub">Aplikasi AMPERA247 &mdash; Layanan Publik Digital Kota Palembang</p>
+  <p class="header-sub">Aplikasi AMPERA PBM &mdash; Polisi Bersama Masyarakat</p>
   <div class="header-divider"></div>
 </div>
 <div class="container">
   <div class="intro">
     <p><strong>Terakhir diperbarui: 31 Juli 2026</strong><br>
-    Kebijakan Privasi ini menjelaskan bagaimana aplikasi <strong>AMPERA247</strong>
-    yang berada di bawah tanggung jawab <strong>Polrestabes Palembang</strong> dan dikembangkan serta dikelola secara teknis oleh <strong>CV Mitra Hoki Maju Mapan (Tim AMPERA247)</strong> mengumpulkan,
+    Kebijakan Privasi ini menjelaskan bagaimana aplikasi <strong>AMPERA PBM</strong>
+    yang berada di bawah tanggung jawab <strong>Polrestabes Palembang</strong> dan dikembangkan serta dikelola secara teknis oleh <strong>CV Mitra Hoki Maju Mapan (Tim AMPERA PBM)</strong> mengumpulkan,
     menggunakan, dan melindungi data pribadi pengguna. Dengan menggunakan aplikasi
     ini, Anda menyetujui ketentuan dalam kebijakan ini.</p>
   </div>
@@ -71,7 +71,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <p>Aplikasi ini mengumpulkan jenis data berikut:</p>
       <ul class="item-list">
         <li><strong>Data Lokasi</strong> &mdash; koordinat GPS perangkat, digunakan hanya pada saat pengguna mengisi e-Form Kecelakaan untuk menentukan lokasi kejadian secara otomatis. Data lokasi <em>tidak</em> dikumpulkan di luar penggunaan fitur tersebut.</li>
-        <li><strong>Data Akun</strong> &mdash; nama lengkap dan username yang terdaftar di sistem AMPERA247.</li>
+        <li><strong>Data Akun</strong> &mdash; nama lengkap dan username yang terdaftar di sistem AMPERA PBM.</li>
         <li><strong>Data Aktivitas Layanan</strong> &mdash; riwayat penggunaan fitur (antrian online, e-form kecelakaan, sertifikasi, rehabilitasi, konseling) beserta waktu dan detail pengajuan.</li>
       </ul>
     </div>
@@ -89,7 +89,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <li>Menyediakan dan mengelola fitur layanan publik digital (antrian online, e-form kecelakaan, sertifikasi online, rehabilitasi, dan konseling).</li>
         <li>Memproses pengajuan layanan yang disampaikan pengguna melalui aplikasi.</li>
         <li>Menggunakan data lokasi untuk memudahkan pengguna melaporkan titik kejadian pada e-Form Kecelakaan.</li>
-        <li>Meningkatkan kualitas dan keandalan layanan AMPERA247.</li>
+        <li>Meningkatkan kualitas dan keandalan layanan AMPERA PBM.</li>
       </ul>
     </div>
   </div>
@@ -104,7 +104,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="section-body">
       <p>Data yang dikumpulkan <strong>tidak dijual, disewakan, atau dibagikan</strong> kepada pihak komersial mana pun. Data hanya dapat diakses oleh:</p>
       <ul class="item-list">
-        <li>Tim pengelola AMPERA247 dan CV Mitra Hoki Maju Mapan (Tim AMPERA247) yang memiliki kewenangan dan akses sistem yang sah.</li>
+        <li>Tim pengelola AMPERA PBM dan CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) yang memiliki kewenangan dan akses sistem yang sah.</li>
         <li>Mitra instansi terkait yang terlibat dalam penyelenggaraan layanan, sesuai lingkup tugasnya.</li>
       </ul>
       <p style="margin-top:12px">Pengungkapan data kepada pihak eksternal hanya dilakukan apabila diwajibkan oleh peraturan perundang-undangan yang berlaku di Indonesia.</p>
@@ -119,7 +119,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="section-title">Keamanan Data</div>
     </div>
     <div class="section-body">
-      <p>Data disimpan di server pengelola AMPERA247 dengan proteksi akses berbasis autentikasi. Transmisi data antara aplikasi dan server menggunakan protokol HTTPS yang terenkripsi.</p>
+      <p>Data disimpan di server pengelola AMPERA PBM dengan proteksi akses berbasis autentikasi. Transmisi data antara aplikasi dan server menggunakan protokol HTTPS yang terenkripsi.</p>
       <p>Meskipun kami menerapkan langkah-langkah keamanan yang wajar, tidak ada sistem yang sepenuhnya aman. Kami berkomitmen untuk menangani setiap insiden keamanan secara cepat dan bertanggung jawab.</p>
     </div>
   </div>
@@ -132,7 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="section-title">Penyimpanan &amp; Retensi Data</div>
     </div>
     <div class="section-body">
-      <p>Data layanan dan lokasi disimpan selama diperlukan untuk kepentingan operasional AMPERA247. Data akun disimpan selama pengguna masih aktif menggunakan layanan. Pengguna dapat mengajukan penghapusan data melalui fitur Hapus Akun di aplikasi.</p>
+      <p>Data layanan dan lokasi disimpan selama diperlukan untuk kepentingan operasional AMPERA PBM. Data akun disimpan selama pengguna masih aktif menggunakan layanan. Pengguna dapat mengajukan penghapusan data melalui fitur Hapus Akun di aplikasi.</p>
     </div>
   </div>
 
@@ -168,12 +168,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="contact-box">
     <h3>Hubungi Kami</h3>
     <p>Pertanyaan seputar kebijakan privasi dapat disampaikan kepada:</p>
-    <p style="margin-top:10px"><strong style="color:#fff">CV Mitra Hoki Maju Mapan (Tim AMPERA247)</strong></p>
-    <p>Pengembang Aplikasi AMPERA247</p>
+    <p style="margin-top:10px"><strong style="color:#fff">CV Mitra Hoki Maju Mapan (Tim AMPERA PBM)</strong></p>
+    <p>Pengembang Aplikasi AMPERA PBM</p>
     <p style="margin-top:8px"><a href="mailto:dharukun@yahoo.com">dharukun@yahoo.com</a></p>
   </div>
 </div>
-<div class="footer">&copy; 2026 AMPERA247 &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA247). Seluruh hak dilindungi.</div>
+<div class="footer">&copy; 2026 AMPERA PBM &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA PBM). Seluruh hak dilindungi.</div>
 </body>
 </html>"""
 
@@ -183,7 +183,7 @@ _CHILD_SAFETY_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kebijakan Keselamatan Anak – AMPERA247</title>
+<title>Kebijakan Keselamatan Anak – AMPERA PBM</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F4F9FF;color:#0D1526;line-height:1.7;font-size:15px}
@@ -222,16 +222,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="header">
   <div class="header-badge"><span>Dokumen Resmi</span></div>
   <h1>Kebijakan Keselamatan Anak</h1>
-  <p class="header-sub">Aplikasi AMPERA247 &mdash; Layanan Publik Digital Kota Palembang</p>
+  <p class="header-sub">Aplikasi AMPERA PBM &mdash; Polisi Bersama Masyarakat</p>
   <div class="header-divider"></div>
 </div>
 <div class="container">
   <div class="intro">
     <p><strong>Terakhir diperbarui: 31 Juli 2026</strong><br>
-    CV Mitra Hoki Maju Mapan (Tim AMPERA247) selaku pengembang aplikasi <strong>AMPERA247</strong> berkomitmen penuh
+    CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) selaku pengembang aplikasi <strong>AMPERA PBM</strong> berkomitmen penuh
     untuk menciptakan lingkungan digital yang aman, khususnya bagi anak-anak dan
     kelompok rentan. Kebijakan ini menjelaskan standar keselamatan anak yang kami terapkan
-    dalam seluruh fitur dan layanan aplikasi AMPERA247.</p>
+    dalam seluruh fitur dan layanan aplikasi AMPERA PBM.</p>
   </div>
 
   <div class="section">
@@ -242,7 +242,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="section-title">Komitmen Kami</div>
     </div>
     <div class="section-body">
-      <p>AMPERA247 berkomitmen untuk:</p>
+      <p>AMPERA PBM berkomitmen untuk:</p>
       <ul class="item-list">
         <li>Melindungi anak-anak dari segala bentuk pelecehan, eksploitasi, dan konten berbahaya di dalam platform kami.</li>
         <li>Mematuhi seluruh peraturan perundang-undangan perlindungan anak yang berlaku di Indonesia, termasuk UU No. 35 Tahun 2014 tentang Perlindungan Anak.</li>
@@ -260,7 +260,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="section-title">Konten dan Perilaku yang Dilarang</div>
     </div>
     <div class="section-body">
-      <p>Pengguna AMPERA247 <strong>dilarang keras</strong> untuk:</p>
+      <p>Pengguna AMPERA PBM <strong>dilarang keras</strong> untuk:</p>
       <ul class="item-list">
         <li>Membagikan, memproduksi, atau mendistribusikan materi pelecehan seksual anak (CSAM) dalam bentuk apapun.</li>
         <li>Melakukan pendekatan tidak pantas (grooming) terhadap anak-anak melalui fitur konseling atau komunikasi lainnya.</li>
@@ -279,7 +279,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="section-title">Pembatasan Pengguna</div>
     </div>
     <div class="section-body">
-      <p>Aplikasi AMPERA247 ditujukan untuk pengguna berusia <strong>17 tahun ke atas</strong>. Fitur konseling online hanya dapat diakses oleh pengguna terdaftar yang telah memverifikasi identitasnya melalui proses pendaftaran akun.</p>
+      <p>Aplikasi AMPERA PBM ditujukan untuk pengguna berusia <strong>17 tahun ke atas</strong>. Fitur konseling online hanya dapat diakses oleh pengguna terdaftar yang telah memverifikasi identitasnya melalui proses pendaftaran akun.</p>
       <p>Pengguna yang diduga berusia di bawah 17 tahun akan dinonaktifkan aksesnya hingga verifikasi usia dapat dilakukan.</p>
     </div>
   </div>
@@ -292,7 +292,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="section-title">Cara Melaporkan Pelanggaran</div>
     </div>
     <div class="section-body">
-      <p>Jika Anda menemukan konten atau perilaku yang melanggar standar keselamatan anak di dalam aplikasi AMPERA247, segera laporkan melalui:</p>
+      <p>Jika Anda menemukan konten atau perilaku yang melanggar standar keselamatan anak di dalam aplikasi AMPERA PBM, segera laporkan melalui:</p>
       <ul class="item-list">
         <li><strong>Email:</strong> dharukun@yahoo.com &mdash; dengan subjek "Laporan Keselamatan Anak"</li>
         <li><strong>Telepon darurat anak:</strong> 129 (KPAI &mdash; Komisi Perlindungan Anak Indonesia)</li>
@@ -322,12 +322,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="contact-box">
     <h3>Kontak Keselamatan Anak</h3>
     <p>Laporan dan pertanyaan terkait keselamatan anak:</p>
-    <p style="margin-top:10px"><strong style="color:#fff">CV Mitra Hoki Maju Mapan (Tim AMPERA247) — Tim AMPERA247</strong></p>
+    <p style="margin-top:10px"><strong style="color:#fff">CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) — Tim AMPERA PBM</strong></p>
     <p style="margin-top:6px"><a href="mailto:dharukun@yahoo.com">dharukun@yahoo.com</a></p>
     <p style="margin-top:4px">Subjek: <em>Laporan Keselamatan Anak</em></p>
   </div>
 </div>
-<div class="footer">&copy; 2026 AMPERA247 &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA247). Seluruh hak dilindungi.</div>
+<div class="footer">&copy; 2026 AMPERA PBM &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA PBM). Seluruh hak dilindungi.</div>
 </body>
 </html>"""
 
@@ -337,7 +337,7 @@ _SUPPORT_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dukungan &amp; Bantuan – AMPERA247</title>
+<title>Dukungan &amp; Bantuan – AMPERA PBM</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F4F9FF;color:#0D1526;line-height:1.7;font-size:15px}
@@ -386,7 +386,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="header">
   <div class="header-badge"><span>Pusat Bantuan</span></div>
   <h1>Dukungan &amp; Bantuan</h1>
-  <p class="header-sub">Aplikasi AMPERA247 &mdash; Layanan Publik Digital Kota Palembang</p>
+  <p class="header-sub">Aplikasi AMPERA PBM &mdash; Polisi Bersama Masyarakat</p>
   <div class="header-divider"></div>
 </div>
 <div class="container">
@@ -425,16 +425,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
     <div class="section-body">
       <div class="faq-item">
-        <div class="faq-q">Bagaimana cara mendaftar akun AMPERA247?</div>
+        <div class="faq-q">Bagaimana cara mendaftar akun AMPERA PBM?</div>
         <div class="faq-a">Buka aplikasi, pilih "Daftar", lalu isi nama lengkap, nomor telepon, dan buat kata sandi. Akun Anda akan langsung aktif setelah pendaftaran selesai.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Aplikasi tidak bisa login setelah update. Apa yang harus dilakukan?</div>
-        <div class="faq-a">Coba hapus cache aplikasi melalui Pengaturan perangkat &gt; Aplikasi &gt; AMPERA247 &gt; Hapus Cache. Jika masih bermasalah, logout lalu login kembali. Hubungi kami jika masalah berlanjut.</div>
+        <div class="faq-a">Coba hapus cache aplikasi melalui Pengaturan perangkat &gt; Aplikasi &gt; AMPERA PBM &gt; Hapus Cache. Jika masih bermasalah, logout lalu login kembali. Hubungi kami jika masalah berlanjut.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">GPS saya tidak terdeteksi saat mengisi e-Form Kecelakaan.</div>
-        <div class="faq-a">Pastikan izin lokasi sudah diberikan untuk aplikasi AMPERA247 di pengaturan perangkat Anda. Aktifkan GPS perangkat dan pastikan Anda berada di lokasi dengan sinyal yang baik.</div>
+        <div class="faq-a">Pastikan izin lokasi sudah diberikan untuk aplikasi AMPERA PBM di pengaturan perangkat Anda. Aktifkan GPS perangkat dan pastikan Anda berada di lokasi dengan sinyal yang baik.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Bagaimana cara menghapus akun saya?</div>
@@ -481,15 +481,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
     <div class="section-body">
       <ul class="item-list">
-        <li><strong>Nama Aplikasi</strong>&nbsp;&mdash;&nbsp;AMPERA247</li>
-        <li><strong>Pengembang</strong>&nbsp;&mdash;&nbsp;CV Mitra Hoki Maju Mapan (Tim AMPERA247)</li>
+        <li><strong>Nama Aplikasi</strong>&nbsp;&mdash;&nbsp;AMPERA PBM</li>
+        <li><strong>Pengembang</strong>&nbsp;&mdash;&nbsp;CV Mitra Hoki Maju Mapan (Tim AMPERA PBM)</li>
         <li><strong>Platform</strong>&nbsp;&mdash;&nbsp;Android &amp; iOS</li>
         <li><strong>Kontak Pengembang</strong>&nbsp;&mdash;&nbsp;dharukun@yahoo.com</li>
       </ul>
     </div>
   </div>
 </div>
-<div class="footer">&copy; 2026 AMPERA247 &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA247). Seluruh hak dilindungi.</div>
+<div class="footer">&copy; 2026 AMPERA PBM &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA PBM). Seluruh hak dilindungi.</div>
 </body>
 </html>"""
 
@@ -499,8 +499,8 @@ _MARKETING_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="AMPERA247 - Platform layanan publik digital untuk warga Kota Palembang. Antrian online, e-Form Kecelakaan, sertifikasi, rehabilitasi, dan konseling dalam satu aplikasi.">
-<title>AMPERA247 – Aplikasi Resmi Polrestabes Palembang</title>
+<meta name="description" content="AMPERA PBM - Platform layanan publik digital untuk warga Kota Palembang. Antrian online, e-Form Kecelakaan, sertifikasi, rehabilitasi, dan konseling dalam satu aplikasi.">
+<title>AMPERA PBM – Aplikasi Resmi Polrestabes Palembang</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F4F9FF;color:#0D1526;line-height:1.7;font-size:15px}
@@ -575,9 +575,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="hero">
   <div class="hero-badge"><span>Aplikasi Resmi Polrestabes Palembang</span></div>
   <div class="hero-logo">
-    <img src="/digital_kamtibmas/static/img/logo_app.png" alt="Logo AMPERA247"/>
+    <img src="/digital_kamtibmas/static/img/logo_app.png" alt="Logo AMPERA PBM"/>
   </div>
-  <h1>AMPERA<span>247</span></h1>
+  <h1>AMPERA <span>PBM</span></h1>
   <p class="hero-sub">Akses layanan Polrestabes Palembang kapan saja dan di mana saja, langsung dari smartphone Anda.</p>
   <div class="btn-row">
     <a class="btn-store btn-android" href="https://play.google.com/store/apps/details?id=id.polisibaik.ampera247" target="_blank" rel="noopener">
@@ -612,7 +612,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="container">
   <p class="section-label">Fitur Unggulan</p>
   <h2 class="section-title">Semua layanan publik dalam satu aplikasi</h2>
-  <p class="section-desc">Tidak perlu antre panjang atau datang langsung. AMPERA247 menghadirkan kemudahan akses layanan untuk seluruh warga Kota Palembang.</p>
+  <p class="section-desc">Tidak perlu antre panjang atau datang langsung. AMPERA PBM menghadirkan kemudahan akses layanan untuk seluruh warga Kota Palembang.</p>
 
   <div class="features">
     <div class="feat">
@@ -668,7 +668,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="step-num">1</div>
       <div class="step-body">
         <h4>Unduh Aplikasi</h4>
-        <p>Unduh AMPERA247 gratis dari Google Play Store atau Apple App Store.</p>
+        <p>Unduh AMPERA PBM gratis dari Google Play Store atau Apple App Store.</p>
       </div>
     </div>
     <div class="how-step">
@@ -688,18 +688,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 
   <div class="disclaimer">
-    <p><strong>Aplikasi Resmi:</strong> AMPERA247 adalah aplikasi resmi yang berada di bawah tanggung jawab <strong>Kepolisian Negara Republik Indonesia, Kepolisian Resor Kota Besar (Polrestabes) Palembang</strong>. Pengembangan teknis dan pengelolaan operasional aplikasi dilakukan oleh CV Mitra Hoki Maju Mapan (Tim AMPERA247) berdasarkan penunjukan dari Polrestabes Palembang. Informasi resmi instansi dapat dilihat di <a href="https://polrestapalembang.polri.go.id" target="_blank" rel="noopener">polrestapalembang.polri.go.id</a>.</p>
+    <p><strong>Aplikasi Resmi:</strong> AMPERA PBM adalah aplikasi resmi yang berada di bawah tanggung jawab <strong>Kepolisian Negara Republik Indonesia, Kepolisian Resor Kota Besar (Polrestabes) Palembang</strong>. Pengembangan teknis dan pengelolaan operasional aplikasi dilakukan oleh CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) berdasarkan penunjukan dari Polrestabes Palembang. Informasi resmi instansi dapat dilihat di <a href="https://polrestapalembang.polri.go.id" target="_blank" rel="noopener">polrestapalembang.polri.go.id</a>.</p>
   </div>
 
   <div class="about">
     <h3>Milik Polrestabes Palembang, dikembangkan oleh CV Mitra Hoki Maju Mapan</h3>
-    <p>AMPERA247 berada di bawah tanggung jawab Polrestabes Palembang. CV Mitra Hoki Maju Mapan (Tim AMPERA247) bertindak sebagai pengembang dan pengelola teknis aplikasi atas penunjukan instansi.</p>
+    <p>AMPERA PBM berada di bawah tanggung jawab Polrestabes Palembang. CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) bertindak sebagai pengembang dan pengelola teknis aplikasi atas penunjukan instansi.</p>
     <a href="mailto:dharukun@yahoo.com">dharukun@yahoo.com</a>
   </div>
 </div>
 
 <div class="footer">
-  &copy; 2026 AMPERA247 &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA247). Seluruh hak dilindungi. &nbsp;|&nbsp;
+  &copy; 2026 AMPERA PBM &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA PBM). Seluruh hak dilindungi. &nbsp;|&nbsp;
   <a href="/kebijakan-privasi">Kebijakan Privasi</a> &nbsp;|&nbsp;
   <a href="/dukungan">Dukungan</a>
 </div>

@@ -239,7 +239,7 @@
                             Palembang, <t t-esc="format_date_id(p.waktu_selesai)"/>
                         </div>
                         <div class="cp-sig-line"/>
-                        <div class="cp-sig-org">AMPERA247</div>
+                        <div class="cp-sig-org">AMPERA PBM</div>
                         <div class="cp-sig-sub">Layanan Digital Kamtibmas</div>
                         <div class="cp-sig-sub">Kota Palembang</div>
                     </div>
