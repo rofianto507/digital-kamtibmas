@@ -33,7 +33,7 @@ def _generate_password(length=8):
 _USERNAME_RE = re.compile(r'^[a-z][a-z0-9._]{3,29}$')
 _RESERVED_USERNAMES = {
     'admin', 'administrator', 'root', 'system', 'support', 'dukungan',
-    'polisi', 'polri', 'polrestabes', 'ampera', 'ampera247', 'ampera2407',
+    'polisi', 'polri', 'polrestabes', 'ampera', 'ampera247', 'ampera2407', 'amperapbm',
 }
 
 
