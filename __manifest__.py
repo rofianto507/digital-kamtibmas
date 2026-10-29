@@ -49,8 +49,12 @@
         'views/welcome_screen_views.xml',
         'views/slider_views.xml',
         'views/menu.xml',
+        'views/login_template.xml',
     ],
     'assets': {
+        'web.assets_frontend': [
+            'digital_kamtibmas/static/src/css/login_brand.css',
+        ],
         'web.assets_backend': [
             # Libs
             'digital_kamtibmas/static/lib/leaflet/leaflet.css',

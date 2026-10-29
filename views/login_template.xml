@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Footer sponsor di halaman login web admin (login, reset password, dll.):
+         logo Bank Sumsel Babel + slogan, di paling bawah tengah. -->
+    <template id="login_layout_sponsor" inherit_id="web.login_layout" name="AMPERA PBM - Sponsor di Login">
+        <xpath expr="//div[hasclass('container')]" position="after">
+            <div class="dkm-login-sponsor">
+                <div class="dkm-login-sponsor__label">Didukung oleh</div>
+                <img class="dkm-login-sponsor__logo"
+                     src="/digital_kamtibmas/static/img/bank_sumselbabel.png"
+                     alt="Bank Sumsel Babel"/>
+                <div class="dkm-login-sponsor__tagline">Mitra Anda Membangun Daerah</div>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

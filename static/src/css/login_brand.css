@@ -1,0 +1,62 @@
+/* Halaman login web admin AMPERA PBM.
+ *
+ * Latar ungu bawaan berasal dari modul sel_custom_preferences
+ * (body.bg-100 { ... !important }), yang dipakai juga oleh database lain.
+ * Aturan di bawah memakai selector yang lebih spesifik ("html body.bg-100").
+ *
+ * PENTING: semua aturan dibatasi dengan :has(.dkm-login-sponsor). Footer itu
+ * hanya ada di halaman login database yang memasang digital_kamtibmas
+ * (template turunan web.login_layout), sedangkan file CSS ini bisa ikut termuat
+ * di bundel aset database lain bila modul terdaftar server-wide
+ * (server_wide_modules). Tanpa pembatasan ini, tampilan login project lain
+ * ikut berubah.
+ */
+
+/* Latar navy sesuai identitas aplikasi: logo biru muda Bank Sumsel Babel
+ * tampak jelas, dan kartu login putih tetap kontras. */
+html body.bg-100:has(.dkm-login-sponsor) {
+    /* fixed + no-repeat + warna dasar: latar menutup seluruh layar dan tidak mengulang
+     * (mis. saat ada elemen tambahan di bawah halaman) */
+    background: #17386a linear-gradient(160deg, #0b1830 0%, #11284d 55%, #17386a 100%) no-repeat fixed !important;
+    min-height: 100vh;
+}
+
+/* Susun halaman vertikal supaya footer sponsor selalu di paling bawah tengah,
+ * dan tidak menimpa kartu login di layar yang pendek. */
+html body.bg-100 #wrapwrap > main:has(.dkm-login-sponsor) {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+html body.bg-100 #wrapwrap > main:has(.dkm-login-sponsor) > .container {
+    flex: 0 0 auto;
+}
+
+.dkm-login-sponsor {
+    margin-top: auto;
+    padding: 28px 16px 26px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.dkm-login-sponsor__label {
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.dkm-login-sponsor__logo {
+    display: block;
+    height: 52px;
+    width: auto;
+    max-width: 78%;
+    margin: 10px auto 8px;
+}
+
+.dkm-login-sponsor__tagline {
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.82);
+}
