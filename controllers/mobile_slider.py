@@ -16,6 +16,8 @@ class MobileSliderController(http.Controller):
                 'id': r.id,
                 'name': r.name,
                 'image_url': f'/web/image/digital.kamtibmas.slider/{r.id}/image',
+                # Kosong = banner tidak bisa diketuk. App versi lama mengabaikan field ini.
+                'url': r.url or '',
             }
             for r in records
         ]
