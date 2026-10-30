@@ -49,7 +49,7 @@ digital_kamtibmas/
 ├── controllers/
 │   ├── __init__.py
 │   ├── display_controller.py         # Controller display antrian
-│   ├── tahti_public.py               # Kiosk buku tamu (auth=public)
+│   ├── tahti_public.py               # Kiosk buku tamu (public + token)
 │   └── intelkam_webhook.py           # Webhook Wablas (incoming + tracking)
 ├── views/
 │   ├── menu.xml
@@ -298,23 +298,31 @@ Inherits: `mail.thread`, `mail.activity.mixin`
 
 ## Tahti — Kiosk Web App
 
-Route publik: `/tahti/buku-tamu` — tablet/kiosk di depan pintu Tahti.
+Halaman kiosk untuk tablet di depan pintu Tahti: `/tahti/buku-tamu/<token>`.
+
+**Akses wajib token** (sejak 1.5.11). Sebelumnya halaman dan API-nya publik tanpa token sehingga siapa pun di internet bisa membaca daftar tahanan (nama, sel, kategori perkara) dan data pengunjung. Token dibuat di menu **Tahti → Kiosk Buku Tamu** (admin) dengan tombol *Generate Token Baru*; token disimpan di `ir.config_parameter` `digital_kamtibmas.tahti_kiosk_token`. Membuat token baru langsung mematikan URL lama (ganti URL di tablet). URL lama `/tahti/buku-tamu` tanpa token mengembalikan 403.
 
 ### Controller (`controllers/tahti_public.py`)
 
 | Route | Method | Auth | Fungsi |
 |---|---|---|---|
-| `/tahti/buku-tamu` | HTTP | public | Render halaman kiosk |
-| `/tahti/api/cari_tahanan` | jsonrpc | public | Cari tahanan aktif (`state=ditahan`) |
-| `/tahti/api/cek_nik` | jsonrpc | public | Cek tamu by NIK, return data jika ada |
-| `/tahti/api/daftar_kunjungan` | jsonrpc | public | Buat/update tamu + buat kunjungan baru |
+| `/tahti/buku-tamu` | HTTP | public | 403 "alamat kiosk sudah berubah" |
+| `/tahti/buku-tamu/<token>` | HTTP | public + token | Render halaman kiosk (403 bila token salah) |
+| `/tahti/api/cari_tahanan` | jsonrpc | public + `token` | Cari tahanan aktif (`state=ditahan`) |
+| `/tahti/api/cek_nik` | jsonrpc | public + `token` | Cek tamu by NIK; hanya mengembalikan `found`, `nama`, `no_hp` (alamat dan id **tidak** dikirim) |
+| `/tahti/api/daftar_kunjungan` | jsonrpc | public + `token` | Buat tamu bila belum ada + buat kunjungan baru |
+
+Token dibandingkan dengan `hmac.compare_digest`; API tanpa token valid melempar `AccessDenied`.
 
 `api_daftar_kunjungan` logic:
 1. Validasi tahanan masih `ditahan`
-2. Cari tamu by NIK → jika tidak ada, buat baru
-3. Jika ada tapi data berubah (nama/hp) → update
-4. Buat record `tahti_kunjungan` dengan `waktu_masuk` = UTC now
-5. Return `code`, `tamu_nama`, `tahanan_nama`
+2. Validasi server: NIK harus 16 digit angka; `hubungan` di luar daftar (keluarga/pengacara/teman/lainnya) menjadi `lainnya`
+3. Cari tamu by NIK → jika tidak ada, buat baru
+4. Jika tamu sudah ada, kiosk **tidak menimpa** data lama (siapa pun bisa mengetik NIK orang lain); hanya mengisi `no_hp` / `foto_ktp` yang masih kosong. Perubahan data dilakukan petugas di backend.
+5. Buat record `tahti_kunjungan` dengan `waktu_masuk` = `fields.Datetime.now()` dan `petugas_id` dikosongkan (default-nya "Public user")
+6. Return `code`, `tamu_nama`, `tahanan_nama`
+
+Model pendukung: `models/tahti_kiosk_config.py` (`digital_kamtibmas.tahti_kiosk_config`, TransientModel untuk wizard URL/token) + `views/tahti_kiosk_config_views.xml`; menu `menu_dkm_tahti_kiosk_config` ada di `menu.xml`.
 
 ### OWL App (`static/src/js/tahti_kiosk.js`)
 
@@ -324,13 +332,16 @@ Pattern: IIFE, OWL 2 standalone, single Component.
 
 | Fase | Layar |
 |---|---|
-| `idle` | Fullscreen dark (logo, jam real-time, "Sentuh untuk mulai") |
-| `cari_tahanan` | Search tahanan + list hasil (langkah 1/3) |
-| `data_tamu` | Input NIK (auto-lookup 16 digit), nama, HP, hubungan chips, keperluan (langkah 2/3) |
-| `konfirmasi` | Summary ringkasan + tombol submit (langkah 3/3) |
+| `idle` | Fullscreen dark (logo 160 px, jam real-time, "Sentuh untuk mulai") |
+| `cari_tahanan` | Search tahanan + list hasil (langkah 1/4) |
+| `foto_ktp` | Kamera (getUserMedia) crop area bingkai KTP; bisa dilewati (langkah 2/4) |
+| `data_tamu` | Input NIK (auto-lookup 16 digit), nama, HP, hubungan chips, keperluan (langkah 3/4) |
+| `konfirmasi` | Summary ringkasan + tombol submit (langkah 4/4) |
 | `sukses` | Fullscreen hijau, nomor kunjungan, countdown 10 detik → idle |
 
 **Penting — OWL XML template di JS**: Tidak boleh pakai HTML named entities (`&nbsp;`, `&mdash;`). Gunakan numeric: `&#160;`, `&#8212;`, atau karakter literal `—`.
+
+**Token**: dibaca dari atribut `data-token` di `<div id="tahti-kiosk-app">` (diisi template dari URL) dan dikirim di setiap `rpc()` (`params: { token, ...params }`).
 
 **CSS**: `static/src/css/tahti_kiosk.css` — Odoo-style, ungu `#714B67`, Standalone (tidak masuk `web.assets_backend`), dimuat via `<link>` di template HTML.
 
@@ -341,9 +352,9 @@ Pattern: IIFE, OWL 2 standalone, single Component.
     <html lang="id">
         <head>...</head>
         <body>
-            <div id="tahti-kiosk-app"/>
+            <div id="tahti-kiosk-app" t-att-data-token="token"/>
             <script src="/web/static/lib/owl/owl.js"/>
-            <script src="/digital_kamtibmas/static/src/js/tahti_kiosk.js"/>
+            <script src="/digital_kamtibmas/static/src/js/tahti_kiosk.js?v=2"/>
         </body>
     </html>
 </template>
@@ -351,6 +362,7 @@ Pattern: IIFE, OWL 2 standalone, single Component.
 
 > Template ini di-register di `__manifest__.py` → `data: [...]`, bukan di `assets`.
 > File JS/CSS kiosk **tidak** masuk `web.assets_backend`.
+> Query `?v=2` pada CSS/JS dinaikkan manual setiap file berubah agar tablet kiosk tidak memakai cache lama.
 
 ---
 
@@ -622,10 +634,15 @@ Banner carousel di dashboard mobile. Ditampilkan berurutan sesuai `sequence`.
 |---|---|---|
 | `name` | Char | Judul (required) |
 | `image` | Binary | Gambar banner (required, attachment) |
+| `url` | Char | **URL Tujuan** (opsional, sejak 1.5.13). Diisi → banner bisa diketuk di app dan membuka alamat itu di browser eksternal |
 | `sequence` | Integer | Urutan tampil (default 10) |
 | `active` | Boolean | Aktif/nonaktif |
 
-**Endpoint**: `GET /api/mobile/slider` (`controllers/mobile_slider.py`, auth public) — return list `{id, name, image_url}`, hanya record `active=True`, urut `sequence`.
+`url` divalidasi (`@api.constrains`): wajib `http://` atau `https://` dengan host; `javascript:`, `ftp:`, `file:`, `intent:`, dan tanpa skema ditolak. Spasi di tepi dibuang saat create/write.
+
+**Endpoint**: `GET /api/mobile/slider` (`controllers/mobile_slider.py`, auth public) — return list `{id, name, image_url, url}`, hanya record `active=True`, urut `sequence`. `url` berisi string kosong bila tidak diisi; app lama mengabaikan field ini.
+
+**Flutter**: `slider_provider.dart` (`SliderItem.url`, getter `actionUri` hanya meloloskan http/https) dan `_SlideImageCard` di `dashboard_screen.dart` (`InkWell` + `launchUrl(... externalApplication)`; banner tanpa URL tidak diberi efek ketuk sama sekali).
 
 ### digital.kamtibmas.welcome.screen
 
@@ -643,7 +660,7 @@ Dialog sambutan yang muncul sekali per sesi saat dashboard mobile dibuka. **Hany
 
 **Endpoint**: `GET /api/mobile/welcome-screen` (`controllers/mobile_welcome.py`, auth public) — domain filter `active=True` + rentang tanggal terhadap `date.today()`, return `null` jika tidak ada yang cocok.
 
-**Flutter**: `lib/features/dashboard/presentation/providers/welcome_screen_provider.dart` (`WelcomeScreenData`) + `_WelcomeDialog` di `dashboard_screen.dart`. Tombol aksi hanya muncul jika `button_url` tidak kosong.
+**Flutter**: `lib/features/dashboard/presentation/providers/welcome_screen_provider.dart` (`WelcomeScreenData`) + `_WelcomeDialog` di `dashboard_screen.dart`. Tombol aksi hanya muncul jika `button_url` tidak kosong. Tata letak `_WelcomeDialog`: rasio gambar dibaca setelah dimuat (`ui.instantiateImageCodec`), lalu lebar gambar dan tombol dihitung sama (`min(lebar layar, tinggi tersisa × rasio)`), supaya tepi kiri-kanan keduanya sejajar. Gambar welcome sebaiknya 9:16 (1080×1920). Teks nama app yang tertanam di gambar tidak bisa diubah dari kode; ganti gambarnya di menu *Welcome Screen Mobile*.
 
 ---
 
@@ -693,6 +710,60 @@ Daftar akun grup **Masyarakat** untuk admin. Model view SQL read-only (`_auto = 
 - `<group string>` tidak valid di `<search>` Odoo 19; taruh `<filter>` group-by langsung.
 - Filter grup di SQL lewat `ir_model_data` (`module='digital_kamtibmas'`, `name='group_masyarakat'`) di `EXISTS`, jadi view bisa dibuat sebelum data grup dimuat.
 - Menuitem yang parent-nya didefinisikan di `menu.xml` **harus** ditaruh di `menu.xml` (dimuat paling akhir di manifest). Menu Warga dan Permintaan Hapus Akun sudah dipindah ke sana.
+
+---
+
+## Konfigurasi Umum Backend
+
+### URL publik (`digital_kamtibmas.public_base_url`)
+
+Link publik (sertifikasi, display antrian, URL kiosk) dibentuk dari helper `public_base_url(env)` di `models/utils.py`, bukan langsung dari `web.base.url`. Alasan: Odoo menimpa `web.base.url` dengan domain tempat admin terakhir login, sehingga link bisa kembali ke domain lama (`palembang.polisibaik.id`). Parameter `digital_kamtibmas.public_base_url` dibuat oleh `data/config_parameter.xml` (`noupdate`, default `https://ampera2407.id`) dan bisa diubah di Settings → Technical → System Parameters; `web.base.url` hanya cadangan. `sertifikasi.url_public` sekarang compute **tidak disimpan** supaya selalu mengikuti domain terbaru. Domain `ampera2407.id` memang benar (bukan typo dari `ampera247`).
+
+### Odoo 19 — jebakan yang sudah terkena
+
+| Hal | Perilaku Odoo 19 | Yang dipakai |
+|---|---|---|
+| `_sql_constraints` | **Diabaikan** (hanya warning di log), constraint tidak pernah dibuat di DB | `name = models.Constraint('unique(...)', 'pesan')` — sudah dikonversi untuk 7 model: `tahti_tamu.nik`, `sertifikasi_profil.nik`, `jenis_layanan.code`, `rehab_tempat.name`, `tahanan_kategori.name`, `intelkam_wa_group.group_id`, `loket_jadwal(loket_id, hari)` |
+| `name_get()` | Dihapus | `_compute_display_name` (mis. `tahti_tamu` → "[NIK] Nama", `konseling` → "[KSL…] Nama") |
+| `name_search(name, args=...)` | Signature jadi `(name, domain, operator, limit)`; search bar & autocomplete memanggil dengan `domain=` → `TypeError` | `_rec_names_search = ['nama', 'nik']`, jangan override `name_search` |
+| `<group string="...">` di `<search>` | Tidak valid (RELAXNG) | Taruh `<filter ... context="{'group_by': ...}"/>` langsung |
+| View SQL (`_auto = False`) | Web client selalu meminta `write_date` saat form dibuka | `_log_access = True` + view menyediakan `create_uid`, `create_date`, `write_uid`, `write_date`; related foto pakai `Binary` bukan `Image` |
+| Urutan load data | `menuitem` yang `parent`-nya dibuat di `menu.xml` gagal bila didefinisikan di file view sebelumnya (instalasi bersih gagal) | Semua `menuitem` yang memakai parent dari `menu.xml` ditaruh di `menu.xml` |
+| ID di `ir.model.access.csv` | ID ganda membuat instalasi bersih gagal (`ON CONFLICT ... cannot affect row a second time`) | Pastikan ID unik (sudah dibersihkan: `access_rehab_*`, `access_rehab_tempat_*`) |
+| `server_wide_modules` | Modul server-wide selalu dianggap terpasang saat menyusun bundel aset → CSS-nya ikut ke DB lain | Batasi CSS dengan selector `:has(...)` yang hanya ada di halaman DB ini (lihat Login Web Admin) |
+
+Uji lokal hanya di DB `palembang` (salinan live yang **dinetralkan**: cron mati, kredensial Wablas diganti, mail server mati, `odoo-bin neutralize`); pita merah "Database neutralized for testing" di halaman lokal berasal dari situ dan tidak ada di live.
+
+## Profil Mobile (ubah nama & foto)
+
+**Endpoint**: `POST /api/dkm/profil/update` (`controllers/mobile_profile.py`, jsonrpc, `auth='user'`). Parameter opsional `nama` dan `foto` (base64). Hanya mengubah akun yang sedang login (`request.env.user`); login, grup, dan hak akses tidak tersentuh. Validasi: nama tidak kosong, maks 60 karakter, spasi dirapikan; foto harus gambar valid (`odoo.tools.image.image_process`, diperkecil maks 1024 px), maks 5 MB setelah decode. Respons `{ok, name}` atau `{ok: false, error}`.
+
+**Flutter**: `profile/presentation/widgets/edit_profile_sheet.dart` (bottom sheet; foto dipilih lewat `file_picker`, diperkecil di perangkat ke maks 1024 px PNG sebelum diunggah), `profile_provider.dart` (`profilePhotoVersionProvider` dinaikkan setelah foto berubah; dipakai sebagai key + query `?v=` pada avatar di dashboard dan profil), `AuthNotifier.updateName`. Entry: avatar (lencana pensil) dan tombol *Edit Profil* di `profile_screen.dart`.
+
+## Login Web Admin (`/web/login`)
+
+Latar ungu `body.bg-100{ linear-gradient(145deg,#1c0e19,#3a2035,#5c3d54) !important }` **bukan** dari Odoo bawaan, melainkan dari modul lain `sel_custom_preferences` (`static/src/css/login_custom.css`) yang dipakai juga oleh database lain; jangan diubah dari proyek ini.
+
+Branding AMPERA PBM ditimpa dari modul ini saja:
+- `views/login_template.xml` — template turunan `web.login_layout` menambah footer `div.dkm-login-sponsor` ("DIDUKUNG OLEH" + logo Bank Sumsel Babel + "Mitra Anda Membangun Daerah") setelah kartu login. Ikut tampil di halaman reset password dan lainnya.
+- `static/src/css/login_brand.css` (bundel `web.assets_frontend`) — latar navy (`#0b1830 → #17386a`, `fixed` + `no-repeat` + warna dasar agar tidak mengulang), footer di paling bawah tengah. **Seluruh aturan dibatasi `:has(.dkm-login-sponsor)`**, kalau tidak CSS ikut mengubah login DB lain bila modul terdaftar `server_wide_modules`. Selector `html body.bg-100:has(...)` + `!important` menang atas aturan modul lain.
+- `static/img/bank_sumselbabel.png` — logo bank 640 px (RGBA).
+
+Catatan uji: Chrome headless tidak menjalankan JS Odoo (form login `d-none` menunggu komponen `web.user_switch`), jadi pratinjau dibuat dari salinan HTML statis yang `d-none`-nya dibuang.
+
+## Mobile Flutter — Branding, Rilis & iOS
+
+**Nama & identitas**: nama tampilan **AMPERA PBM** (short description "Polisi Bersama Masyarakat") di label Android, `CFBundleName`/`CFBundleDisplayName`, web manifest, layar login/splash/profil. Pengenal teknis tidak berubah: `id.polisibaik.ampera247` (applicationId / bundle id / `userAgentPackageName`), `ampera247.keystore`, path URL `/ampera247`, nama repo `ampera247-mobile`, domain `ampera2407.id`. `_AmperaBridgePainter` = siluet Jembatan Ampera (landmark), bukan merek.
+
+**Layar awal** (`login_screen.dart`, `splash_screen.dart`): logo penuh tanpa lingkaran (login 150 px, splash 210 px), urutan: logo → POLRESTABES PALEMBANG → garis + bintang → AMPERA PBM → "Polisi Bersama Masyarakat" (rapat ke judul). Versi app ditampilkan di bawah login ("Versi 1.4.0 (8)") dan di Profil, dibaca saat runtime lewat `appVersionProvider` (`core/config/app_version.dart`, paket `package_info_plus`).
+
+**Aset logo**: `assets/images/logo.png` (1024, transparan), `logo_ios.png` (latar navy `#1D2A44`, tanpa alpha untuk ikon iOS), `splash_logo.png` (emblem + tulisan POLRESTABES PALEMBANG untuk splash native). Emblem dipusatkan berdasarkan **poros simetri** (mahkota/banner/ujung perisai, ≈0,5363 lebar emblem), **bukan** kotak pembatas — pita kiri/kanan logo tidak simetris sehingga pemusatan bbox membuat emblem tampak 3% ke kanan. Regenerasi ikon: `dart run flutter_launcher_icons` lalu `dart run flutter_native_splash:create`; generator pertama mengubah `ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS` di `project.pbxproj` secara keliru → kembalikan dengan `git checkout -- ios/Runner.xcodeproj/project.pbxproj`. Splash native Android 12+ selalu memakai ikon launcher dalam lingkaran (teks tidak bisa); gambar `splash_logo.png` hanya berlaku Android ≤11 dan iOS. Build debug yang di-`force-stop` lalu dibuka dari launcher memakai kode saat build awal, bukan hasil hot restart.
+
+**Konseling (WebView)**: ruang obrolan dan panggilan video adalah **Odoo Discuss** (`{baseUrl}/odoo/discuss/channel-<id>`) di `webview_flutter`, cookie `session_id` disuntikkan dari secure storage, UA diset desktop Chrome. Halaman backend `/mobile/konseling/chat/<id>` + `mobile_chat.js` tidak dipakai versi sekarang (jangan dihapus selama app lama masih beredar). iOS: `WebKitWebViewControllerCreationParams(allowsInlineMediaPlayback: true, mediaTypesRequiringUserAction: {})` dan `setOnPlatformPermissionRequest(... grant())` (setara Android); dependensi langsung `webview_flutter_wkwebview ^3.26.0`. Belum teruji di iPhone fisik — uji lewat TestFlight (panggilan video KSL00001).
+
+**Konfigurasi iOS** (`ios/`): `Podfile` ditambahkan ke repo (template Flutter + makro `PERMISSION_CAMERA/MICROPHONE`), tetapi Flutter 3.44 membangun plugin lewat **Swift Package Manager** dan `permission_handler_apple` 9.4.10 mengaktifkan izin otomatis dari kunci `NS*UsageDescription` di `Info.plist`, jadi makro itu tidak berperan (aman, hanya jalur CocoaPods). `UIBackgroundModes` (fetch, remote-notification) dihapus karena tidak dipakai. `PrivacyInfo.xcprivacy` ditambah *Photos or Videos* (foto profil). `ITSAppUsesNonExemptEncryption=false`. Deployment target 13.0 → App Store Connect memberi peringatan 90068: **mulai April 2027 wajib ≥ 15.0** (ubah di target Runner, `Podfile`, dan `ios/Flutter/AppFrameworkInfo.plist`). Build di MacBook (tanpa iPhone fisik): `git pull`; `flutter clean`; `rm -rf ios/Pods ios/Podfile.lock build ~/Library/Developer/Xcode/DerivedData/Runner-*`; `flutter pub get`; `cd ios && pod install --repo-update`; `flutter build ipa --release --dart-define=BASE_URL=https://ampera2407.id --dart-define=DB_NAME=palembang --dart-define=IS_PRODUCTION=true` (`env.prod.json` tidak ikut repo dan isinya usang); cek `Info.plist` & ikon di `.xcarchive`; Validate lalu Distribute **lewat satu jalur saja** (Organizer atau Transporter — kirim build yang sama dua kali ditolak). Tim penandatangan: akun *CV Mitra Hoki Maju Mapan* (Team ID `8Z7833D76K`).
+
+**Status rilis** (per 2026-10-30): build 1.4.0 (7) sudah terunggah ke App Store Connect dengan nama lama; build **1.4.0 (8)** (nama AMPERA PBM) sudah menjadi IPA di Mac tetapi **belum diunggah** (menunggu perbaikan WebView iOS lalu uji TestFlight). Masih menunggu: surat pernyataan Polrestabes (bukti otorisasi untuk 5.1.1(ix)), penggantian Name/Subtitle di App Store Connect dan judul/short description di Play Console, screenshot baru (simulator iPhone 17 Pro Max 1320×2868 dan iPad Pro 13" 2064×2752), gambar welcome dan banner slider baru di server, serta upload halaman kebijakan privasi (memuat klaim afiliasi — tahan sampai surat ada).
 
 ---
 
@@ -990,3 +1061,6 @@ OWL XML parser **tidak** mengenal HTML named entities. Gunakan numeric:
 | 1.5.8 | **Perubahan strategi App Store / Play Store**: Polrestabes Palembang bersedia memberi surat pernyataan bahwa AMPERA247 berada di bawah tanggung jawab Polri satwil Polrestabes Palembang dan CV. Mitra Hoki Maju Mapan ditunjuk sebagai pengembang / pengelola teknis. Rute Bank Sumsel Babel dan posisi "community app" ditinggalkan. Draft surat bilingual (Indonesia + Inggris, `.docx`, field kosong di-highlight kuning) dibuat di `Documents/Surat_Pernyataan_Polrestabes_AMPERA247.docx` — menunggu scan PDF bertanda tangan + cap; surat yang sama dipakai untuk Play Console dan App Store Connect (nama app, Bundle ID `id.polisibaik.ampera247`, dan nama CV harus persis sama dengan akun developer). `controllers/privacy_policy.py` diubah: disclaimer "tidak berafiliasi dengan instansi pemerintah" diganti pernyataan **Aplikasi Resmi Polrestabes Palembang** (title, badge, hero, bagian about, intro kebijakan privasi, link `polrestapalembang.polri.go.id`). **Jangan deploy halaman ini dan jangan ubah listing sebelum surat ada** — klaim resmi tanpa bukti berisiko dianggap menyesatkan. Listing Play Store (disclaimer "community app" di atas deskripsi) diubah manual di Play Console setelah surat; welcome screen sponsor Bank Sumsel Babel perlu ditinjau ulang. |
 | 1.5.9 | **Registrasi v2 + manajemen Warga**: (1) Pendaftaran app diganti username + nama + password + ulangi password + foto opsional (tanpa WhatsApp / telepon) lewat endpoint baru `/mobile/dkm/v2/check-username` dan `/mobile/dkm/v2/register`; endpoint v1 `/mobile/dkm/register` **tidak diubah** agar app lama tetap jalan. Aturan username dan password: lihat bagian "Warga & Registrasi Mobile". Server live sudah diverifikasi merespons endpoint baru dan lama. (2) Menu **Warga** (`digital_kamtibmas.warga`, view SQL read-only) untuk admin: list + pencarian + smart button riwayat layanan + Reset Password / Nonaktifkan / Hapus Akun (anonimisasi); tombol "Hapus Akun Pengguna" ditambahkan di Permintaan Hapus Akun. Bug saat dibuka di live: `Invalid field 'write_date'` — view SQL harus menyediakan kolom log akses (`_log_access = True`). (3) Instalasi bersih modul sebelumnya tidak mungkin dan sudah diperbaiki: ID duplikat di `ir.model.access.csv` (`access_rehab_*` dan `access_rehab_tempat_*`, baris terakhir yang berlaku sehingga izin tidak berubah) dan menu Permintaan Hapus Akun yang memakai parent dari `menu.xml` sebelum dimuat (dipindah ke `menu.xml`, xmlid sama). Diuji lewat instalasi di database sementara (19 skenario fungsional lulus: akses, aksi, reset password, anonimisasi). (4) **Flutter 1.4.0+7**: `registration_screen.dart` dan `registration_provider.dart` memakai endpoint v2. `env.prod.json` masih berisi `palembang.polisibaik.id` (usang) — build rilis memakai `--dart-define=BASE_URL=https://ampera2407.id --dart-define=DB_NAME=palembang --dart-define=IS_PRODUCTION=true` secara eksplisit. Upgrade modul di server live (`-u digital_kamtibmas`) diperlukan untuk model / menu Warga. |
 | 1.5.10 | **Rebranding: nama tampilan AMPERA247 diganti AMPERA PBM** (short description / tagline: "Polisi Bersama Masyarakat"). Diganti: label Android, `CFBundleName`/`CFBundleDisplayName` iOS, web manifest & index, judul/teks di login, splash, profil, `pubspec.yaml`; backend: halaman publik (`privacy_policy.py`, `account_deletion.py`), menu root Odoo, kiosk Tahti & sertifikasi, display antrian, template cetak sertifikasi, pesan WhatsApp registrasi v1. **Tidak diubah (pengenal teknis)**: package / bundle id `id.polisibaik.ampera247`, `applicationId`, `userAgentPackageName`, `ampera247.keystore`, path URL `/ampera247` (Marketing URL listing), daftar username terlarang, nama repo. Domain tetap `ampera2407.id`. Versi Flutter dinaikkan ke **1.4.0+8** karena build iOS 1.4.0 (7) sudah terunggah ke App Store Connect dengan nama lama. Desain welcome screen dibuat ulang (1080x1920, judul "AMPERA PBM", logo baru + tulisan Polrestabes Palembang); skrip render ada di sesi kerja, hasil `welcome_amperapbm.png`. Yang harus diubah manual di toko: nama app "AMPERA PBM" (maks 30 karakter), subtitle App Store / short description Play Store "Polisi Bersama Masyarakat", screenshot. |
+| 1.5.11 | **Pengerasan backend**: (1) Kiosk buku tamu Tahti wajib token (`/tahti/buku-tamu/<token>`, menu *Kiosk Buku Tamu*, `models/tahti_kiosk_config.py`); API cari_tahanan/cek_nik/daftar_kunjungan menolak tanpa token; cek_nik tidak lagi mengirim alamat; kiosk tidak bisa menimpa data tamu lama; NIK divalidasi 16 digit di server. (2) 7 constraint unik dikonversi ke `models.Constraint` (di Odoo 19 `_sql_constraints` diabaikan; sebelumnya tidak pernah aktif); `name_get`/`name_search` diganti `_compute_display_name`/`_rec_names_search` (pencarian Tamu di search bar sebelumnya `TypeError`). (3) `public_base_url` + `url_public` sertifikasi tidak disimpan (link tidak lagi kembali ke polisibaik.id). (4) Menu Warga (`models/warga.py`) memakai `_log_access = True` karena form membaca `write_date`. Detail: bagian *Konfigurasi Umum Backend*. |
+| 1.5.12 | **Mobile 1.4.0+8 — profil, layar awal, iOS**: (1) Ubah nama & foto profil (`/api/dkm/profil/update`, `edit_profile_sheet.dart`). (2) Logo di-center ulang berdasarkan poros emblem; login & splash tanpa lingkaran, tulisan POLRESTABES PALEMBANG + garis bintang + AMPERA PBM; splash native `splash_logo.png`; versi app tampil di login & profil (`package_info_plus`); perbaikan router agar pesan "username/password salah" tampil (login tidak lagi dilempar ke splash saat loading). (3) iOS: Podfile, `UIBackgroundModes` dihapus, PrivacyInfo + foto, WKWebView inline playback + izin media otomatis untuk panggilan konseling; build IPA 1.4.0 (8) dibuat di MacBook (belum diunggah). (4) Welcome dialog: lebar gambar = lebar tombol. Detail: bagian *Mobile Flutter — Branding, Rilis & iOS*. |
+| 1.5.13 | **Slider bisa diketuk + login web admin**: (1) `digital.kamtibmas.slider.url` (validasi http/https), API `/api/mobile/slider` mengirim `url`, app membuka di browser eksternal; app lama tidak terpengaruh. (2) Halaman `/web/login`: latar navy + footer logo Bank Sumsel Babel dan slogan "Mitra Anda Membangun Daerah" (`login_template.xml`, `login_brand.css`, `bank_sumselbabel.png`); CSS dibatasi `:has(.dkm-login-sponsor)` agar tidak bocor ke DB lain (modul terdaftar `server_wide_modules`); latar ungu aslinya dari `sel_custom_preferences`. (3) Desain welcome screen baru (`welcome_amperapbm_v3.png`, 9:16; slogan sponsor ditambahkan). Perlu upload 3 file backend slider + 4 file login lalu upgrade modul di live. |
