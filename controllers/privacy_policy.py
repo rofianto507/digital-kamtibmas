@@ -170,7 +170,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <p>Pertanyaan seputar kebijakan privasi dapat disampaikan kepada:</p>
     <p style="margin-top:10px"><strong style="color:#fff">CV Mitra Hoki Maju Mapan (Tim AMPERA PBM)</strong></p>
     <p>Pengembang Aplikasi AMPERA PBM</p>
-    <p style="margin-top:8px"><a href="mailto:dharukun@yahoo.com">dharukun@yahoo.com</a></p>
+    <p style="margin-top:8px"><a href="mailto:apkgotech@gmail.com">apkgotech@gmail.com</a></p>
   </div>
 </div>
 <div class="footer">&copy; 2026 AMPERA PBM &mdash; CV Mitra Hoki Maju Mapan (Tim AMPERA PBM). Seluruh hak dilindungi.</div>
@@ -294,7 +294,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="section-body">
       <p>Jika Anda menemukan konten atau perilaku yang melanggar standar keselamatan anak di dalam aplikasi AMPERA PBM, segera laporkan melalui:</p>
       <ul class="item-list">
-        <li><strong>Email:</strong> dharukun@yahoo.com &mdash; dengan subjek "Laporan Keselamatan Anak"</li>
+        <li><strong>Email:</strong> apkgotech@gmail.com &mdash; dengan subjek "Laporan Keselamatan Anak"</li>
         <li><strong>Telepon darurat anak:</strong> 129 (KPAI &mdash; Komisi Perlindungan Anak Indonesia)</li>
         <li><strong>Situs KPAI:</strong> www.kpai.go.id</li>
       </ul>
@@ -323,7 +323,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <h3>Kontak Keselamatan Anak</h3>
     <p>Laporan dan pertanyaan terkait keselamatan anak:</p>
     <p style="margin-top:10px"><strong style="color:#fff">CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) — Tim AMPERA PBM</strong></p>
-    <p style="margin-top:6px"><a href="mailto:dharukun@yahoo.com">dharukun@yahoo.com</a></p>
+    <p style="margin-top:6px"><a href="mailto:apkgotech@gmail.com">apkgotech@gmail.com</a></p>
     <p style="margin-top:4px">Subjek: <em>Laporan Keselamatan Anak</em></p>
   </div>
 </div>
@@ -403,7 +403,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <svg viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </div>
       <h4>Email Dukungan</h4>
-      <p><a href="mailto:dharukun@yahoo.com">dharukun@yahoo.com</a></p>
+      <p><a href="mailto:apkgotech@gmail.com">apkgotech@gmail.com</a></p>
       <span class="badge-hours">Senin &ndash; Jumat, 08.00 &ndash; 17.00 WIB</span>
     </div>
     <div class="contact-card">
@@ -426,7 +426,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="section-body">
       <div class="faq-item">
         <div class="faq-q">Bagaimana cara mendaftar akun AMPERA PBM?</div>
-        <div class="faq-a">Buka aplikasi, pilih "Daftar", lalu isi nama lengkap, nomor telepon, dan buat kata sandi. Akun Anda akan langsung aktif setelah pendaftaran selesai.</div>
+        <div class="faq-a">Buka aplikasi, pilih "Daftar", lalu isi username, nama, dan kata sandi (minimal 8 karakter, kombinasi huruf dan angka), lalu unggah foto. Akun Anda akan langsung aktif setelah pendaftaran selesai.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Aplikasi tidak bisa login setelah update. Apa yang harus dilakukan?</div>
@@ -484,7 +484,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <li><strong>Nama Aplikasi</strong>&nbsp;&mdash;&nbsp;AMPERA PBM</li>
         <li><strong>Pengembang</strong>&nbsp;&mdash;&nbsp;CV Mitra Hoki Maju Mapan (Tim AMPERA PBM)</li>
         <li><strong>Platform</strong>&nbsp;&mdash;&nbsp;Android &amp; iOS</li>
-        <li><strong>Kontak Pengembang</strong>&nbsp;&mdash;&nbsp;dharukun@yahoo.com</li>
+        <li><strong>Kontak Pengembang</strong>&nbsp;&mdash;&nbsp;apkgotech@gmail.com</li>
       </ul>
     </div>
   </div>
@@ -675,7 +675,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="step-num">2</div>
       <div class="step-body">
         <h4>Buat Akun</h4>
-        <p>Daftarkan diri menggunakan nama lengkap dan nomor telepon. Proses berlangsung kurang dari 1 menit.</p>
+        <p>Daftarkan diri menggunakan username, nama, dan kata sandi. Proses berlangsung kurang dari 1 menit.</p>
       </div>
     </div>
     <div class="how-step">
@@ -688,13 +688,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 
   <div class="disclaimer">
-    <p><strong>Aplikasi Resmi:</strong> AMPERA PBM adalah aplikasi resmi yang berada di bawah tanggung jawab <strong>Kepolisian Negara Republik Indonesia, Kepolisian Resor Kota Besar (Polrestabes) Palembang</strong>. Pengembangan teknis dan pengelolaan operasional aplikasi dilakukan oleh CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) berdasarkan penunjukan dari Polrestabes Palembang. Informasi resmi instansi dapat dilihat di <a href="https://polrestapalembang.polri.go.id" target="_blank" rel="noopener">polrestapalembang.polri.go.id</a>.</p>
+    <p><strong>Aplikasi Resmi:</strong> AMPERA PBM adalah aplikasi resmi yang berada di bawah tanggung jawab <strong>Kepolisian Negara Republik Indonesia, Kepolisian Resor Kota Besar (Polrestabes) Palembang</strong>. Pengembangan teknis dan pengelolaan operasional aplikasi dilakukan oleh CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) berdasarkan penunjukan dari Polrestabes Palembang. Informasi resmi instansi dapat dilihat di situs <a href="https://sumsel.polri.go.id" target="_blank" rel="noopener">Polda Sumatera Selatan (sumsel.polri.go.id)</a>.</p>
   </div>
 
   <div class="about">
     <h3>Milik Polrestabes Palembang, dikembangkan oleh CV Mitra Hoki Maju Mapan</h3>
     <p>AMPERA PBM berada di bawah tanggung jawab Polrestabes Palembang. CV Mitra Hoki Maju Mapan (Tim AMPERA PBM) bertindak sebagai pengembang dan pengelola teknis aplikasi atas penunjukan instansi.</p>
-    <a href="mailto:dharukun@yahoo.com">dharukun@yahoo.com</a>
+    <a href="mailto:apkgotech@gmail.com">apkgotech@gmail.com</a>
   </div>
 </div>
 
