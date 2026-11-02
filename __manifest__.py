@@ -1,11 +1,49 @@
 {
     'name': 'Digital Kamtibmas',
     'version': '19.0.1.0.0',
-    'summary': 'Sistem Informasi Digital Kamtibmas Polrestabes Palembang',
-    'description': 'Modul pengelolaan data kamtibmas digital untuk Polrestabes Palembang.',
+    'summary': 'Sistem Informasi Digital Kamtibmas Polrestabes Palembang (AMPERA PBM)',
+    'description': """
+AMPERA PBM - Polisi Bersama Masyarakat
+======================================
+
+Sistem informasi digital untuk Kepolisian Resor Kota Besar (Polrestabes)
+Palembang. Modul ini adalah backend dari aplikasi seluler resmi
+**AMPERA PBM - Polisi Bersama Masyarakat** (Android dan iOS) yang berada di
+bawah tanggung jawab Polrestabes Palembang.
+
+Dikembangkan dan dikelola secara teknis oleh CV. Mitra Hoki Maju Mapan
+berdasarkan Surat Pernyataan Kapolrestabes Palembang No. B/1718/X/2026
+tanggal 20 Oktober 2026.
+
+Fitur Utama
+-----------
+* Antrian online: jenis layanan, loket, layar display antrian, dan kiosk.
+* e-Form Kecelakaan: laporan kejadian lengkap dengan titik lokasi pada peta.
+* Sertifikasi online: bank soal, tes daring, dan sertifikat digital.
+* Rehabilitasi: tempat rehabilitasi dan permohonan rehabilitasi.
+* Barang Bukti: pencatatan dan informasi barang bukti.
+* Konseling: konsultasi melalui chat dan panggilan video (Discuss).
+* Tahanan Titipan (Tahti): data tahanan, sel, kunjungan, dan buku tamu kiosk.
+* Patroli: grup patroli dan rute patroli.
+* Intelkam: distribusi informasi dan pencatatan respons melalui WhatsApp.
+* Manajemen Warga: data pengguna aplikasi seluler dan permintaan hapus akun.
+* Konten aplikasi: layar sambut dan banner beranda yang dapat dibuka tautannya.
+* Dashboard statistik dan peta.
+
+Aplikasi Seluler
+----------------
+* Pendaftaran dengan username dan kata sandi, ubah nama dan foto profil.
+* Menyediakan API untuk aplikasi seluler Android dan iOS.
+* Halaman publik: informasi aplikasi, dukungan, kebijakan privasi, dan
+  penghapusan akun (https://ampera2407.id/ampera247).
+
+Pengembang
+----------
+CV. Mitra Hoki Maju Mapan (Tim AMPERA PBM)
+""",
     'category': 'Tools',
-    'author': 'Cv Sel Studio',
-    'website': 'https://selstudio.id',
+    'author': 'CV. Mitra Hoki Maju Mapan',
+    'website': 'https://ampera2407.id/ampera247',
     'depends': ['base', 'web', 'mail', 'calendar', 'contacts', 'hr', 'spreadsheet_dashboard'],
     'data': [
         'security/security.xml',
