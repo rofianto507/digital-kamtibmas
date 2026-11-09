@@ -60,3 +60,12 @@ html body.bg-100 #wrapwrap > main:has(.dkm-login-sponsor) > .container {
     letter-spacing: 0.06em;
     color: rgba(255, 255, 255, 0.82);
 }
+
+/* Form login selalu tampil.
+ * Odoo 19 menyembunyikan form (class d-none) bila browser mengingat 2 akun atau
+ * lebih, lalu menampilkan daftar "Choose a user". Daftar itu disembunyikan oleh
+ * sel_custom_preferences, sehingga setelah logout halaman tampak kosong.
+ * Di sini form dipaksa tampil; daftar akun tetap tersembunyi. */
+html body.bg-100:has(.dkm-login-sponsor) form.oe_login_form.d-none {
+    display: block !important;
+}

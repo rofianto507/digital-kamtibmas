@@ -7,6 +7,22 @@
         <field name="model">digital_kamtibmas.patroli_grup</field>
         <field name="arch" type="xml">
             <form string="Grup Patroli">
+                <header>
+                    <button name="action_buat_akun" type="object" string="Buat Akun Login"
+                            class="btn-primary" invisible="user_id"
+                            groups="digital_kamtibmas.group_dkm_admin"/>
+                    <button name="action_reset_password" type="object" string="Reset Password"
+                            invisible="not user_id"
+                            groups="digital_kamtibmas.group_dkm_admin"
+                            confirm="Buat password baru untuk akun grup ini? Password lama tidak berlaku lagi."/>
+                    <button name="action_toggle_akun" type="object" string="Nonaktifkan Akun"
+                            invisible="not user_id or not akun_aktif"
+                            groups="digital_kamtibmas.group_dkm_admin"
+                            confirm="Nonaktifkan akun login grup ini? Grup tidak bisa login ke aplikasi patroli."/>
+                    <button name="action_toggle_akun" type="object" string="Aktifkan Akun"
+                            invisible="not user_id or akun_aktif"
+                            groups="digital_kamtibmas.group_dkm_admin"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_patroli" type="object"
@@ -24,8 +40,11 @@
                             <field name="no_pol" string="Nopol"/>
                             <field name="jenis_kendaraan"/>
                         </group>
-                        <group>
-                            <field name="user_id"/>
+                        <group string="Akun Login Aplikasi Patroli">
+                            <field name="username" invisible="user_id" placeholder="mis. patroli.alfa"/>
+                            <field name="user_id" invisible="not user_id" readonly="1"/>
+                            <field name="akun_login" invisible="not user_id"/>
+                            <field name="akun_aktif" invisible="not user_id" widget="boolean"/>
                             <field name="active"/>
                         </group>
                     </group>
@@ -47,7 +66,8 @@
                 <field name="name"/>
                 <field name="no_pol" string="Nopol"/>
                 <field name="jenis_kendaraan"/>
-                <field name="user_id"/>
+                <field name="akun_login"/>
+                <field name="akun_aktif" optional="show"/>
                 <field name="patroli_count" string="Jml Patroli"/>
                 <field name="active" column_invisible="True"/>
             </list>
