@@ -65,7 +65,7 @@
                             <field name="merek"/>
                             <field name="tipe"/>
                             <field name="warna"/>
-                            <field name="tahun_kendaraan"/>
+                            <field name="tahun_kendaraan" options="{'enable_formatting': false}"/>
                         </group>
                         <group>
                             <field name="nomor_polisi"/>

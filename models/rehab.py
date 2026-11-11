@@ -1,6 +1,8 @@
 from datetime import date
 from odoo import models, fields, api
 
+from .utils import today_local
+
 
 class Rehab(models.Model):
     _name        = 'digital_kamtibmas.rehab'
@@ -32,7 +34,7 @@ class Rehab(models.Model):
     keterangan         = fields.Text('Keterangan / Alasan Permohonan')
 
     # ── Jadwal & Status ────────────────────────────────────────────────────────
-    tanggal_pengajuan  = fields.Date('Tanggal Pengajuan', default=fields.Date.today)
+    tanggal_pengajuan  = fields.Date('Tanggal Pengajuan', default=lambda self: today_local(self.env))
     tanggal_jadwal     = fields.Datetime('Tanggal Jadwal Rehab', tracking=True)
     state              = fields.Selection([
         ('menunggu',   'Menunggu'),

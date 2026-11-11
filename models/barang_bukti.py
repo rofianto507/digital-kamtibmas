@@ -1,5 +1,7 @@
 from odoo import models, fields, api
 
+from .utils import today_local
+
 
 class BarangBukti(models.Model):
     _name        = 'digital_kamtibmas.barang_bukti'
@@ -14,7 +16,7 @@ class BarangBukti(models.Model):
     nomor_perkara      = fields.Char('No. LP / Perkara', tracking=True)
     lokasi_kejadian    = fields.Char('TKP / Lokasi Kejadian')
     tanggal_penyitaan  = fields.Date('Tanggal Penyitaan')
-    tanggal_penerimaan = fields.Date('Tanggal Diterima', default=fields.Date.today)
+    tanggal_penerimaan = fields.Date('Tanggal Diterima', default=lambda self: today_local(self.env))
     petugas_id         = fields.Many2one('res.users', 'Penyidik / Petugas', tracking=True)
 
     # ── Identitas Kendaraan ───────────────────────────────────────────────────

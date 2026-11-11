@@ -2,6 +2,8 @@ from markupsafe import Markup
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
+from .utils import today_local
+
 
 class Konseling(models.Model):
     _name        = 'digital_kamtibmas.konseling'
@@ -29,7 +31,7 @@ class Konseling(models.Model):
     keterangan         = fields.Text('Keterangan / Uraian Permasalahan')
 
     # ── Jadwal, Konselor & Status ─────────────────────────────────────────────
-    tanggal_pengajuan  = fields.Date('Tanggal Pengajuan', default=fields.Date.today)
+    tanggal_pengajuan  = fields.Date('Tanggal Pengajuan', default=lambda self: today_local(self.env))
     tanggal_jadwal     = fields.Datetime('Tanggal Jadwal Konseling', tracking=True)
     konselor_id        = fields.Many2one('res.users', 'Konselor / Petugas', tracking=True)
     hasil_konseling    = fields.Text('Hasil Konseling / Rekomendasi')
