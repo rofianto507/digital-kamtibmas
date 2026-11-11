@@ -1,6 +1,18 @@
 PARAM_PUBLIC_BASE_URL = 'digital_kamtibmas.public_base_url'
 
 
+def today_local(env):
+    """Tanggal hari ini menurut zona waktu pengguna (default WIB).
+
+    `fields.Date.today` memakai tanggal UTC sehingga antara 00.00-07.00 WIB
+    hasilnya tertinggal satu hari.
+    """
+    import pytz
+    from datetime import datetime
+    tz = pytz.timezone(env.context.get('tz') or env.user.tz or 'Asia/Jakarta')
+    return datetime.now(pytz.utc).astimezone(tz).date()
+
+
 def public_base_url(env):
     """Domain untuk link publik (sertifikasi, display antrian).
 

@@ -1,5 +1,7 @@
 from odoo import models, fields, api
 
+from .utils import today_local
+
 
 class Tahanan(models.Model):
     _name        = 'digital_kamtibmas.tahanan'
@@ -40,7 +42,8 @@ class Tahanan(models.Model):
     penyidik_id   = fields.Many2one('res.users', 'Penyidik')
 
     # ── Penahanan ─────────────────────────────────────────────────────────────
-    tanggal_masuk  = fields.Date('Tanggal Masuk', required=True, default=fields.Date.today, tracking=True)
+    tanggal_masuk  = fields.Date('Tanggal Masuk', required=True,
+                                 default=lambda self: today_local(self.env), tracking=True)
     tanggal_keluar = fields.Date('Tanggal Keluar', tracking=True)
     sel_id         = fields.Many2one('digital_kamtibmas.tahti_sel', 'Sel / Kamar', ondelete='set null', tracking=True)
     keterangan     = fields.Text('Keterangan')
@@ -71,7 +74,7 @@ class Tahanan(models.Model):
     # ── Workflow ──────────────────────────────────────────────────────────────
 
     def action_bebaskan(self):
-        self.write({'state': 'bebas', 'tanggal_keluar': fields.Date.today()})
+        self.write({'state': 'bebas', 'tanggal_keluar': today_local(self.env)})
 
     def action_tahan_kembali(self):
         self.write({'state': 'ditahan', 'tanggal_keluar': False})

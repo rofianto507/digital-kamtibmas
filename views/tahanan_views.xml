@@ -9,7 +9,7 @@
             <form string="Data Tahanan">
                 <header>
                     <button name="action_bebaskan" type="object" string="Bebaskan"
-                            class="btn-success" invisible="state != 'ditahan'"/>
+                            class="btn-success" invisible="not id or state != 'ditahan'"/>
                     <button name="action_tahan_kembali" type="object" string="Tahan Kembali"
                             invisible="state != 'bebas'"/>
                     <field name="state" widget="statusbar" statusbar_visible="ditahan,bebas"/>
