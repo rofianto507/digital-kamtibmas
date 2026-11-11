@@ -2,6 +2,8 @@ import json
 from odoo import http, fields
 from odoo.http import request, Response
 
+from ..models.utils import today_local
+
 PARAM_TOKEN = 'digital_kamtibmas.display_token'
 
 
@@ -33,7 +35,7 @@ class AntrianDisplayController(http.Controller):
             return Response(json.dumps({'error': 'invalid_token'}),
                             content_type='application/json', status=403)
 
-        today   = fields.Date.today()
+        today   = today_local(request.env)
         Loket   = request.env['digital_kamtibmas.loket'].sudo()
         Antrian = request.env['digital_kamtibmas.antrian'].sudo()
 

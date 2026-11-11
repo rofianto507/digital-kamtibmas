@@ -1,5 +1,7 @@
 from odoo import models, fields, api
 
+from .utils import today_local
+
 
 HARI_SELECTION = [
     ('0', 'Senin'),
@@ -37,7 +39,7 @@ class Loket(models.Model):
 
     @api.depends('antrian_ids.tanggal_booking', 'antrian_ids.state')
     def _compute_antrian_count(self):
-        today = fields.Date.today()
+        today = today_local(self.env)
         Antrian = self.env['digital_kamtibmas.antrian'].sudo()
         for rec in self:
             rec.antrian_count = Antrian.search_count([
@@ -54,7 +56,7 @@ class Loket(models.Model):
             'view_mode': 'list,form',
             'domain': [
                 ('loket_id', '=', self.id),
-                ('tanggal_booking', '=', fields.Date.today()),
+                ('tanggal_booking', '=', today_local(self.env)),
             ],
             'context': {'default_loket_id': self.id},
         }

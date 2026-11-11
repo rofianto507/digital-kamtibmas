@@ -1,6 +1,8 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
+from .utils import today_local
+
 
 class Antrian(models.Model):
     _name        = 'digital_kamtibmas.antrian'
@@ -14,7 +16,8 @@ class Antrian(models.Model):
                                        default=lambda self: self.env.user)
     atas_nama       = fields.Char('Atas Nama', required=True,
                                    help='Nama penerima layanan (boleh berbeda dengan pendaftar)')
-    tanggal_booking = fields.Date('Tanggal Booking', required=True, default=fields.Date.today)
+    tanggal_booking = fields.Date('Tanggal Booking', required=True,
+                                   default=lambda self: today_local(self.env))
     loket_id        = fields.Many2one('digital_kamtibmas.loket', string='Loket',
                                        required=True, ondelete='restrict')
     layanan_id      = fields.Many2one('digital_kamtibmas.jenis_layanan', string='Jenis Layanan',
@@ -34,7 +37,7 @@ class Antrian(models.Model):
         for vals in vals_list:
             if vals.get('nomor_antrian', 'New') == 'New':
                 loket = self.env['digital_kamtibmas.loket'].browse(vals['loket_id'])
-                tanggal = vals.get('tanggal_booking') or fields.Date.today()
+                tanggal = vals.get('tanggal_booking') or today_local(self.env)
 
                 # Nomor urut per layanan per hari (reset tiap hari)
                 urut = self.search_count([
