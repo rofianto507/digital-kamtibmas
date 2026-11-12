@@ -116,7 +116,7 @@
             </div>
             <div t-elif="state.nikStatus === 'found'"
                  style="font-size:12px;color:var(--green);margin-top:4px;font-weight:600">
-                &#10003; NIK pernah terdaftar — lengkapi data Anda
+                &#10003; NIK sudah terdaftar atas nama <t t-esc="state.nikMasked"/>
             </div>
             <div t-elif="state.nikStatus === 'new'"
                  style="font-size:12px;color:var(--muted);margin-top:4px">
@@ -124,6 +124,17 @@
             </div>
         </div>
 
+        <t t-if="state.nikStatus === 'found'">
+            <div class="sk-form-group" t-if="state.nikVerif">
+                <label class="sk-label">Tanggal Lahir (verifikasi) <span class="sk-req">*</span></label>
+                <input class="sk-input"
+                       type="date"
+                       t-att-value="state.form.tanggal_lahir"
+                       t-on-input="ev => state.form.tanggal_lahir = ev.target.value"/>
+            </div>
+            <div class="sk-subtitle" t-else="">Data Anda sudah tersimpan. Ketuk Lanjut ke Soal.</div>
+        </t>
+        <t t-else="">
         <div class="sk-form-group">
             <label class="sk-label">Nama Lengkap <span class="sk-req">*</span></label>
             <input class="sk-input"
@@ -180,6 +191,7 @@
                    t-att-value="state.form.alamat"
                    t-on-input="ev => state.form.alamat = ev.target.value"/>
         </div>
+        </t>
 
         <t t-if="state.formError">
             <div style="color:var(--red);font-size:13px;margin-bottom:10px;text-align:center"
@@ -349,6 +361,8 @@
                 },
                 formError: '',
                 nikStatus: '',    // '' | 'found' | 'new'
+                nikMasked: '',
+                nikVerif: false,
                 nikChecking: false,
                 loading: false,
 
@@ -409,6 +423,8 @@
                 const result = await rpc('/sertifikasi/api/cek_nik', { token: TOKEN, nik });
                 if (result.found) {
                     this.state.nikStatus       = 'found';
+                    this.state.nikMasked       = result.nama_masked || '';
+                    this.state.nikVerif        = !!result.perlu_verifikasi;
                     // Data pribadi tidak lagi dikirim server (privasi); peserta mengisi sendiri.
                 } else {
                     this.state.nikStatus = 'new';
@@ -465,7 +481,12 @@
                 this.state.formError = 'NIK harus 16 digit.';
                 return;
             }
-            if (!f.nama.trim()) {
+            const sudahTerdaftar = this.state.nikStatus === 'found';
+            if (sudahTerdaftar && this.state.nikVerif && !f.tanggal_lahir) {
+                this.state.formError = 'Isi tanggal lahir untuk verifikasi.';
+                return;
+            }
+            if (!sudahTerdaftar && !f.nama.trim()) {
                 this.state.formError = 'Nama lengkap wajib diisi.';
                 return;
             }

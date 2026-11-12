@@ -9,6 +9,10 @@ _WIB = timedelta(hours=7)
 GRACE_MENIT = 2  # toleransi keterlambatan submit (menit)
 
 
+def _mask_nama(nama):
+    return ' '.join((w[:2] + '*' * max(len(w) - 2, 1)) for w in (nama or '').split())
+
+
 def _today_wib():
     return (datetime.utcnow() + _WIB).date()
 
@@ -100,8 +104,13 @@ class SertifikasiPublicController(http.Controller):
         if not profil:
             return {'found': False}
 
-        # Jangan kembalikan data pribadi (nama, lahir, HP, alamat) ke klien publik.
-        return {'found': True}
+        # Jangan kembalikan data pribadi lengkap ke klien publik: hanya nama tersamar,
+        # dan peserta cukup memverifikasi tanggal lahir (bila tercatat) tanpa mengisi ulang data.
+        return {
+            'found': True,
+            'nama_masked': _mask_nama(profil.nama),
+            'perlu_verifikasi': bool(profil.tanggal_lahir),
+        }
 
     # ── API: mulai ujian ──────────────────────────────────────────────────────
 
@@ -126,8 +135,6 @@ class SertifikasiPublicController(http.Controller):
             return {'error': 'NIK wajib diisi'}
         if len(nik) < 16:
             return {'error': 'NIK harus 16 digit'}
-        if not nama:
-            return {'error': 'Nama lengkap wajib diisi'}
 
         Peserta = request.env['digital_kamtibmas.sertifikasi.peserta'].sudo()
         Profil  = request.env['digital_kamtibmas.sertifikasi.profil'].sudo()
@@ -135,6 +142,12 @@ class SertifikasiPublicController(http.Controller):
         # Get or create profil terlebih dahulu
         profil = Profil.search([('nik', '=', nik)], limit=1)
         if profil:
+            # NIK sudah terdaftar: tidak perlu isi ulang; verifikasi tanggal lahir bila tercatat
+            if profil.tanggal_lahir:
+                tgl = str(data.get('tanggal_lahir') or '')[:10]
+                if tgl != str(profil.tanggal_lahir):
+                    return {'error': 'Tanggal lahir tidak sesuai dengan data NIK yang terdaftar.'}
+            nama = profil.nama
             # Update data kontak yang mungkin berubah (no_hp, alamat)
             update_vals = {}
             if data.get('no_hp') and profil.no_hp != (data['no_hp'] or '').strip():
@@ -144,6 +157,8 @@ class SertifikasiPublicController(http.Controller):
             if update_vals:
                 profil.write(update_vals)
         else:
+            if not nama:
+                return {'error': 'Nama lengkap wajib diisi'}
             profil = Profil.create({
                 'nik':           nik,
                 'nama':          nama,
