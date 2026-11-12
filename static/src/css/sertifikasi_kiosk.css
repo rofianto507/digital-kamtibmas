@@ -27,6 +27,7 @@ html, body {
 
 #sertifikasi-kiosk-app {
     height: 100vh;
+    height: 100dvh; /* tinggi area terlihat di browser HP (di luar bar alamat/navigasi) */
     display: flex;
     flex-direction: column;
 }
@@ -131,6 +132,7 @@ html, body {
     background-size: 400% 400%;
     animation: sk-gradient-flow 14s ease infinite;
     min-height: 100vh;
+    min-height: 100dvh;
     text-align: center;
     padding: 32px 20px;
 }
@@ -297,6 +299,8 @@ html, body {
 .sk-soal-screen {
     background: #F0F4F8;
     min-height: 100vh;
+    min-height: 100dvh;
+    max-height: 100dvh;
     padding: 0;
     align-items: stretch;
     justify-content: flex-start;
@@ -454,6 +458,7 @@ html, body {
     background: var(--white);
     border-top: 1px solid #E2E8F0;
     padding: 14px 20px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     display: flex;
     gap: 10px;
     flex-shrink: 0;
