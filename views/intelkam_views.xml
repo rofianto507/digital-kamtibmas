@@ -40,10 +40,10 @@
                         Group ID adalah nomor yang muncul di daftar chat (contoh: <strong>120363428002197043</strong>).
                         <br/><br/>
                         <strong>URL Webhook (Get Incoming Message):</strong><br/>
-                        <code>https://palembang.polisibaik.id/intelkam/webhook/wablas</code>
+                        <code><field name="webhook_url" class="d-inline"/></code>
                         <br/><br/>
                         <strong>URL Tracking (Get Status Message) — untuk update status Delivered/Read:</strong><br/>
-                        <code>https://palembang.polisibaik.id/intelkam/webhook/wablas/tracking</code><br/>
+                        <code><field name="tracking_url" class="d-inline"/></code><br/>
                         Isi kedua URL ini di Wablas &gt; Device &gt; Settings.
                     </div>
                 </sheet>

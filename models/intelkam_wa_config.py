@@ -18,6 +18,15 @@ class IntelkamWaConfig(models.Model):
                              help='Nomor WhatsApp bot tanpa + (contoh: 6285608855007)')
     active = fields.Boolean(default=True)
     notes = fields.Text('Catatan')
+    webhook_url = fields.Char('URL Webhook', compute='_compute_webhook_urls')
+    tracking_url = fields.Char('URL Tracking', compute='_compute_webhook_urls')
+
+    def _compute_webhook_urls(self):
+        from .utils import public_base_url
+        base = public_base_url(self.env)
+        for rec in self:
+            rec.webhook_url = f'{base}/intelkam/webhook/wablas'
+            rec.tracking_url = f'{base}/intelkam/webhook/wablas/tracking'
 
     @api.model
     def get_config(self):

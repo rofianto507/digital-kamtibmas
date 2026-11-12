@@ -74,32 +74,39 @@ class IntelkamDistribusiInfo(models.Model):
         self.env.cr.commit()
 
         # Hapus log lama jika retry
-        self.log_ids.unlink()
+        self.sudo().log_ids.unlink()
 
         n_antri = 0
         n_gagal = 0
 
-        for group in self.group_ids:
-            result = config.send_message(
-                phone=group.group_id,
-                message=self._format_pesan(group),
-                is_group=True,
-            )
-            # Wablas 'pending' = pesan sudah diantrekan, bukan gagal
-            log_status = _WABLAS_STATUS_MAP.get(result.get('wablas_status', ''), 'pending') \
-                if result['success'] else 'failed'
+        try:
+            for group in self.group_ids:
+                result = config.send_message(
+                    phone=group.group_id,
+                    message=self._format_pesan(group),
+                    is_group=True,
+                )
+                # Wablas 'pending' = pesan sudah diantrekan, bukan gagal
+                log_status = _WABLAS_STATUS_MAP.get(result.get('wablas_status', ''), 'pending') \
+                    if result['success'] else 'failed'
 
-            self.env['intelkam.distribusi.log'].create({
-                'distribusi_id': self.id,
-                'group_id': group.id,
-                'wablas_message_id': result['message_id'],
-                'status': log_status,
-                'error_message': result['error'],
-            })
-            if result['success']:
-                n_antri += 1
-            else:
-                n_gagal += 1
+                self.env['intelkam.distribusi.log'].sudo().create({
+                    'distribusi_id': self.id,
+                    'group_id': group.id,
+                    'wablas_message_id': result['message_id'],
+                    'status': log_status,
+                    'error_message': result['error'],
+                })
+                if result['success']:
+                    n_antri += 1
+                else:
+                    n_gagal += 1
+        except Exception as e:
+            # Jangan biarkan status macet di 'Mengirim' bila terjadi error tak terduga
+            self.env.cr.rollback()
+            self.write({'state': 'gagal'})
+            self.env.cr.commit()
+            raise exceptions.UserError(f'Pengiriman terhenti karena error: {e}')
 
         # Ada yg berhasil diantrekan Wablas → terkirim
         new_state = 'terkirim' if n_antri > 0 else 'gagal'
@@ -136,7 +143,7 @@ class IntelkamDistribusiInfo(models.Model):
         """Polling status pengiriman ke Wablas untuk log yang masih pending."""
         self.ensure_one()
         config = self.env['intelkam.wa.config'].get_config()
-        pending_logs = self.log_ids.filtered(
+        pending_logs = self.sudo().log_ids.filtered(
             lambda l: l.status == 'pending' and l.wablas_message_id
         )
         if not pending_logs:
@@ -155,8 +162,19 @@ class IntelkamDistribusiInfo(models.Model):
             if wablas_status and wablas_status != 'pending':
                 new_status = _WABLAS_STATUS_MAP.get(wablas_status, log.status)
                 if new_status != log.status:
-                    log.write({'status': new_status})
+                    vals = {'status': new_status}
+                    if new_status == 'failed' and not log.error_message:
+                        vals['error_message'] = (
+                            f'Dibatalkan oleh Wablas (status: {wablas_status}). Periksa bahwa nomor bot '
+                            'anggota group tujuan dan device Wablas berstatus Connected.')
+                    log.sudo().write(vals)
                     updated += 1
+        # Selaraskan status distribusi dengan hasil log terbaru
+        logs = self.sudo().log_ids
+        if logs and all(l.status == 'failed' for l in logs):
+            self.write({'state': 'gagal'})
+        elif logs and self.state == 'gagal' and any(l.status in ('delivered', 'read') for l in logs):
+            self.write({'state': 'terkirim'})
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
