@@ -116,7 +116,7 @@
             </div>
             <div t-elif="state.nikStatus === 'found'"
                  style="font-size:12px;color:var(--green);margin-top:4px;font-weight:600">
-                &#10003; Data ditemukan — formulir telah diisi otomatis
+                &#10003; NIK pernah terdaftar — lengkapi data Anda
             </div>
             <div t-elif="state.nikStatus === 'new'"
                  style="font-size:12px;color:var(--muted);margin-top:4px">
@@ -409,12 +409,7 @@
                 const result = await rpc('/sertifikasi/api/cek_nik', { token: TOKEN, nik });
                 if (result.found) {
                     this.state.nikStatus       = 'found';
-                    this.state.form.nama        = result.nama;
-                    this.state.form.tempat_lahir = result.tempat_lahir;
-                    this.state.form.tanggal_lahir = result.tanggal_lahir;
-                    this.state.form.jenis_kelamin = result.jenis_kelamin;
-                    this.state.form.no_hp       = result.no_hp;
-                    this.state.form.alamat      = result.alamat;
+                    // Data pribadi tidak lagi dikirim server (privasi); peserta mengisi sendiri.
                 } else {
                     this.state.nikStatus = 'new';
                 }

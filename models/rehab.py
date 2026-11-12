@@ -45,7 +45,7 @@ class Rehab(models.Model):
 
     @api.depends('tanggal_lahir')
     def _compute_umur(self):
-        today = date.today()
+        today = today_local(self.env)
         for rec in self:
             if rec.tanggal_lahir:
                 tl = rec.tanggal_lahir

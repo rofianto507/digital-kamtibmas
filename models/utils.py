@@ -13,6 +13,14 @@ def today_local(env):
     return datetime.now(pytz.utc).astimezone(tz).date()
 
 
+def now_local(env):
+    """Waktu sekarang menurut zona waktu pengguna (default WIB), tanpa tzinfo."""
+    import pytz
+    from datetime import datetime
+    tz = pytz.timezone(env.context.get('tz') or env.user.tz or 'Asia/Jakarta')
+    return datetime.now(pytz.utc).astimezone(tz).replace(tzinfo=None)
+
+
 def public_base_url(env):
     """Domain untuk link publik (sertifikasi, display antrian).
 

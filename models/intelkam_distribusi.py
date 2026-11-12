@@ -168,6 +168,10 @@ class IntelkamDistribusiInfo(models.Model):
             }
         }
 
+    def _now_wib(self):
+        from .utils import now_local
+        return now_local(self.env)
+
     def _format_pesan(self, group):
         lines = [
             '*[DISTRIBUSI INFORMASI]*',
@@ -177,7 +181,7 @@ class IntelkamDistribusiInfo(models.Model):
             '---',
             self.isi_instruksi,
             '---',
-            f'_{self.pengirim_id.name} — {datetime.now().strftime("%d/%m/%Y %H:%M")}_',
+            f'_{self.pengirim_id.name} — {self._now_wib().strftime("%d/%m/%Y %H:%M")}_',
         ]
         return '\n'.join(lines)
 

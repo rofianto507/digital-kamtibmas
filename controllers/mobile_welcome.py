@@ -2,13 +2,14 @@ import json
 from datetime import date
 from odoo import http
 from odoo.http import request, Response
+from ..models.utils import today_local
 
 
 class MobileWelcomeController(http.Controller):
 
     @http.route('/api/mobile/welcome-screen', type='http', auth='public', methods=['GET'], csrf=False)
     def get_welcome_screen(self, **kwargs):
-        today = date.today()
+        today = today_local(request.env)
         domain = [
             ('active', '=', True),
             '|', ('tanggal_mulai', '=', False), ('tanggal_mulai', '<=', today),

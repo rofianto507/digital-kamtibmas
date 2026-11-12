@@ -1,6 +1,7 @@
 import logging
 from odoo import http, fields
 from odoo.http import request
+from ..models.utils import today_local
 
 _logger = logging.getLogger(__name__)
 
@@ -9,7 +10,7 @@ class MobileSertifikasiController(http.Controller):
 
     @http.route('/mobile/dkm/sertifikasi/list', type='jsonrpc', auth='public', csrf=False, cors='*')
     def list_sertifikasi(self, **kwargs):
-        today = str(fields.Date.today())
+        today = str(today_local(request.env))
         domain = [
             ('state', '=', 'aktif'),
             '|',
