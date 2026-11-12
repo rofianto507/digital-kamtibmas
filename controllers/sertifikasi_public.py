@@ -9,6 +9,17 @@ _WIB = timedelta(hours=7)
 GRACE_MENIT = 2  # toleransi keterlambatan submit (menit)
 
 
+def _asset_version():
+    """Versi aset = waktu ubah file JS/CSS terbaru, agar browser HP tidak memakai cache lama (7 hari)."""
+    import os
+    base = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'src')
+    try:
+        return int(max(os.path.getmtime(os.path.join(base, 'js', 'sertifikasi_kiosk.js')),
+                       os.path.getmtime(os.path.join(base, 'css', 'sertifikasi_kiosk.css'))))
+    except OSError:
+        return 0
+
+
 def _mask_nama(nama):
     return ' '.join((w[:2] + '*' * max(len(w) - 2, 1)) for w in (nama or '').split())
 
@@ -25,6 +36,7 @@ class SertifikasiPublicController(http.Controller):
     def kiosk_index(self, token, **kwargs):
         return request.render('digital_kamtibmas.sertifikasi_kiosk_template', {
             'company_logo_url': '/digital_kamtibmas/static/img/logo_app.png',
+            'asset_v': _asset_version(),
         })
 
     # ── API: info sertifikasi ─────────────────────────────────────────────────

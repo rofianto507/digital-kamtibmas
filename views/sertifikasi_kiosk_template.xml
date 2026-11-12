@@ -10,12 +10,12 @@
                 <meta name="apple-mobile-web-app-capable" content="yes"/>
                 <title>Sertifikasi Anti Narkoba — AMPERA PBM</title>
                 <link rel="stylesheet" href="/digital_kamtibmas/static/lib/fontawesome/css/font-awesome.css"/>
-                <link rel="stylesheet" href="/digital_kamtibmas/static/src/css/sertifikasi_kiosk.css"/>
+                <link rel="stylesheet" t-attf-href="/digital_kamtibmas/static/src/css/sertifikasi_kiosk.css?v=#{asset_v}"/>
             </head>
             <body>
                 <div id="sertifikasi-kiosk-app" t-att-data-logo="company_logo_url"/>
                 <script type="text/javascript" src="/web/static/lib/owl/owl.js"/>
-                <script type="text/javascript" src="/digital_kamtibmas/static/src/js/sertifikasi_kiosk.js"/>
+                <script type="text/javascript" t-attf-src="/digital_kamtibmas/static/src/js/sertifikasi_kiosk.js?v=#{asset_v}"/>
             </body>
         </html>
     </template>
